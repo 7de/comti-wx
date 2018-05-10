@@ -1,0 +1,94 @@
+<style lang="scss">
+    $fontcolor: #7b7b7b;
+    $activecolor: #1AAD19;
+    .tab {
+        color: $fontcolor;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 70rpx;
+        line-height: 70rpx;
+        width: 100%;
+        background-color: #fff;
+        font-size: 33rpx;
+        white-space: nowrap;
+        box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+        -webkit-box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+        .tab_item {
+            &.active {
+                color: $activecolor;
+                &:after{
+                    background-color: $activecolor;
+                }
+            }
+            display: inline-block;
+            width: 50%;
+            text-align: center;
+            position: relative;
+            &:after{
+                content:'';
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 2rpx;
+                width: 30%;
+                height: 5rpx;
+                margin: 0 auto;
+                background-color: #fff;
+            }
+        }
+        .title {
+            display: block;
+        }
+    }
+</style>
+<template>
+    <view class="tab">
+        <view class="tab_item tab_message{{active == 0 ? ' active' : ''}}" @tap="change(0)">
+            <text class="title">电单车</text>
+        </view>
+        <view class="tab_item tab_contact{{active == 1 ? ' active' : ''}}" @tap="change(1)">
+            <text class="title">电动汽车</text>
+        </view>
+        <!-- <view class="tab_item tab_discovery{{active == 2 ? ' active' : ''}}" @tap="change(2)">
+            <image class="icon" src="../images/discovery{{active == 2 ? '_active' : ''}}.png"></image>
+            <text class="title">发现</text>
+        </view>
+        <view class="tab_item tab_me{{active == 3 ? ' active' : ''}}" @tap="change(3)">
+            <image class="icon" src="../images/me{{active == 3 ? '_active' : ''}}.png"></image>
+            <text class="title">我</text>
+        </view> -->
+    </view>
+</template>
+<script>
+    import wepy from 'wepy'
+    import zanToptips from '../components/zan-toptips'
+    export default class Tab extends wepy.component {
+      props = {
+        active: {
+          twoWay: true
+        }
+      }
+      components = {
+        zanToptips
+      }
+      data = {
+      }
+
+      methods = {
+        change (idx, evt) {
+          this.active = +idx
+          if (this.active === 1) {
+            this.$invoke('zanToptips', 'showZanTopTips', { content: 'toptips的内容 Wepy', options: 3000 })
+            console.log(this.active)
+          }
+        },
+        showTopTips() {
+          this.$invoke('zanToptips', 'showZanTopTips', { content: 'toptips的内容 Wepy', options: 1000 })
+        }
+      }
+
+      onLoad () {
+      }
+    }
+</script>

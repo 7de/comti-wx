@@ -1,0 +1,202 @@
+<style lang="scss">
+.con{
+  position: relative;
+  height: 94.3vh;
+}
+#mapCon{
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+</style>
+
+<template>
+  <view class="con">
+    <map id="mapCon" latitude="{{latitude}}" longitude="{{longitude}}" scale="{{scale}}" markers="{{markers}}" controls="{{controls}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location/>
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Commap extends wepy.component {
+  props = {
+    markers: []
+  }
+  data = {
+    scale: 18,
+    latitude: 22.55329,
+    longitude: 113.88308,
+    controls: []
+  }
+
+  onLoad(options) {
+    this.iniMap()
+    wepy.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        console.log(res)
+        this.longitude = res.longitude
+        this.latitude = res.latitude
+        this.$apply()
+      },
+      fail: (rel) => {
+        wepy.getSetting({
+          success: (res) => {
+            let that = this
+            if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
+              wepy.showModal({
+                title: '是否授权当前位置',
+                content: '需要获取您的地理位置，请确认授权，否则地图功能将无法使用',
+                success: (res) => {
+                  if (res.cancel) {
+                    console.info('1授权失败返回数据')
+                  } else if (res.confirm) {
+                    wepy.openSetting({
+                      success: function (data) {
+                        if (data.authSetting['scope.userLocation'] === true) {
+                          wepy.showToast({
+                            title: '授权成功',
+                            icon: 'success',
+                            duration: 1000
+                          })
+                          // 再次授权，调用getLocationt的API
+                          wepy.getLocation({
+                            type: 'gcj02',
+                            success: (res) => {
+                              console.log(res)
+                              that.longitude = res.longitude
+                              that.latitude = res.latitude
+                              that.$apply()
+                            }
+                          })
+                          that.movetoPosition()
+                        } else {
+                          wepy.showToast({
+                            title: '授权失败',
+                            icon: 'success',
+                            duration: 2000
+                          })
+                        }
+                      }
+                    })
+                  }
+                }
+              })
+            }
+          }
+        })
+      }
+    })
+    wepy.getSystemInfo({
+      success: (res) => {
+        this.controls = [{
+          id: 1,
+          iconPath: '/images/location.png',
+          position: {
+            left: 20,
+            top: res.windowHeight - 100,
+            width: 40,
+            height: 40
+          },
+          clickable: true
+        }, {
+          id: 2,
+          iconPath: '/images/code.png',
+          position: {
+            left: res.windowWidth / 2 - 20,
+            top: res.windowHeight - 115,
+            width: 60,
+            height: 60
+          },
+          clickable: true
+        }, {
+          id: 3,
+          iconPath: '/images/user.png',
+          position: {
+            left: res.windowWidth - 50,
+            top: res.windowHeight - 100,
+            width: 40,
+            height: 40
+          },
+          clickable: true
+        }, {
+          id: 4,
+          iconPath: '/images/pos.png',
+          position: {
+            left: res.windowWidth / 2 - 14,
+            top: res.windowHeight / 2 - 32,
+            width: 28,
+            height: 28
+          },
+          clickable: false
+        }]
+      }
+    })
+  }
+
+  methods = {
+    // 地图控件点击处理
+    bindcontroltap(e) {
+      switch (e.controlId) {
+        case 1: this.movetoPosition()
+          break
+        case 2: this.openCode()
+          break
+        case 3: wepy.navigateTo({
+          url: './personal'
+        })
+      }
+    }
+  }
+  // 初始化地图
+  iniMap() {
+    this.mapCtx = wepy.createMapContext('mapCon')
+    this.movetoPosition()
+  }
+
+  // 定位到本地坐标
+  movetoPosition() {
+    this.mapCtx.moveToLocation()
+  }
+
+  // 扫一扫
+  openCode() {
+    if (this.timer === '' || this.timer === undefined) {
+      wepy.scanCode({
+        success: (res) => {
+          wepy.showLoading({
+            title: '正在扫描中...',
+            mask: true
+          })
+          wepy.request({
+            url: 'https://www.easy-mock.com/mock/5af3aa047d36e87abdb424cf/example/scan/res',
+            data: {},
+            method: 'GET',
+            success: (res) => {
+              wepy.hideLoading()
+              wepy.redirectTo({
+                url: '../pages/scancode/index?title=' + res.data.data.title + '&code=' + res.data.data.code,
+                success: (res) => {
+                  wepy.showLoading({
+                    title: '获取设备成功',
+                    duration: 1000
+                  })
+                }
+              })
+            }
+          })
+        }
+      })
+    } else {
+      wepy.navigateBack({
+        delta: 1
+      })
+    }
+  }
+}
+</script>

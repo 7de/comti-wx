@@ -1,0 +1,182 @@
+<style lang="scss">
+</style>
+<template>
+  <view class="container">
+    <zanTab :tab.sync="tab1" componentId="tab1"></zanTab>
+    <view class="tab-con">
+      <block wx:if="{{currentTab==='topay'}}">
+        <card2 :list="topayData"/>
+      </block>
+      <block wx:elif="{{currentTab==='charging'}}">
+        <card3 :list="chargingData"/>
+      </block>
+      <block wx:elif="{{currentTab==='send'}}">
+        <card4 :list="completionData"/>
+      </block>
+      <block wx:elif="{{currentTab==='close'}}">
+        <card5 />
+      </block>
+      <block wx:else>
+        <card1 :list="allData"/>
+      </block>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+import zanTab from '../components/zan-tab'
+import Card from '../components/card'
+
+export default class Order extends wepy.page {
+  config = {
+    'navigationBarTitleText': '我的订单'
+  }
+  components = {
+    zanTab: zanTab,
+    card1: Card,
+    card2: Card,
+    card3: Card,
+    card4: Card,
+    card5: Card
+  }
+  data = {
+    currentTab: 'all',
+    tab1: {
+      list: [
+        {
+          id: 'all',
+          title: '全部'
+        },
+        {
+          id: 'topay',
+          title: '待付款'
+        },
+        {
+          id: 'charging',
+          title: '充电中'
+        },
+        {
+          id: 'send',
+          title: '已完成'
+        },
+        {
+          id: 'close',
+          title: '已关闭'
+        }
+      ],
+      selectedId: 'all',
+      scroll: false
+    },
+    allData: [
+      {
+        orderCode: 157329154253577067,
+        state: '待付款',
+        chargingTime: '3',
+        creatTime: '2018-05-08 16:00',
+        completionTime: '2018-05-08 19:00'
+      },
+      {
+        orderCode: 157329154253577067,
+        state: '充电中',
+        chargingTime: '3',
+        creatTime: '2018-05-08 16:00',
+        completionTime: '2018-05-08 19:00'
+      }
+    ],
+    topayData: [
+      {
+        orderCode: 157329154253577067,
+        state: '待付款',
+        chargingTime: '3',
+        creatTime: '2018-05-08 16:00',
+        completionTime: '2018-05-08 19:00'
+      },
+      {
+        orderCode: 1573291542535789121,
+        state: '待付款',
+        chargingTime: '2',
+        creatTime: '2018-05-06 16:00',
+        completionTime: '2018-05-06 18:00'
+      }
+    ],
+    chargingData: [
+      {
+        orderCode: 157329154253577067,
+        state: '充电中',
+        chargingTime: '3',
+        creatTime: '2018-05-08 16:00',
+        completionTime: '2018-05-08 19:00'
+      },
+      {
+        orderCode: 1573291542535789121,
+        state: '充电中',
+        chargingTime: '2',
+        creatTime: '2018-05-06 16:00',
+        completionTime: '2018-05-06 18:00'
+      }
+    ],
+    completionData: [
+      {
+        orderCode: 157329154253577067,
+        state: '已完成',
+        chargingTime: '3',
+        creatTime: '2018-05-08 16:00',
+        completionTime: '2018-05-08 19:00'
+      },
+      {
+        orderCode: 1573291542535789,
+        state: '已完成',
+        chargingTime: '5',
+        creatTime: '2018-05-07 16:00',
+        completionTime: '2018-05-07 21:00'
+      },
+      {
+        orderCode: 1573291542535789121,
+        state: '已完成',
+        chargingTime: '2',
+        creatTime: '2018-05-06 16:00',
+        completionTime: '2018-05-06 18:00'
+      }
+    ],
+    closeData: [
+      {
+        orderCode: 157329154253577067,
+        state: '已关闭',
+        chargingTime: '3',
+        creatTime: '2018-05-08 16:00',
+        completionTime: '2018-05-08 19:00'
+      },
+      {
+        orderCode: 1573291542535789,
+        state: '已关闭',
+        chargingTime: '5',
+        creatTime: '2018-05-07 16:00',
+        completionTime: '2018-05-07 21:00'
+      },
+      {
+        orderCode: 1573291542535789121,
+        state: '已关闭',
+        chargingTime: '2',
+        creatTime: '2018-05-06 16:00',
+        completionTime: '2018-05-06 18:00'
+      }
+    ]
+  }
+  events = {
+    // tab事件切换
+    zanTabChange(selectedId, event) {
+      let { componentId } = event.source
+      this[componentId].selectedId = selectedId
+      this.currentTab = selectedId
+      this.$apply()
+    }
+  }
+  onLoad(option) {
+    if (option.selectedId) {
+      this.tab1.selectedId = option.selectedId
+      this.currentTab = option.selectedId
+    }
+  }
+}
+</script>

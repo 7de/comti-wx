@@ -1,0 +1,78 @@
+{
+	"description": "A WePY project",
+	"setting": {
+		"urlCheck": true,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true
+	},
+	"compileType": "miniprogram",
+	"appid": "wx385f55b4aef20405",
+	"projectname": "%E5%BA%B7%E4%BD%93%E4%BD%B3%E5%85%85%E7%94%B5",
+	"miniprogramRoot": "./dist",
+	"condition": {
+		"search": {
+			"current": -1,
+			"list": []
+		},
+		"conversation": {
+			"current": -1,
+			"list": []
+		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
+		"game": {
+			"list": []
+		},
+		"miniprogram": {
+			"current": 0,
+			"list": [
+				{
+					"id": -1,
+					"name": "地图",
+					"pathName": "pages/home",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "个人中心",
+					"pathName": "pages/personal",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "我的订单",
+					"pathName": "pages/order",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "我的钱包",
+					"pathName": "pages/wallet",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "关于我们",
+					"pathName": "pages/about",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "帮助反馈",
+					"pathName": "pages/help",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "扫码成功",
+					"pathName": "pages/scancode/index",
+					"query": ""
+				}
+			]
+		}
+	}
+}

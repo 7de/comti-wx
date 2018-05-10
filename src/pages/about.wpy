@@ -1,0 +1,45 @@
+<style lang="scss">
+.logo-page{
+  height: 100vh;
+  position: relative;
+}
+.logo-img{
+  width: 320rpx;
+}
+.logo-bd{
+  >view{
+    padding-left: 180rpx;
+  }
+  .logo-bd__item{
+    padding: 15rpx 0;
+  }
+}
+
+</style>
+<template>
+  <view class="logo-page">
+    <view class="logo-hd zan-center">
+      <image src="../images/logo.png" mode="aspectFit" class="logo-img"></image>
+    </view>
+    <view class="logo-bd">
+      <view class="zan-font-12 zan-c-gray-darker zan-left">
+        <text>客服热线：400-8636-400</text>
+        <view class="logo-bd__item">官方网站：<text>http://www.comtika.com</text></view>
+        <text>当前版本：v1.0.0</text>
+      </view>
+    </view>
+    <footer />
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import Footer from '../components/footer'
+export default class Message extends wepy.page {
+  config = {
+    'navigationBarTitleText': '关于我们'
+  }
+  components = {
+    footer: Footer
+  }
+}
+</script>

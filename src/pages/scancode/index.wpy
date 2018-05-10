@@ -1,0 +1,60 @@
+<style lang="scss">
+
+</style>
+<template>
+  <view class="container">
+    <view class="zan-panel">
+      <view class="zan-cell">
+        <view class="zan-cell__bd zan-c-gray">设备编号: <text>{{code}}</text></view>
+      </view>
+    </view>
+    <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}">
+      <view class="zan-panel">
+        <view class="zan-cell">
+          <view class="zan-cell__bd zan-c-gray">充电时长（h）：</view>
+          <view class="zan-cell__ft">{{pickerBtn ? array[index]:'请选择充电时长'}}</view>
+        </view>
+      </view>
+    </picker>
+    <view class="zan-panel">
+      <view class="zan-cell">
+        <view class="zan-cell__bd zan-c-gray">预估金额（元）：</view>
+        <view class="zan-cell__ft zan-font-16 zan-c-red">{{pickerBtn ? array[index]:0}}</view>
+      </view>
+      <view class="zan-cell">
+        <view class="zan-cell__bd zan-c-gray">账户余额（元）：</view>
+        <view class="zan-cell__ft zan-font-16 zan-c-red">12131</view>
+      </view>
+    </view>
+    <view class="zan-panel" style="margin:100rpx 40rpx 0">
+      <button class="zan-btn zan-btn--primary" formType="submit">确认并提交</button>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Index extends wepy.page {
+  config = {
+    'navigationBarTitleText': '充电服务'
+  }
+  data = {
+    title: '',
+    code: null,
+    array: ['2', '4', '6', '12'],
+    index: 0,
+    pickerBtn: false
+  }
+  onLoad(option) {
+    this.title = option.title
+    this.code = option.code
+  }
+  methods = {
+    bindPickerChange(e) {
+      console.log('picker发送选择改变，携带值为', e)
+      console.log('picker发送选择改变，携带值为', e.detail.value)
+      this.index = e.detail.value
+      this.pickerBtn = true
+    }
+  }
+}
+</script>

@@ -1,0 +1,36 @@
+@import "common";
+
+.zan-panel {
+  position: relative;
+  background: #fff;
+  margin-top: 40rpx;
+  overflow: hidden;
+
+  &::after {
+    @include hairline;
+    border-top-width: 2rpx;
+    border-bottom-width: 2rpx;
+  }
+}
+
+.zan-panel-title {
+  font-size: 25rpx;
+  line-height: 1;
+  color: #999;
+  padding: 20rpx 15rpx 0 15rpx;
+}
+
+
+.zan-panel--without-margin-top {
+  margin-top: 0;
+}
+
+.zan-panel--without-border {
+  &::after {
+    border: 0 none;
+  }
+}
+
+.zan-panel--radius {
+  border-radius: 15rpx;
+}

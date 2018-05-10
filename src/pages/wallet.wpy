@@ -1,0 +1,119 @@
+<style lang="scss">
+
+</style>
+<template>
+  <view class="container">
+    <zanTab :tab.sync="tab" componentId="tab"></zanTab>
+    <view class="page_spacing">
+      <block wx:if="{{currentTab==='record'}}">
+          <view class="zan-panel">
+            <view class="zan-cell">
+              <view class="zan-cell__bd">充值：150元</view>
+              <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">2018-05-09 10:00</view>
+            </view>
+            <view class="zan-cell">
+              <view class="zan-cell__bd">充值：50元</view>
+              <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">2018-05-05 10:00</view>
+            </view>
+            <view class="zan-cell">
+              <view class="zan-cell__bd">充值：10元</view>
+              <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">2018-05-01 10:00</view>
+            </view>
+          </view>
+      </block>
+      <block wx:elif="{{currentTab==='detail'}}">
+        <view class="zan-panel">
+          <view class="zan-cell">
+            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单编号：2018050921001001270562608302</view>
+          </view>
+          <view class="zan-cell">
+            <view class="zan-cell__bd">充值</view>
+            <view class="zan-cell__ft">￥50 元</view>
+          </view>
+          <view class="zan-cell">
+            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单时间：2018-05-09 10:10</view>
+          </view>
+        </view>
+        <view class="zan-panel">
+          <view class="zan-cell">
+            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单编号：2018050921001001270562608302</view>
+          </view>
+          <view class="zan-cell">
+            <view class="zan-cell__bd">充值</view>
+            <view class="zan-cell__ft">￥500 元</view>
+          </view>
+          <view class="zan-cell">
+            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单时间：2018-05-09 10:10</view>
+          </view>
+        </view>
+      </block>
+      <block wx:else>
+        <view class="zan-panel zan-panel--without-border" style="background-color:transparent">
+          <view class="zan-cell">
+            <view class="zan-cell__bd">余额（元）</view>
+            <view class="zan-cell__ft zan-font-20">￥<text class="zan-font-30">50</text></view>
+          </view>
+          <button class="zan-btn zan-btn--primary" style="margin-top:120rpx;">马上充值</button>
+        <view class="zan-cell zan-cell__no-pading">
+          <view class="zan-cell__bd zan-font-12 zan-c-gray">
+            <view class="zan-pull-right">充值协议</view><view class="zan-pull-right" style="padding-right:5rpx">退款 |</view>
+          </view>
+        </view>
+
+
+        </view>
+        
+      </block>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+import zanTab from '../components/zan-tab'
+
+export default class Wallet extends wepy.page {
+  config = {
+    'navigationBarTitleText': '我的钱包'
+  }
+  components = {
+    zanTab: zanTab
+  }
+  data = {
+    currentTab: 0,
+    tab: {
+      list: [
+        {
+          id: 'balance',
+          title: '账户余额'
+        },
+        {
+          id: 'record',
+          title: '充值记录'
+        },
+        {
+          id: 'detail',
+          title: '余额明细'
+        }
+      ],
+      selectedId: 'balance',
+      scroll: false
+    }
+  }
+  events = {
+    // tab事件切换
+    zanTabChange(selectedId, event) {
+      let { componentId } = event.source
+      this[componentId].selectedId = selectedId
+      this.currentTab = selectedId
+      this.$apply()
+    }
+  }
+  onLoad(option) {
+    if (option.selectedId) {
+      this.tab.selectedId = option.selectedId
+      this.currentTab = option.selectedId
+    }
+  }
+}
+</script>

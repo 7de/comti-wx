@@ -1,0 +1,36 @@
+<style lang="scss">
+  .zan-cell.zan-font-12{
+    font-size: 12px;
+  }
+</style>
+<template>
+  <view class="page_spacing">
+    <block wx:if="{{list}}">
+      <view wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item" class="zan-panel">
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd zan-c-gray-dark">订单编号：{{item.orderCode}}</view>
+          <view class="zan-cell__ft">{{item.state}}</view>
+        </view>
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd">充电时长：<text class="zan-c-green zan-font-16">{{item.chargingTime}}</text> 小时</view>
+          <view class="zan-cell__ft">金额：￥<text class="zan-c-red zan-font-16">{{item.chargingTime*1}}</text> 元</view>
+        </view>
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd  zan-c-gray-dark">创建时间：{{item.creatTime}}</view>
+        </view>
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd  zan-c-gray-dark">完成时间：{{item.completionTime}}</view>
+        </view>
+      </view>
+    </block>
+    <view wx:else class="zan-center" style="padding-top:20rpx"><text class="zan-c-gray-dark zan-font-14">暂无数据</text></view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Card extends wepy.component {
+  props = {
+    list: {}
+  }
+}
+</script>

@@ -1,0 +1,111 @@
+<style lang="scss">
+/* page,.body,.tab_item {
+  height:100%;
+} */
+.body > .tab_con{
+  margin-top: 70rpx;
+}
+    $fontcolor: #7b7b7b;
+    $activecolor: #1AAD19;
+    .tab {
+        color: $fontcolor;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 70rpx;
+        line-height: 70rpx;
+        width: 100%;
+        background-color: #fff;
+        font-size: 33rpx;
+        white-space: nowrap;
+        box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+        -webkit-box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+        .tab_item {
+            &.active {
+                color: $activecolor;
+                &:after{
+                    background-color: $activecolor;
+                }
+            }
+            display: inline-block;
+            width: 50%;
+            text-align: center;
+            position: relative;
+            &:after{
+                content:'';
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 2rpx;
+                width: 30%;
+                height: 5rpx;
+                margin: 0 auto;
+                background-color: #fff;
+            }
+        }
+        .title {
+            display: block;
+        }
+    }
+</style>
+<template>
+  <view class="body">
+    <view class="tab">
+      <view class="tab_item tab_message{{currentTab == 0 ? ' active' : ''}}">
+          <text class="title">电单车</text>
+      </view>
+      <view class="tab_item tab_contact" @tap="showTopTips">
+          <text class="title">电动汽车</text>
+      </view>
+    </view>
+    <view class="tab_con">
+      <commap :markers="markers"/>
+    </view>
+    <zanToptips/>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+import Commap from '../components/commap'
+import zanTab from '../components/zan-tab'
+import zanToptips from '../components/zan-toptips'
+import zanLoadmore from '../components/zan-loadmore'
+// import Toast from 'wepy-com-toast'
+
+export default class Home extends wepy.page {
+  config = {
+    'navigationBarTitleText': '康体佳充电'
+  }
+  components = {
+    commap: Commap,
+    zanTab,
+    zanToptips,
+    zanLoadmore
+  }
+  data = {
+    currentTab: 0,
+    markers: []
+  }
+  onShow() {
+    this.currentTab = 0
+  }
+  methods = {
+    // 顶部提示
+    showTopTips() {
+      this.$invoke('zanToptips', 'showZanTopTips', { content: '功能暂未开通，敬请期待...', options: 2000 })
+    }
+  }
+  onLoad() {
+    wepy.request({
+      url: 'https://www.easy-mock.com/mock/5af3aa047d36e87abdb424cf/example/map/markers',
+      data: {},
+      method: 'GET',
+      success: (res) => {
+        this.markers = res.data.data
+        console.log(this.markers)
+      }
+    })
+  }
+}
+</script>

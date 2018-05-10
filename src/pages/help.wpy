@@ -1,0 +1,59 @@
+<style lang="scss">
+.com-textarea{
+  height:180rpx;
+  width:93%;
+  padding:5%;
+}
+
+</style>
+<template>
+  <view class="container">
+    <view class="page_spacing">
+        <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}">
+          <view class="zan-panel">
+            <view class="zan-cell zan-cell--access">
+              <view class="zan-cell__bd">{{pickerBtn ? array[index]:'请选择反馈类型'}}</view>
+              <view class="zan-cell__ft"></view>
+            </view>
+          </view>
+        </picker>
+        <view class="zan-panel">
+          <textarea maxlength="100" placeholder="请写下您对康体佳充电的感受，我们将认真听取您的意见，努力提供更优质的服务" name="textarea" class="com-textarea zan-font-12"/>
+        </view>
+        <view class="zan-panel">
+          <zanField1 :options="notitle" :value="textareaValue" componentId="zanField1"></zanField1>
+        </view>
+        <view class="zan-panel">
+          <button class="zan-btn zan-btn--primary" formType="submit">提交</button>
+        </view>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+import zanField from '../components/zan-field'
+export default class Message extends wepy.page {
+  config = {
+    'navigationBarTitleText': '帮助反馈'
+  }
+  components = {
+    zanField1: zanField
+  }
+  data = {
+    array: ['投诉', '建议'],
+    index: 0,
+    pickerBtn: false,
+    notitle: {
+      placeholder: '手机/邮箱/QQ（选填）',
+      componentId: 'textarea:test'
+    }
+  }
+  methods = {
+    bindPickerChange(e) {
+      console.log('picker发送选择改变，携带值为', e.detail.value)
+      this.index = e.detail.value
+      this.pickerBtn = true
+    }
+  }
+}
+</script>
