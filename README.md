@@ -29,3 +29,13 @@ npm run dev
 ### 5.导入至开发者工具
 
 编译完成生成`dist`目录后，开发者工具本地开发目录指向项目根目录。
+
+### 6.错误提示
+
+如果出现util的错误，请先安装util,然后再更新wepy
+```bash
+npm install util
+```
+```bash
+wepy upgrade wepy
+```
