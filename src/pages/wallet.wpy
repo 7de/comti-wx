@@ -54,15 +54,12 @@
             <view class="zan-cell__ft zan-font-20">￥<text class="zan-font-30">50</text></view>
           </view>
           <button class="zan-btn zan-btn--primary" style="margin-top:120rpx;">马上充值</button>
-        <view class="zan-cell zan-cell__no-pading">
-          <view class="zan-cell__bd zan-font-12 zan-c-gray">
-            <view class="zan-pull-right">充值协议</view><view class="zan-pull-right" style="padding-right:5rpx">退款 |</view>
+          <view class="zan-cell zan-cell__no-pading">
+            <view class="zan-cell__bd zan-font-12 zan-c-gray">
+              <view class="zan-pull-right">充值协议</view><view class="zan-pull-right" style="padding-right:5rpx">退款 |</view>
+            </view>
           </view>
         </view>
-
-
-        </view>
-        
       </block>
     </view>
   </view>

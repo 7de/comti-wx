@@ -73,22 +73,18 @@
       <view class="zan-panel">
         <navigator class="zan-cell zan-cell--access" url="./order">
           <view class="zan-cell__bd">我的订单</view>
-          <view class="zan-cell__ft">查看更多订单</view>
+          <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">查看更多订单</view>
         </navigator>
         <view class="zan-cell">
-          <navigator class="zan-col zan-col-6" url="./order?selectedId=topay">
-            <view class="iconfont icon-signboard"></view>
-            <text class="icon-classname">待付款</text>
-          </navigator>
-          <navigator class="zan-col zan-col-6" url="./order?selectedId=charging">
+          <navigator class="zan-col zan-col-8" url="./order?selectedId=charging">
             <view class="iconfont icon-electrical"></view>
             <text class="icon-classname">充电中</text>
           </navigator>
-          <navigator class="zan-col zan-col-6" url="./order?selectedId=send">
+          <navigator class="zan-col zan-col-8" url="./order?selectedId=send">
             <view class="iconfont icon-trust"></view>
-            <text class="icon-classname">已完成</text>
+            <text class="icon-classname">充电完成</text>
           </navigator>
-          <navigator class="zan-col zan-col-6" url="./order?selectedId=close">
+          <navigator class="zan-col zan-col-8" url="./order?selectedId=close">
             <view class="iconfont icon-history"></view>
             <text class="icon-classname">已关闭</text>
           </navigator>

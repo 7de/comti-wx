@@ -1,99 +1,180 @@
 <style lang="scss">
 .con{
   position: relative;
-  height: 94.3vh;
+  transition: all .15s;
+  .close{
+    position: absolute;
+    bottom:-9%;
+    right: 0;
+    width: 80rpx;
+    height:80rpx;
+    line-height: 80rpx;
+    z-index: 20;
+    color: #1AAD19;
+    >text{
+      font-size: 48rpx;
+    }
+  }
 }
 #mapCon{
   position: absolute;
-  top: 0;
+  top:0;
   right: 0;
   bottom: 0;
   left: 0;
   width: 100%;
   height: 100%;
 }
+.markermask{
+  widows: 100%;
+  color: #444;
+  font-size:28rpx;
+  padding: 30rpx;
+  background-color: #fff;
+}
+.map-tag{
+  margin: 0 20rpx;
+  border-radius: 20px;
+  border-bottom-left-radius: 0;
+  &::after{
+    content:'';
+    border-width:0
+  }
+}
 </style>
 
 <template>
-  <view class="con">
-    <map id="mapCon" latitude="{{latitude}}" longitude="{{longitude}}" scale="{{scale}}" markers="{{markers}}" controls="{{controls}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location/>
+  <view class="con" style="height:{{showMap?74:93}}vh">
+    <map id="mapCon" class="" latitude="{{latitude}}" longitude="{{longitude}}" scale="{{scale}}" markers="{{markers}}" controls="{{controls}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location/>
+    <zanPopup direction="bottom">
+      <view class="markermask">
+        <view class="zan-font-16">
+          {{markersinfo["callout"].title}}充电站
+          <view class="zan-tag zan-tag--primary map-tag">慢充</view>
+          <view class="zan-tag zan-tag--warn zan-tag--plain">24h</view>
+        </view>
+        <view class="zan-c-gray-dark margin-top-10">地址：{{markersinfo["callout"].addr}}</view>
+        <view class="margin-top-10">
+          <text class="padding-right-30">空闲：<text class="zan-c-green">{{markersinfo["callout"].free}}</text></text>
+          <text>总设备：{{markersinfo["callout"].equipment}}</text>
+        </view>
+        <view class="margin-top-10">
+          <text class="padding-right-30">电费：<text class="zan-c-green">{{markersinfo["callout"].electricity}}</text>元/度</text>
+          <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee}}</text>元/度</text>
+        </view>
+      </view>
+    </zanPopup>
+    <view class="close zan-center" @tap="toggleTopPopup" wx:if="{{showMap}}"><text class="iconfont icon-wrong"></text></view>
   </view>
 </template>
 
 <script>
 import wepy from 'wepy'
 
+import zanPopup from '../components/zan-popup'
+import api from '../common/api'
+
 export default class Commap extends wepy.component {
-  props = {
-    markers: []
-  }
   data = {
     scale: 18,
     latitude: 22.55329,
     longitude: 113.88308,
-    controls: []
+    controls: [],
+    markers: [],
+    oldMarkerID: null,
+    markersinfo: {},
+    showMap: false,
+    showPopup: false
+  }
+  components = {
+    zanPopup
   }
 
   onLoad(options) {
     this.iniMap()
+    wepy.showLoading()
     wepy.getLocation({
       type: 'gcj02',
       success: (res) => {
-        console.log(res)
+        wepy.hideLoading()
         this.longitude = res.longitude
         this.latitude = res.latitude
         this.$apply()
+        this.getMarkers()
       },
       fail: (rel) => {
-        wepy.getSetting({
-          success: (res) => {
-            let that = this
-            if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
-              wepy.showModal({
-                title: '是否授权当前位置',
-                content: '需要获取您的地理位置，请确认授权，否则地图功能将无法使用',
-                success: (res) => {
-                  if (res.cancel) {
-                    console.info('1授权失败返回数据')
-                  } else if (res.confirm) {
-                    wepy.openSetting({
-                      success: function (data) {
-                        if (data.authSetting['scope.userLocation'] === true) {
-                          wepy.showToast({
-                            title: '授权成功',
-                            icon: 'success',
-                            duration: 1000
-                          })
-                          // 再次授权，调用getLocationt的API
-                          wepy.getLocation({
-                            type: 'gcj02',
-                            success: (res) => {
-                              console.log(res)
-                              that.longitude = res.longitude
-                              that.latitude = res.latitude
-                              that.$apply()
-                            }
-                          })
-                          that.movetoPosition()
-                        } else {
-                          wepy.showToast({
-                            title: '授权失败',
-                            icon: 'success',
-                            duration: 2000
-                          })
-                        }
-                      }
-                    })
-                  }
-                }
-              })
-            }
-          }
-        })
+        wepy.hideLoading()
+        this.getScopeLocation()
       }
     })
+    this.mapControl()
+  }
+
+  methods = {
+    // 地图控件点击处理
+    bindcontroltap(e) {
+      switch (e.controlId) {
+        case 1: this.movetoPosition()
+          break
+        case 2: this.openCode()
+          break
+        case 3: wepy.navigateTo({
+          url: './personal'
+        })
+      }
+    },
+    // 标点点击
+    bindmarkertap(e) {
+      let _markers = this.markers
+      let markerId = e.markerId
+      for (let v in _markers) {
+        if (_markers[v].id === markerId) {
+          this.markersinfo = _markers[v]
+        }
+      }
+      if (!this.showMap && this.oldMarkerID !== markerId) {
+        this.toggleTopPopup()
+        this.oldMarkerID = markerId
+      } else if (!this.showMap && this.oldMarkerID === markerId) {
+        this.toggleTopPopup()
+      }
+    },
+    toggleTopPopup() {
+      this.$invoke('zanPopup', 'togglePopup')
+      this.showMap = !this.showMap
+      this.$apply()
+    }
+  }
+  // 初始化地图
+  iniMap() {
+    this.mapCtx = wepy.createMapContext('mapCon')
+    this.movetoPosition()
+  }
+  toggleTopPopup() {
+    this.$invoke('zanPopup', 'togglePopup')
+    this.showMap = !this.showMap
+    this.$apply()
+  }
+
+  // 定位到本地坐标
+  movetoPosition() {
+    this.mapCtx.moveToLocation()
+  }
+
+  // 地图标记
+  getMarkers() {
+    const URL = 'https://www.easy-mock.com/mock/5af3aa047d36e87abdb424cf/example/map/markers'
+    api.get(URL).then(res => {
+      this.markers = res.data
+      this.$apply()
+    })
+  }
+
+  // 地图控件
+  mapControl() {
     wepy.getSystemInfo({
-      success: (res) => {
+      success: res => {
+        console.log(res.pixelRatio)
         this.controls = [{
           id: 1,
           iconPath: '/images/location.png',
@@ -108,10 +189,10 @@ export default class Commap extends wepy.component {
           id: 2,
           iconPath: '/images/code.png',
           position: {
-            left: res.windowWidth / 2 - 20,
-            top: res.windowHeight - 115,
-            width: 60,
-            height: 60
+            left: res.windowWidth / 2 - 45,
+            top: res.windowHeight - 103,
+            width: 95,
+            height: 40
           },
           clickable: true
         }, {
@@ -135,33 +216,9 @@ export default class Commap extends wepy.component {
           },
           clickable: false
         }]
+        this.$apply()
       }
     })
-  }
-
-  methods = {
-    // 地图控件点击处理
-    bindcontroltap(e) {
-      switch (e.controlId) {
-        case 1: this.movetoPosition()
-          break
-        case 2: this.openCode()
-          break
-        case 3: wepy.navigateTo({
-          url: './personal'
-        })
-      }
-    }
-  }
-  // 初始化地图
-  iniMap() {
-    this.mapCtx = wepy.createMapContext('mapCon')
-    this.movetoPosition()
-  }
-
-  // 定位到本地坐标
-  movetoPosition() {
-    this.mapCtx.moveToLocation()
   }
 
   // 扫一扫
@@ -197,6 +254,48 @@ export default class Commap extends wepy.component {
         delta: 1
       })
     }
+  }
+
+  // 是否授权当前位置
+  getScopeLocation() {
+    wepy.getSetting({
+      success: (res) => {
+        let that = this
+        if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
+          wepy.showModal({
+            title: '是否授权当前位置',
+            content: '需要获取您的地理位置，请确认授权，否则地图功能将无法使用',
+            success: (res) => {
+              if (res.cancel) {
+                /* wepy.navigateTo({
+                  url: 'authorize'
+                }) */
+                console.info('1授权失败返回数据')
+              } else if (res.confirm) {
+                wepy.openSetting({
+                  success: function (data) {
+                    if (data.authSetting['scope.userLocation'] === true) {
+                      wepy.showToast({
+                        title: '授权成功',
+                        icon: 'success',
+                        duration: 1000
+                      })
+                      that.movetoPosition()
+                    } else {
+                      wepy.showToast({
+                        title: '授权失败',
+                        icon: 'success',
+                        duration: 2000
+                      })
+                    }
+                  }
+                })
+              }
+            }
+          })
+        }
+      }
+    })
   }
 }
 </script>

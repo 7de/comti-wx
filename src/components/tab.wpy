@@ -76,7 +76,7 @@
       }
 
       methods = {
-        change (idx, evt) {
+/*         change (idx, evt) {
           this.active = +idx
           if (this.active === 1) {
             this.$invoke('zanToptips', 'showZanTopTips', { content: 'toptips的内容 Wepy', options: 3000 })
@@ -85,7 +85,7 @@
         },
         showTopTips() {
           this.$invoke('zanToptips', 'showZanTopTips', { content: 'toptips的内容 Wepy', options: 1000 })
-        }
+        } */
       }
 
       onLoad () {

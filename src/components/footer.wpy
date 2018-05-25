@@ -1,5 +1,5 @@
 <style lang="scss">
-.logo-ft{
+.com-ft{
   position: absolute;
   bottom:50rpx;
   left: 0;
@@ -7,7 +7,7 @@
 }
 </style>
 <template>
-  <view class="logo-ft zan-center">
+  <view class="com-ft zan-center">
       <text class="zan-font-12 zan-c-gray">CopyRight® 康体佳充电 2015-2018</text>
     </view>
 </template>

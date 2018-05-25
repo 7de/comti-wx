@@ -17,7 +17,7 @@
             <navigator class="zan-cell zan-cell--access" url="{{ item.path }}" hidden="{{!item.path}}">
               <view class="zan-cell__icon iconfont icon-{{item.iconfont}}" style="color:#38f;" wx:if="{{item.iconfont}}"></view>
               <view class="zan-cell__bd">{{ item.title }}</view>
-              <view class="zan-cell__ft"><text wx:if="{{item.rightcon}}">{{item.rightcon}}</text></view>
+              <view class="zan-cell__ft"><text class="zan-font-12 zan-c-gray-dark" wx:if="{{item.rightcon}}">{{item.rightcon}}</text></view>
             </navigator>
         </block>
     </view>

@@ -1,8 +1,4 @@
 <style lang="scss">
-.logo-page{
-  height: 100vh;
-  position: relative;
-}
 .logo-img{
   width: 320rpx;
 }
@@ -17,9 +13,9 @@
 
 </style>
 <template>
-  <view class="logo-page">
+  <view class="container">
     <view class="logo-hd zan-center">
-      <image src="../images/logo.png" mode="aspectFit" class="logo-img"></image>
+      <image src="../images/logo.png" mode="aspectFit" class="logo-img" />
     </view>
     <view class="logo-bd">
       <view class="zan-font-12 zan-c-gray-darker zan-left">

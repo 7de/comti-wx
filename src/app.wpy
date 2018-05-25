@@ -7,6 +7,7 @@
 @import "./zanui/col.scss";
 @import "./zanui/color.scss";
 @import "./zanui/btn.scss";
+@import "./zanui/tag.scss";
 page{
   color: #444;
 }
@@ -46,22 +47,21 @@ page{
   color: #666;
 }
 
+.margin-top-10{
+  margin-top: 10rpx;;
+}
+.padding-right-30{
+  padding-right: 30rpx;
+}
+
 </style>
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
-
-import { setStore } from 'wepy-redux'
-import configStore from './store'
-
-const store = configStore()
-setStore(store)
-
 export default class extends wepy.app {
   config = {
     pages: [
       'pages/home',
-      'pages/index',
       'pages/personal',
       'pages/order',
       'pages/wallet',
@@ -69,40 +69,29 @@ export default class extends wepy.app {
       'pages/setting',
       'pages/help',
       'pages/about',
-      'pages/scancode/index'
+      'pages/scancode/index',
+      'pages/authorize'
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarTextStyle: 'white',
       navigationBarBackgroundColor: '#1AAD19',
-      navigationBarTitleText: 'WeChat'
+      navigationBarTitleText: '康体佳充电'
     }
   }
 
   globalData = {
-    userInfo: null
+    userInfo: null,
+    code: null
   }
 
   constructor () {
     super()
+    // this.use('promisify')
     this.use('requestfix')
   }
 
   onLaunch() {
-    this.testAsync()
-  }
-
-  sleep (s) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('promise resolved')
-      }, s * 1000)
-    })
-  }
-
-  async testAsync () {
-    const data = await this.sleep(3)
-    console.log(data)
   }
 
   getUserInfo(cb) {

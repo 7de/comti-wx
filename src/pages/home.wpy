@@ -3,7 +3,7 @@
   height:100%;
 } */
 .body > .tab_con{
-  margin-top: 70rpx;
+  margin-top: 80rpx;
 }
     $fontcolor: #7b7b7b;
     $activecolor: #1AAD19;
@@ -12,8 +12,8 @@
         position: fixed;
         top: 0;
         left: 0;
-        height: 70rpx;
-        line-height: 70rpx;
+        height: 80rpx;
+        line-height: 80rpx;
         width: 100%;
         background-color: #fff;
         font-size: 33rpx;
@@ -68,24 +68,19 @@
 import wepy from 'wepy'
 
 import Commap from '../components/commap'
-import zanTab from '../components/zan-tab'
 import zanToptips from '../components/zan-toptips'
 import zanLoadmore from '../components/zan-loadmore'
+// import api from '../common/api'
 // import Toast from 'wepy-com-toast'
 
 export default class Home extends wepy.page {
-  config = {
-    'navigationBarTitleText': '康体佳充电'
-  }
   components = {
     commap: Commap,
-    zanTab,
     zanToptips,
     zanLoadmore
   }
   data = {
-    currentTab: 0,
-    markers: []
+    currentTab: 0
   }
   onShow() {
     this.currentTab = 0
@@ -97,15 +92,7 @@ export default class Home extends wepy.page {
     }
   }
   onLoad() {
-    wepy.request({
-      url: 'https://www.easy-mock.com/mock/5af3aa047d36e87abdb424cf/example/map/markers',
-      data: {},
-      method: 'GET',
-      success: (res) => {
-        this.markers = res.data.data
-        console.log(this.markers)
-      }
-    })
+    // api.getUserInfo()
   }
 }
 </script>
