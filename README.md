@@ -6,7 +6,7 @@
 
 ## 体验步骤
 ### 1. 安装 wepy
-本项目基于wepy开发，[参考这里](https://github.com/wepyjs/wepy)，zanUI
+本项目基于wepy开发，[参考这里](https://github.com/wepyjs/wepy)
 ```bash
 npm install -g wepy-cli
 ```

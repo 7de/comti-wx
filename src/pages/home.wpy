@@ -82,6 +82,37 @@ export default class Home extends wepy.page {
   data = {
     currentTab: 0
   }
+  onLoad() {
+    // 查看是否授权
+    wepy.getSetting({
+      success: res => {
+        if (res.authSetting['scope.userInfo']) {
+          // 已经授权，可以直接调用 getUserInfo 获取头像昵称
+          wepy.getUserInfo({
+            lang: 'zh_CN',
+            success: function(res) {
+              console.log(res.userInfo)
+            }
+          })
+        } else {
+          wepy.showModal({
+            title: '提示',
+            content: '我们需要获得您的授权，才能进行下一步操作，请点击去授权',
+            showCancel: false,
+            confirmText: '去授权',
+            success: function(res) {
+              if (res.confirm) {
+                wepy.redirectTo({
+                  url: './authorize'
+                })
+              }
+            }
+          })
+        }
+      }
+    })
+  }
+
   onShow() {
     this.currentTab = 0
   }
@@ -90,9 +121,6 @@ export default class Home extends wepy.page {
     showTopTips() {
       this.$invoke('zanToptips', 'showZanTopTips', { content: '功能暂未开通，敬请期待...', options: 2000 })
     }
-  }
-  onLoad() {
-    // api.getUserInfo()
   }
 }
 </script>

@@ -174,13 +174,12 @@ export default class Commap extends wepy.component {
   mapControl() {
     wepy.getSystemInfo({
       success: res => {
-        console.log(res.pixelRatio)
         this.controls = [{
           id: 1,
           iconPath: '/images/location.png',
           position: {
             left: 20,
-            top: res.windowHeight - 100,
+            top: res.windowHeight - 125,
             width: 40,
             height: 40
           },
@@ -190,7 +189,7 @@ export default class Commap extends wepy.component {
           iconPath: '/images/code.png',
           position: {
             left: res.windowWidth / 2 - 45,
-            top: res.windowHeight - 103,
+            top: res.windowHeight - 128,
             width: 95,
             height: 40
           },
@@ -200,7 +199,7 @@ export default class Commap extends wepy.component {
           iconPath: '/images/user.png',
           position: {
             left: res.windowWidth - 50,
-            top: res.windowHeight - 100,
+            top: res.windowHeight - 125,
             width: 40,
             height: 40
           },

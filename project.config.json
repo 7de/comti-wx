@@ -71,6 +71,12 @@
 					"name": "扫码成功",
 					"pathName": "pages/scancode/index",
 					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "重新授权",
+					"pathName": "pages/authorize",
+					"query": ""
 				}
 			]
 		}

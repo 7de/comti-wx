@@ -50,8 +50,15 @@ page{
 .margin-top-10{
   margin-top: 10rpx;;
 }
+.padding-rl-30{
+  padding-left: 30rpx;
+  padding-right: 30rpx;
+}
 .padding-right-30{
   padding-right: 30rpx;
+}
+.padding-bottom-30{
+  padding-bottom: 30rpx;
 }
 
 </style>
@@ -79,7 +86,17 @@ export default class extends wepy.app {
       navigationBarTitleText: '康体佳充电'
     }
   }
-
+  onLaunch() {
+    wepy.login({
+      success: res => {
+        if (res.code) {
+          console.log(res)
+        } else {
+          console.log('登录失败！' + res.errMsg)
+        }
+      }
+    })
+  }
   globalData = {
     userInfo: null,
     code: null
@@ -89,9 +106,6 @@ export default class extends wepy.app {
     super()
     // this.use('promisify')
     this.use('requestfix')
-  }
-
-  onLaunch() {
   }
 
   getUserInfo(cb) {
