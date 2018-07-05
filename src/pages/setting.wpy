@@ -4,10 +4,10 @@
 <template>
   <view class="container">
     <view class="zan-panel">
-      <view class="zan-cell zan-cell--access">
+      <navigator class="zan-cell zan-cell--access" url="./setting-user">
         <view class="zan-cell__bd">用户指南</view>
         <view class="zan-cell__ft"></view>
-      </view>
+      </navigator>
     </view>
     <footer />
   </view>

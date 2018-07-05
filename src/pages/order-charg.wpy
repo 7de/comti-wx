@@ -1,0 +1,237 @@
+<style lang="scss">
+</style>
+<template>
+  <view class="container">
+    <zanTab :tab.sync="tab1" componentId="tab1" fixed></zanTab>
+    <view class="tab-con">
+      <block wx:if="{{currentTab===0}}">
+        <block wx:if="{{chargData.length>0}}">
+          <scroll-view scroll-y='true' bindscrolltolower="chargLower" style="height:{{height-50}}px">
+            <view  class="zan-panel" wx:for="{{chargData}}" wx:key="index" wx:for-index="index" wx:for-item="item">
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd zan-c-gray-dark">订单编号：{{item.orderNo}}</view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd zan-c-gray-dark">订单状态：{{item.orderStatus===1?'充电完成':item.orderStatus===2?'已关闭':item.orderStatus===3?'全部':'充电中'}}</view>
+                <view class="zan-cell__ft" wx:if="item.orderStatus==0"><navigator class="zan-btn zan-btn--small zan-btn--primary" url="./charging?orderNo={{item.orderNo}}&time={{item.actPeriod/60}}">查看充电详情</navigator></view>
+                <view wx:else>
+                  <view class="zan-cell__ft">充电时长：<text class="zan-c-red zan-font-16">{{item.actChargerTime}}</text> 分钟</view>
+                </view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <!-- <view class="zan-cell__bd">充电时长：<text class="zan-c-green zan-font-16">{{item.actChargerTime}}</text> 分钟</view> -->
+                <view class="zan-cell__bd">订单金额：￥<text class="zan-c-red zan-font-16">{{item.chargeMoney/100}}</text></view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">0.00</text></view>
+                <view class="zan-cell__ft" wx:if="{{item.orderStatus!==0}}">结算金额：￥<text class="zan-c-red zan-font-16">{{item.totalFee/100}}</text></view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd  zan-c-gray-dark">订单时间：{{item.extraMap.startTimeFad}}</view>
+              </view>
+            </view>
+            <block wx:if="{{chargHideLoadMore}}">
+              <view class="zan-loadmore">
+                <view class="zan-loading"></view>
+                <view class="zan-loadmore__tips">加载中...</view>
+              </view>
+            </block>
+          </scroll-view>
+        </block>
+        <view wx:else class="zan-center" style="padding-top:20rpx"><text class="zan-c-gray-dark zan-font-12">暂无数据</text></view>
+      </block>
+      <block wx:elif="{{currentTab===1}}">
+        <block wx:if="{{complData.length>0}}">
+          <scroll-view scroll-y='true' bindscrolltolower="complLower" style="height:{{height-50}}px">
+            <view  class="zan-panel" wx:for="{{complData}}" wx:key="index" wx:for-index="index" wx:for-item="item">
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd zan-c-gray-dark">订单编号：{{item.orderNo}}</view>
+                <view class="zan-cell__ft">{{item.orderStatus===1?'充电完成':item.orderStatus===2?'已关闭':item.orderStatus===3?'全部':'充电中'}}</view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd">充电时长：<text class="zan-c-green zan-font-16">{{item.actChargerTime}}</text> 分钟</view>
+                <view class="zan-cell__ft">订单金额：￥<text class="zan-c-red zan-font-16">{{item.chargeMoney/100}}</text></view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">0.00</text></view>
+                <view class="zan-cell__ft">结算金额：￥<text class="zan-c-red zan-font-16">{{item.totalFee/100}}</text></view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd  zan-c-gray-dark">订单时间：{{item.extraMap.startTimeFad}}</view>
+              </view>
+              <view class="zan-cell zan-font-12">
+                <view class="zan-cell__bd  zan-c-gray-dark">结束时间：{{item.extraMap.endTimeFad}}</view>
+              </view>
+            </view>
+            <block wx:if="{{complHideLoadMore}}">
+              <view class="zan-loadmore">
+                <view class="zan-loading"></view>
+                <view class="zan-loadmore__tips">加载中...</view>
+              </view>
+            </block>
+          </scroll-view>
+        </block>
+        <view wx:else class="zan-center" style="padding-top:20rpx"><text class="zan-c-gray-dark zan-font-12">暂无数据</text></view>
+      </block>
+    </view>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+import zanTab from '../components/zan-tab'
+import Card from '../components/card'
+import api from '../common/api'
+
+const orderURL = 'server/' // 订单列表
+
+export default class Order extends wepy.page {
+  config = {
+    'navigationBarTitleText': '我的订单'
+  }
+  components = {
+    zanTab: zanTab,
+    cardA: Card,
+    cardB: Card,
+    cardC: Card,
+    cardD: Card
+  }
+  data = {
+    height: '',
+    currentTab: 3,
+    tab1: {
+      list: [
+        {
+          id: 3,
+          title: '全部'
+        },
+        {
+          id: 0,
+          title: '充电中'
+        },
+        {
+          id: 1,
+          title: '充电完成'
+        },
+        {
+          id: 2,
+          title: '已关闭'
+        }
+      ],
+      selectedId: 3,
+      scroll: false
+    },
+    pageSize: 5, // 当前页数量
+    chargData: [],
+    chargPagtotal: null, // 充电中总数
+    chargPagenum: 1,
+    chargHideLoadMore: false
+  }
+  events = {
+    // tab事件切换
+    zanTabChange(selectedId, event) {
+      let { componentId } = event.source
+      this[componentId].selectedId = selectedId
+      this.currentTab = Number(selectedId)
+      this.$apply()
+      // this.getData(this.currentTab, 1, 5)
+    },
+    // 金额转换
+    formatMoney(str) {
+      return api.fotmatMoney(str)
+    }
+  }
+  onLoad(option) {
+    wepy.showLoading({
+      title: '加载中'
+    })
+    wepy.getSystemInfo({
+      success: (res) => {
+        this.height = res.windowHeight
+        this.$apply()
+      }
+    })
+    if (option.selectedId) {
+      this.tab1.selectedId = option.selectedId
+      this.currentTab = parseInt(option.selectedId)
+    }
+  }
+  onShow() {
+    this.getData(0, this.chargPagenum)
+  }
+  chargLower() {
+    this.chargHideLoadMore = true
+    this.$apply()
+    let _length = this.chargData.length
+    console.log(_length)
+    if (_length === this.chargPagtotal) {
+      this.chargHideLoadMore = false
+      this.$apply()
+      wepy.showToast({ // 如果全部加载完成了也弹一个框
+        title: '全部加载完了',
+        icon: 'success',
+        duration: 500
+      })
+      return false
+    } else {
+      this.chargHideLoadMore = false
+      this.chargPagenum = this.chargPagenum + 1
+      this.$apply()
+      this.plusData(0, this.chargPagenum)
+    }
+  }
+  // 读取订单列表
+  getData(state, num) {
+    api.get(orderURL + 'queryOrderNoListMobile?orderStatus=' + state + '&rdSession=' + this.$parent.token + '&pageNum=' + num + '&pageSize=' + this.pageSize).then(res => {
+      wepy.hideLoading()
+      console.log(res.data)
+      console.log(res.dataCount)
+      if (state === 0) {
+        this.chargData = res.data
+        this.chargPagtotal = res.dataCount
+        this.$apply()
+      } else if (state === 1) {
+        this.complData = res.data
+        this.complPagtotal = res.dataCount
+        this.$apply()
+      } else if (state === 2) {
+        this.closeData = res.data
+        this.closePagtotal = res.dataCount
+        this.$apply()
+      } else {
+        this.allData = res.data
+        this.allPagtotal = res.dataCount
+        this.$apply()
+      }
+    })
+  }
+  // 下拉加载订单列表
+  plusData(state, num) {
+    api.get(orderURL + 'queryOrderNoListMobile?orderStatus=' + state + '&rdSession=' + this.$parent.token + '&pageNum=' + num + '&pageSize=' + this.pageSize).then(res => {
+      wepy.hideLoading()
+      console.log(res.data)
+      let _length = res.data.length
+      let _total = res.dataCount
+      console.log(_total)
+      if (_length !== _total) {
+        if (state === 0) {
+          this.chargData = this.chargData.concat(res.data)
+        } else if (state === 1) {
+          this.complData = this.complData.concat(res.data)
+        } else if (state === 2) {
+          this.closeData = this.closeData.concat(res.data)
+        } else {
+          this.allData = this.allData.concat(res.data)
+        }
+        this.$apply()
+      } else {
+        wepy.showToast({ // 如果全部加载完成了也弹一个框
+          title: '没有数据加载了',
+          icon: 'none',
+          duration: 2000
+        })
+      }
+    })
+  }
+}
+</script>

@@ -8,6 +8,7 @@
 @import "./zanui/color.scss";
 @import "./zanui/btn.scss";
 @import "./zanui/tag.scss";
+@import "./zanui/load.scss";
 page{
   color: #444;
 }
@@ -50,6 +51,12 @@ page{
 .margin-top-10{
   margin-top: 10rpx;;
 }
+.margin-top-15{
+  margin-top: 15rpx;;
+}
+.margin-top-30{
+  margin-top: 30rpx;;
+}
 .padding-rl-30{
   padding-left: 30rpx;
   padding-right: 30rpx;
@@ -65,19 +72,27 @@ page{
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
+import api from './common/api'
+const URL = 'platform/platform/customer/getCustomerByKey'
 export default class extends wepy.app {
   config = {
     pages: [
       'pages/home',
       'pages/personal',
       'pages/order',
+      'pages/order-charg',
       'pages/wallet',
+      'pages/wallet-detail',
+      'pages/wallet-topup',
+      'pages/wallet-topup-record',
       'pages/message',
       'pages/setting',
       'pages/help',
       'pages/about',
       'pages/scancode/index',
-      'pages/authorize'
+      'pages/charging',
+      'pages/authorize',
+      'pages/setting-user'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -86,39 +101,78 @@ export default class extends wepy.app {
       navigationBarTitleText: '康体佳充电'
     }
   }
+  globalData = {
+    receiving: false,
+    token: '',
+    userInfo: null,
+    code: null,
+    longitude: 0,
+    latitude: 0
+  }
   onLaunch() {
-    wepy.login({
-      success: res => {
-        if (res.code) {
-          console.log(res)
-        } else {
-          console.log('登录失败！' + res.errMsg)
+    const updateManager = wepy.getUpdateManager()
+    updateManager.onCheckForUpdate(function (res) {
+      // 请求完新版本信息的回调
+      console.log(res.hasUpdate)
+    })
+    updateManager.onUpdateReady(function () {
+      wepy.showModal({
+        title: '更新提示',
+        content: '新版本已经准备好，是否重启应用？',
+        success: function (res) {
+          if (res.confirm) {
+            // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
+            wepy.clearStorage()
+            updateManager.applyUpdate()
+          }
         }
-      }
+      })
+    })
+    updateManager.onUpdateFailed(function () {
+      // 新的版本下载失败
+      console.log('下载失败，请重新再试')
+      wepy.showModal({
+        title: '更新提示',
+        content: '新版本下载失败',
+        showCancel: false
+      })
     })
   }
-  globalData = {
-    userInfo: null,
-    code: null
+  onShow () {
+    try {
+      this.token = this.token ? this.token : wepy.getStorageSync('token_r')
+      if (this.token) {
+        // Do something with return value
+        console.log('token主页:' + this.token)
+        // 判断token是否有效
+        api.get(URL + '?rdSession=' + this.token).then(res => {
+        })
+      } else {
+        console.log('空L:')
+        wepy.navigateTo({
+          url: '/pages/authorize'
+        })
+      }
+    } catch (e) {
+      // Do something when catch error
+      console.log('错误:' + e)
+      wepy.showToast({
+        title: '未登录',
+        icon: 'none',
+        duration: 2000,
+        success: res => {
+          wepy.redirectTo({
+            url: '/pages/authorize'
+          })
+        }
+      })
+    }
   }
 
   constructor () {
     super()
     // this.use('promisify')
     this.use('requestfix')
-  }
-
-  getUserInfo(cb) {
-    const that = this
-    if (this.globalData.userInfo) {
-      return this.globalData.userInfo
-    }
-    wepy.getUserInfo({
-      success (res) {
-        that.globalData.userInfo = res.userInfo
-        cb && cb(res.userInfo)
-      }
-    })
   }
 }
 </script>

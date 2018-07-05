@@ -1,0 +1,88 @@
+<style lang="scss">
+// @import '../zanui/cell.scss';
+.zan-select__list .zan-select__radio {
+  display: none;
+  min-height: 200rpx;
+}
+.com-select{
+  height: 45rpx;
+  line-height: 45rpx;
+  border:1px solid #eee;
+  border-radius: 50rpx;
+  text-align: center;
+  padding:10rpx 8rpx;
+  margin: 10rpx 15rpx;
+  font-size: 12px;
+  color:#999;
+}
+.com-select_active{
+  border-color:#4b0;
+  background-color: #4b0;
+  color:#fff;
+}
+.zan-select__list{
+  padding: 25rpx 30rpx;
+  .zan-row{
+    overflow: hidden;
+  }
+}
+</style>
+<template>
+<block>
+  <radio-group
+    class="zan-select__list"
+    name="{{ name || componentId || '' }}"
+    bindchange="handleZanSelectChange"
+    data-component-id="{{ componentId }}"
+  >
+    <view class="zan-row">
+      <label wx:for="{{ items }}" wx:key="value" class="zan-col zan-col-8">
+        <view class="com-select {{item.value === checkedValue?'com-select_active':''}}">
+          <radio class="zan-select__radio" value="{{ item.value }}" checked="{{ item.value === checkedValue }}" />
+          <view class="com-select__bd">
+            {{ item.name }}
+          </view>
+        </view>
+        <!-- <view class="zan-cell">
+          <radio class="zan-select__radio" value="{{ item.value }}" checked="{{ item.value === checkedValue }}"/>
+          <view
+            class="zan-cell__bd"
+            style="{{ 'padding-left: ' + item.padding * 10 + 'px;' }}"
+          >{{ item.name }}</view>
+          <view wx:if="{{ item.value === checkedValue }}" class="zan-cell__ft">
+            <icon type="success_no_circle" size="14"></icon>
+          </view>
+        </view> -->
+      </label>
+    </view>
+  </radio-group>
+</block>
+</template>
+<script>
+import wepy from 'wepy'
+
+export default class zanSelect extends wepy.component {
+  props = {
+    items: Object,
+    name: {
+      type: String,
+      default: ''
+    },
+    activeColor: {
+      type: String,
+      default: '#999'
+    },
+    checkedValue: Number,
+    componentId: String
+  }
+  data = {}
+  methods = {
+    handleZanSelectChange(e) {
+      let value = e.detail.value
+      console.info('[zan:Select:change]', value, e)
+      this.$emit('zanSelectChange', value)
+    }
+  }
+  computed = {}
+}
+</script>

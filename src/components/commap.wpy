@@ -4,7 +4,7 @@
   transition: all .15s;
   .close{
     position: absolute;
-    bottom:-9%;
+    bottom:-9.8%;
     right: 0;
     width: 80rpx;
     height:80rpx;
@@ -26,10 +26,11 @@
   height: 100%;
 }
 .markermask{
-  widows: 100%;
+  // widows: 100%;
+  height:100%;
   color: #444;
   font-size:28rpx;
-  padding: 30rpx;
+  padding:0 30rpx 40rpx;
   background-color: #fff;
 }
 .map-tag{
@@ -44,23 +45,23 @@
 </style>
 
 <template>
-  <view class="con" style="height:{{showMap?74:93}}vh">
-    <map id="mapCon" class="" latitude="{{latitude}}" longitude="{{longitude}}" scale="{{scale}}" markers="{{markers}}" controls="{{controls}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location/>
+  <view class="con" style="height:{{showMap?71:93}}vh">
+    <map id="mapCon" class="" latitude="{{latitude}}" longitude="{{longitude}}" markers="{{markers}}" controls="{{controls}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location/>
     <zanPopup direction="bottom">
       <view class="markermask">
         <view class="zan-font-16">
-          {{markersinfo["callout"].title}}充电站
+          {{markersinfo["callout"].siteName}}充电站
           <view class="zan-tag zan-tag--primary map-tag">慢充</view>
           <view class="zan-tag zan-tag--warn zan-tag--plain">24h</view>
         </view>
-        <view class="zan-c-gray-dark margin-top-10">地址：{{markersinfo["callout"].addr}}</view>
+        <view class="zan-c-gray-dark margin-top-15 zan-font-12 zan-ellipsis" style="width:100%">地址：{{markersinfo["callout"].siteAddress}}</view>
         <view class="margin-top-10">
-          <text class="padding-right-30">空闲：<text class="zan-c-green">{{markersinfo["callout"].free}}</text></text>
-          <text>总设备：{{markersinfo["callout"].equipment}}</text>
+          <text class="padding-right-30">空闲：<text class="zan-c-green">{{markersinfo["callout"].free?markersinfo["callout"].free:''}}</text></text>
+          <text>总设备：{{markersinfo["callout"].equipment?markersinfo["callout"].equipment:''}}</text>
         </view>
         <view class="margin-top-10">
-          <text class="padding-right-30">电费：<text class="zan-c-green">{{markersinfo["callout"].electricity}}</text>元/度</text>
-          <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee}}</text>元/度</text>
+          <text class="padding-right-30">电费：<text class="zan-c-green">{{markersinfo["callout"].electricity?markersinfo["callout"].electricity:''}}</text>元/度</text>
+          <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee?markersinfo["callout"].servicefee:''}}</text>元/度</text>
         </view>
       </view>
     </zanPopup>
@@ -74,40 +75,91 @@ import wepy from 'wepy'
 import zanPopup from '../components/zan-popup'
 import api from '../common/api'
 
+const equiUrl = 'equip/equipSocket/querySocketStatus' // 扫描设备状态
+const markerURL = 'sites/sites/' // 站点
+
 export default class Commap extends wepy.component {
   data = {
-    scale: 18,
-    latitude: 22.55329,
-    longitude: 113.88308,
+    latitude: 0,
+    longitude: 0,
     controls: [],
     markers: [],
     oldMarkerID: null,
     markersinfo: {},
     showMap: false,
-    showPopup: false
+    showPopup: false,
+    _token: '',
+    height: '' // 屏幕高度
   }
   components = {
     zanPopup
   }
 
   onLoad(options) {
-    this.iniMap()
-    wepy.showLoading()
-    wepy.getLocation({
-      type: 'gcj02',
+    wepy.getSystemInfo({
       success: (res) => {
-        wepy.hideLoading()
-        this.longitude = res.longitude
-        this.latitude = res.latitude
+        this.height = res.windowHeight
         this.$apply()
-        this.getMarkers()
-      },
-      fail: (rel) => {
-        wepy.hideLoading()
-        this.getScopeLocation()
       }
     })
+    // this.iniMap()
+    this.mapCtx = wepy.createMapContext('mapCon')
+    this.mapCtx.moveToLocation()
+    wepy.showLoading({
+      title: '位置加载中'
+    })
+    wepy.getStorage({
+      key: 'user_longitude',
+      success: res => {
+        wepy.hideLoading()
+        this.longitude = res.data
+        this.$apply()
+        wepy.getStorage({
+          key: 'user_latitude',
+          success: res => {
+            this.latitude = res.data
+            this.$apply()
+            /* wepy.openLocation({
+              latitude: this.latitude,
+              longitude: this.longitude
+            }) */
+          }
+        })
+      },
+      fail: () => {
+        wepy.hideLoading()
+        wepy.getLocation({
+          type: 'gcj02',
+          success: (res) => {
+            let latitude = res.latitude
+            let longitude = res.longitude
+            /* wepy.openLocation({
+              latitude: latitude,
+              longitude: longitude
+            }) */
+            wepy.setStorage({
+              key: 'user_longitude',
+              data: longitude
+            })
+            wepy.setStorage({
+              key: 'user_latitude',
+              data: latitude
+            })
+            this.longitude = longitude
+            this.latitude = latitude
+            this.$apply()
+            this.movetoPosition()
+          },
+          fail: (rel) => {
+            // wepy.hideLoading()
+            this.getScopeLocation()
+          }
+        })
+      }
+    })
+    this.getMarkers()
     this.mapControl()
+    this._token = wepy.getStorageSync('token_r')
   }
 
   methods = {
@@ -119,7 +171,7 @@ export default class Commap extends wepy.component {
         case 2: this.openCode()
           break
         case 3: wepy.navigateTo({
-          url: './personal'
+          url: '/pages/personal'
         })
       }
     },
@@ -161,10 +213,10 @@ export default class Commap extends wepy.component {
     this.mapCtx.moveToLocation()
   }
 
-  // 地图标记
+  // 获取地图标记
   getMarkers() {
-    const URL = 'https://www.easy-mock.com/mock/5af3aa047d36e87abdb424cf/example/map/markers'
-    api.get(URL).then(res => {
+    api.get(markerURL + 'queryMapSiteList').then(res => {
+      // console.log(res.data)
       this.markers = res.data
       this.$apply()
     })
@@ -176,32 +228,32 @@ export default class Commap extends wepy.component {
       success: res => {
         this.controls = [{
           id: 1,
-          iconPath: '/images/location.png',
+          iconPath: '/images/location_2.png',
           position: {
-            left: 20,
-            top: res.windowHeight - 125,
-            width: 40,
-            height: 40
+            left: 5,
+            top: res.windowHeight - 165,
+            width: 60,
+            height: 60
           },
           clickable: true
         }, {
           id: 2,
-          iconPath: '/images/code.png',
+          iconPath: '/images/code_2.png',
           position: {
-            left: res.windowWidth / 2 - 45,
-            top: res.windowHeight - 128,
-            width: 95,
-            height: 40
+            left: res.windowWidth / 2 - 70,
+            top: res.windowHeight - 162,
+            width: 138,
+            height: 55
           },
           clickable: true
         }, {
           id: 3,
-          iconPath: '/images/user.png',
+          iconPath: '/images/user_2.png',
           position: {
-            left: res.windowWidth - 50,
-            top: res.windowHeight - 125,
-            width: 40,
-            height: 40
+            left: res.windowWidth - 65,
+            top: res.windowHeight - 165,
+            width: 60,
+            height: 60
           },
           clickable: true
         }, {
@@ -222,37 +274,30 @@ export default class Commap extends wepy.component {
 
   // 扫一扫
   openCode() {
-    if (this.timer === '' || this.timer === undefined) {
-      wepy.scanCode({
-        success: (res) => {
-          wepy.showLoading({
-            title: '正在扫描中...',
-            mask: true
+    /* wepy.showLoading({
+      title: '正在扫描中...',
+      mask: true
+    }) */
+    wepy.scanCode({
+      success: (res) => {
+        console.log(res)
+        console.log(res.result)
+        const _num = res.result
+        const _numIndex = _num.indexOf('=')
+        const _numNum = _num.substring(_numIndex + 1)
+        console.log(_numNum)
+        wepy.showLoading({
+          title: '正在查询设备...',
+          mask: true
+        })
+        api.get(equiUrl + '?rdSession=' + this._token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
+          wepy.hideLoading()
+          wepy.navigateTo({
+            url: '../pages/scancode/index?num=' + _numNum
           })
-          wepy.request({
-            url: 'https://www.easy-mock.com/mock/5af3aa047d36e87abdb424cf/example/scan/res',
-            data: {},
-            method: 'GET',
-            success: (res) => {
-              wepy.hideLoading()
-              wepy.redirectTo({
-                url: '../pages/scancode/index?title=' + res.data.data.title + '&code=' + res.data.data.code,
-                success: (res) => {
-                  wepy.showLoading({
-                    title: '获取设备成功',
-                    duration: 1000
-                  })
-                }
-              })
-            }
-          })
-        }
-      })
-    } else {
-      wepy.navigateBack({
-        delta: 1
-      })
-    }
+        })
+      }
+    })
   }
 
   // 是否授权当前位置
@@ -266,13 +311,11 @@ export default class Commap extends wepy.component {
             content: '需要获取您的地理位置，请确认授权，否则地图功能将无法使用',
             success: (res) => {
               if (res.cancel) {
-                /* wepy.navigateTo({
-                  url: 'authorize'
-                }) */
                 console.info('1授权失败返回数据')
               } else if (res.confirm) {
                 wepy.openSetting({
                   success: function (data) {
+                    console.log(data)
                     if (data.authSetting['scope.userLocation'] === true) {
                       wepy.showToast({
                         title: '授权成功',

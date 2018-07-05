@@ -5,48 +5,48 @@
 .body > .tab_con{
   margin-top: 80rpx;
 }
-    $fontcolor: #7b7b7b;
-    $activecolor: #1AAD19;
-    .tab {
-        color: $fontcolor;
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 80rpx;
-        line-height: 80rpx;
-        width: 100%;
-        background-color: #fff;
-        font-size: 33rpx;
-        white-space: nowrap;
-        box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
-        -webkit-box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
-        .tab_item {
-            &.active {
-                color: $activecolor;
-                &:after{
-                    background-color: $activecolor;
-                }
-            }
-            display: inline-block;
-            width: 50%;
-            text-align: center;
-            position: relative;
-            &:after{
-                content:'';
-                position: absolute;
-                left: 0;
-                right: 0;
-                bottom: 2rpx;
-                width: 30%;
-                height: 5rpx;
-                margin: 0 auto;
-                background-color: #fff;
-            }
-        }
-        .title {
-            display: block;
-        }
-    }
+  $fontcolor: #7b7b7b;
+  $activecolor: #1AAD19;
+  .tab {
+      color: $fontcolor;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 80rpx;
+      line-height: 80rpx;
+      width: 100%;
+      background-color: #fff;
+      font-size: 33rpx;
+      white-space: nowrap;
+      box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+      -webkit-box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+      .tab_item {
+          &.active {
+              color: $activecolor;
+              &:after{
+                  background-color: $activecolor;
+              }
+          }
+          display: inline-block;
+          width: 50%;
+          text-align: center;
+          position: relative;
+          &:after{
+              content:'';
+              position: absolute;
+              left: 0;
+              right: 0;
+              bottom: 2rpx;
+              width: 30%;
+              height: 5rpx;
+              margin: 0 auto;
+              background-color: #fff;
+          }
+      }
+      .title {
+          display: block;
+      }
+  }
 </style>
 <template>
   <view class="body">
@@ -70,9 +70,11 @@ import wepy from 'wepy'
 import Commap from '../components/commap'
 import zanToptips from '../components/zan-toptips'
 import zanLoadmore from '../components/zan-loadmore'
-// import api from '../common/api'
+import api from '../common/api'
 // import Toast from 'wepy-com-toast'
 
+const orderURL = 'server/'
+const URL = 'platform/platform/customer/getCustomerByKey'
 export default class Home extends wepy.page {
   components = {
     commap: Commap,
@@ -80,41 +82,36 @@ export default class Home extends wepy.page {
     zanLoadmore
   }
   data = {
-    currentTab: 0
+    currentTab: 0,
+    timer: '',
+    token: ''
   }
   onLoad() {
-    // 查看是否授权
-    wepy.getSetting({
-      success: res => {
-        if (res.authSetting['scope.userInfo']) {
-          // 已经授权，可以直接调用 getUserInfo 获取头像昵称
-          wepy.getUserInfo({
-            lang: 'zh_CN',
-            success: function(res) {
-              console.log(res.userInfo)
-            }
-          })
-        } else {
-          wepy.showModal({
-            title: '提示',
-            content: '我们需要获得您的授权，才能进行下一步操作，请点击去授权',
-            showCancel: false,
-            confirmText: '去授权',
-            success: function(res) {
-              if (res.confirm) {
-                wepy.redirectTo({
-                  url: './authorize'
-                })
-              }
-            }
-          })
-        }
-      }
-    })
+    this.mapCtx = wepy.createMapContext('mapCon')
+    this.mapCtx.moveToLocation()
   }
-
   onShow() {
     this.currentTab = 0
+    this.mapCtx.moveToLocation()
+    console.log('首页' + this.$parent.token)
+    this.$parent.token = this.$parent.token ? this.$parent.token : wepy.getStorageSync('token_r')
+    this.$apply()
+    if (this.$parent.token) {
+      api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
+        // 判断是否有进行中的订单
+        api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(res => {
+          let _len = res.data.length
+          console.log(_len)
+          if (_len) {
+            this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/order?selectedId=0' })
+          }
+        })
+      })
+    } else {
+      wepy.redirectTo({
+        url: '/pages/authorize'
+      })
+    }
   }
   methods = {
     // 顶部提示

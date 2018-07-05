@@ -77,6 +77,30 @@
 					"name": "重新授权",
 					"pathName": "pages/authorize",
 					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "在线充值",
+					"pathName": "pages/wallet-topup",
+					"query": ""
+				},
+				{
+					"id": 9,
+					"name": "充电中",
+					"pathName": "pages/charging",
+					"query": "orderNo=1529553361945006&time=1&equipNo=1000511201"
+				},
+				{
+					"id": -1,
+					"name": "充值记录",
+					"pathName": "pages/wallet-topup-record",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "钱包明细",
+					"pathName": "pages/wallet-detail",
+					"query": ""
 				}
 			]
 		}

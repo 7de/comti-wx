@@ -1,6 +1,6 @@
 <style lang="scss">
 .logo-img{
-  width: 320rpx;
+  width: 280rpx;
 }
 .logo-bd{
   >view{

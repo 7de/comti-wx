@@ -13,33 +13,16 @@
                 .me_icon {
                     width: 130rpx;
                     height: 130rpx;
-                    margin-left: 0rpx;
                     position: absolute;
-                }
-                .qr_code {
-                    position: absolute;
-                    right: 60rpx;
-                    width: 50rpx;
-                    height: 50rpx;
-                    margin-top: -65rpx;
-                }
-                .arrow_left {
-                    position: absolute;
-                    right: 20rpx;
-                    width: 30rpx;
-                    height: 40rpx;
-                    margin-top: -60rpx;
+                    margin-left: 10rpx;
                 }
                 .wechat_info {
-                    padding-left: 150rpx;
+                    padding-left: 180rpx;
                     padding-top: 25rpx;
-                    .wechat_name {
-                        font-size: 32rpx;
-                    }
+                    font-size: 30rpx;
                     .wechat_id {
                         margin-top: 20rpx;
                         color: #333;
-                        font-size: 26rpx;
                     }
                 }
             }
@@ -61,30 +44,31 @@
 <template>
   <view class="container personal">
     <view class="info item">
-      <view class="me_icon round"><open-data type="userAvatarUrl"></open-data></view>
-      <view class="wechat_info">
-        <view class="wechat_name"><open-data type="userNickName" lang="zh_CN"></open-data></view>
-        <view class="wechat_id"><open-data type="userCity" lang="zh_CN"></open-data></view>
+      <view class="me_icon round">
+        <view class="img-mask"></view>
+        <open-data type="userAvatarUrl"></open-data>
       </view>
-      <image class="qr_code" src="../images/qr_code.png"></image>
-      <!-- <image class="arrow_left" src="../images/arrow_left.png"></image> -->
+      <view class="wechat_info">
+        <view class="wechat_name">昵称：<open-data type="userNickName" lang="zh_CN"></open-data></view>
+        <view class="wechat_id">城市：<open-data type="userCity" lang="zh_CN"></open-data></view>
+      </view>
     </view>
     <view class="page_spacing">
       <view class="zan-panel">
-        <navigator class="zan-cell zan-cell--access" url="./order">
+        <navigator class="zan-cell zan-cell--access" url="./order?selectedId=3">
           <view class="zan-cell__bd">我的订单</view>
           <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">查看更多订单</view>
         </navigator>
         <view class="zan-cell">
-          <navigator class="zan-col zan-col-8" url="./order?selectedId=charging">
+          <navigator class="zan-col zan-col-8" url="./order?selectedId=0">
             <view class="iconfont icon-electrical"></view>
             <text class="icon-classname">充电中</text>
           </navigator>
-          <navigator class="zan-col zan-col-8" url="./order?selectedId=send">
+          <navigator class="zan-col zan-col-8" url="./order?selectedId=1">
             <view class="iconfont icon-trust"></view>
             <text class="icon-classname">充电完成</text>
           </navigator>
-          <navigator class="zan-col zan-col-8" url="./order?selectedId=close">
+          <navigator class="zan-col zan-col-8" url="./order?selectedId=2">
             <view class="iconfont icon-history"></view>
             <text class="icon-classname">已关闭</text>
           </navigator>
@@ -114,7 +98,7 @@ export default class Personal extends wepy.page {
       {
         title: '我的钱包',
         rightcon: '查看余额明细',
-        path: './wallet?selectedId=detail'
+        path: './wallet-detail'
       },
       {
         iconfont: 'trade',
@@ -124,39 +108,29 @@ export default class Personal extends wepy.page {
       {
         iconfont: 'manageorder',
         title: '充值记录',
-        path: './wallet?selectedId=record'
+        path: './wallet-topup-record'
       }
     ],
     settingData: [
-      {
+      /* {
         iconfont: 'email',
         title: '系统消息',
         path: './message'
-      },
+      }, */
       {
         iconfont: 'set',
         title: '系统设置',
         path: './setting'
       },
-      {
+      /* {
         iconfont: 'remind',
         title: '帮助反馈',
         path: './help'
-      },
+      }, */
       {
         iconfont: 'information',
         title: '关于我们',
         path: './about'
-      }
-    ],
-    dSetting: [
-      {
-        id: 'clear',
-        iconfont: 'manageorder',
-        title: '清除本地聊天记录',
-        action(e) {
-          console.log(e)
-        }
       }
     ]
   }

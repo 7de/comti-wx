@@ -1,5 +1,4 @@
 <style lang="scss">
-@import '../zanui/cell.scss';
 
 .zan-field {
   padding: 7px 15px;

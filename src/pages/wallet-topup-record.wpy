@@ -1,0 +1,86 @@
+<template>
+    <view class="container">
+      <block wx:if="{{recordList.length>0}}">
+        <scroll-view scroll-y='true' bindscrolltolower="lower" style="height:{{height}}px">
+          <view class="zan-panel" wx:for="{{recordList}}" wx:key="index" wx:for-index="index" wx:for-item="item">
+            <view class="zan-cell">
+              <view class="zan-cell__bd">{{item.goodsName}}</view>
+              <view class="zan-cell__ft">￥{{item.totalFee/100}}</view>
+            </view>
+            <view class="zan-cell">
+              <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">充值时间：{{item.payTime}}</view>
+            </view>
+          </view>
+          <block wx:if="{{isHideLoadMore}}">
+            <view class="zan-loadmore">
+              <view class="zan-loading"></view>
+              <view class="zan-loadmore__tips">加载中...</view>
+            </view>
+          </block>
+        </scroll-view>
+      </block>
+      <view wx:else class="zan-center" style="padding-top:20rpx">
+        <text class="zan-c-gray-dark zan-font-12">暂无数据</text>
+      </view>
+    </view>
+</template>
+<script>
+import wepy from 'wepy'
+import api from '../common/api'
+const recordURL = 'order/rechargeOrder/'
+export default class WalletTopupRecord extends wepy.page {
+  config = {
+    'navigationBarTitleText': '充值记录'
+  }
+  data = {
+    isHideLoadMore: false,
+    height: '',
+    recordList: [],
+    pageNum: 1, // 当前页
+    pageSize: 5, // 当前页数量
+    pagtotal: null // 数据总数
+  }
+  lower(e) {
+    this.isHideLoadMore = true
+    if (this.recordList.length === this.pagtotal) {
+      this.isHideLoadMore = false
+      wepy.showToast({ // 如果全部加载完成了也弹一个框
+        title: '全部加载完了',
+        icon: 'success',
+        duration: 500
+      })
+      return false
+    } else {
+      this.isHideLoadMore = false
+      wepy.showLoading({
+        title: '加载中',
+        icon: 'loading'
+      })
+      api.get(recordURL + 'queryBalanceSub?rdSession=' + this.$parent.token + '&start=' + (this.pageNum + 1) + '&size=' + this.pageSize).then(res => {
+        wepy.hideLoading()
+        console.log(res.data)
+        this.recordList = this.recordList.concat(res.data.list)
+        this.$apply()
+        console.log(this.recordList)
+      })
+    }
+  }
+  onShow() {
+    // 充值记录查询
+    api.get(recordURL + 'queryRechargeRecords?rdSession=' + this.$parent.token + '&start=1&size=5').then(res => {
+      console.log(res.data)
+      this.recordList = res.data.list
+      this.pagtotal = res.data.totalRow
+      this.$apply()
+    })
+  }
+  onLoad() {
+    wepy.getSystemInfo({
+      success: (res) => {
+        this.height = res.windowHeight
+        this.$apply()
+      }
+    })
+  }
+}
+</script>

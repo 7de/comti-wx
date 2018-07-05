@@ -1,59 +1,329 @@
 <style lang="scss">
-
+.scan-box{
+  >.zan-panel{
+    margin-top: 30rpx;
+  }
+  >.zan-panel-title{
+    padding-top: 30rpx;
+  }
+  .scan-input{
+    font-size: 40rpx;
+  }
+  .scan-subtitle{
+    width: 140rpx;
+    height:28px;
+    line-height: 28px;
+    text-align: center;
+  }
+  .scan-subtitle-txt{
+    line-height: 28px;
+  }
+  .scan-cell{
+    padding-top:10px;
+    padding-bottom:10px;
+  }
+  .scan-btn{
+    button{
+      height: 38px;
+      line-height: 38px;
+      font-size: 12px;
+      color: #fff;
+      background-color: #f47a55;
+      border:1px solid #fff;
+      >text{
+        margin-left: 5px;
+        position: relative;
+      }
+    }
+  }
+}
 </style>
 <template>
-  <view class="container">
+  <view class="container scan-box">
     <view class="zan-panel">
-      <view class="zan-cell">
-        <view class="zan-cell__bd zan-c-gray">设备编号: <text>{{code}}</text></view>
-      </view>
-    </view>
-    <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}">
-      <view class="zan-panel">
-        <view class="zan-cell">
-          <view class="zan-cell__bd zan-c-gray">充电时长（h）：</view>
-          <view class="zan-cell__ft">{{pickerBtn ? array[index]:'请选择充电时长'}}</view>
+      <view class="zan-cell scan-cell">
+        <view class="zan-cell__bd zan-clearfix">
+          <view class="scan-subtitle zan-pull-left">
+            <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
+          </view>
+          <view class="zan-pull-left"><input type="text" class="zan-field__input" style="height:28px;font-size:16px;font-weight:bold" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/></view>
         </view>
       </view>
-    </picker>
+    </view>
+    <view class="zan-panel-title">请选择充电时长：</view>
+    <view class="zan-panel">
+      <zanSelect1 :items="items" :checkedValue.sync="checked_base" componentId="base" ></zanSelect1>
+    </view>
+    <view class="zan-panel-title">预估金额：<text class="zan-font-12">(电费{{changeFee}}+服务费{{serviceFee}})</text></view>
+    <view class="zan-panel">
+      <view class="zan-cell scan-cell">
+        <view class="zan-cell__bd zan-clearfix">
+          <view class="scan-subtitle zan-pull-left">
+            <view class="iconfont icon-uutmoney zan-font-24" style="color:#7fb80e;"></view>
+          </view>
+          <text class="zan-pull-left zan-font-22 zan-c-red scan-subtitle-txt">￥{{totalFee}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="zan-panel-title">账户金额：</view>
     <view class="zan-panel">
       <view class="zan-cell">
-        <view class="zan-cell__bd zan-c-gray">预估金额（元）：</view>
-        <view class="zan-cell__ft zan-font-16 zan-c-red">{{pickerBtn ? array[index]:0}}</view>
-      </view>
-      <view class="zan-cell">
-        <view class="zan-cell__bd zan-c-gray">账户余额（元）：</view>
-        <view class="zan-cell__ft zan-font-16 zan-c-red">12131</view>
+        <view class="zan-cell__bd" style="overflow:hidden">
+          <text class="zan-pull-left zan-font-26 zan-c-red scan-subtitle-txt zan-ellipsis" style="width:90%;">￥{{account}}</text>  
+        </view>
+        <view class="zan-cell__ft scan-btn">
+          <navigator  url="../wallet-topup">
+            <button type="button" style="overflow:hidden;font-size:12px;">
+              <view class="iconfont icon-signboard zan-font-18 zan-pull-left"></view>
+              <text class="zan-pull-left">余额充值</text>
+            </button>
+          </navigator>
+        </view>
       </view>
     </view>
-    <view class="zan-panel" style="margin:100rpx 40rpx 0">
-      <button class="zan-btn zan-btn--primary" formType="submit">确认并提交</button>
+    <view class="zan-panel" style="margin:30rpx 40rpx">
+      <button class="zan-btn zan-btn--primary" @tap="goCharging">确认并提交</button>
     </view>
+    <zanToptips/>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
-export default class Index extends wepy.page {
+import zanSelect from '../../components/zan-select'
+import zanToptips from '../../components/zan-toptips'
+import api from '../../common/api'
+
+const balaneURL = 'wallet/customWallet/' // 钱包
+const chargrURL = 'server/' // 开始充电
+const equiUrl = 'equip/equipSocket/querySocketStatus' // 判断状态
+
+export default class ScanIndex extends wepy.page {
   config = {
     'navigationBarTitleText': '充电服务'
   }
+  components = {
+    zanSelect1: zanSelect,
+    zanToptips
+  }
   data = {
-    title: '',
-    code: null,
-    array: ['2', '4', '6', '12'],
-    index: 0,
-    pickerBtn: false
+    items: [
+      {
+        value: '120',
+        name: '智能充满自停'
+      },
+      {
+        value: '1',
+        name: '1小时'
+      },
+      {
+        value: '2',
+        name: '2小时'
+      },
+      {
+        value: '3',
+        name: '3小时'
+      },
+      {
+        value: '5',
+        name: '5小时'
+      },
+      {
+        value: '6',
+        name: '6小时'
+      },
+      {
+        value: '8',
+        name: '8小时'
+      },
+      {
+        value: '12',
+        name: '12小时'
+      }
+    ],
+    checked_base: -1,
+    code: null, // 插座ID
+    input_focus: false,
+    time_value: 0,
+    account: '0.00',
+    charger_mode: null, // 充电模式
+    changeFee: '0.00', // 充电费
+    serviceFee: '0.00', // 服务费
+    totalFee: '0.00', // 总费用
+    _token: null
   }
   onLoad(option) {
-    this.title = option.title
-    this.code = option.code
+    // 页面传值
+    if (option.num) {
+      this.code = option.num
+      this.$apply()
+    } else if (option.q !== undefined) {
+      let _url = decodeURIComponent(option.q) // 字符分割
+      let _urlBox = _url.split('num=')
+      this.code = _urlBox[1]
+      this.$apply()
+    }
+  }
+  onShow() {
+    this._token = this.$parent.token
+    this.$apply()
+    console.log('扫描' + this._token)
+    if (this._token) {
+      // 账户余额查询
+      api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
+        if (res.code === 0) {
+          this.account = api.fotmatMoney(res.data)
+          this.$apply()
+        }
+      })
+      // 设备判断
+      wepy.request({
+        url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
+        method: 'GET',
+        success: res => {
+          wepy.hideLoading()
+          if (res.data.code === -1) {
+            let _msg = res.data.msg
+            wepy.showModal({
+              title: '提示',
+              content: _msg,
+              showCancel: false,
+              confirmText: '去首页',
+              success: function(res) {
+                if (res.confirm) {
+                  wepy.redirectTo({
+                    url: '/pages/home'
+                  })
+                }
+              }
+            })
+          } else if (res.data.code === 0) {
+
+          } else {
+            wepy.showToast({
+              title: res.data.msg,
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        }
+      })
+    } else {
+      wepy.redirectTo({
+        url: '/pages/authorize'
+      })
+    }
   }
   methods = {
-    bindPickerChange(e) {
-      console.log('picker发送选择改变，携带值为', e)
-      console.log('picker发送选择改变，携带值为', e.detail.value)
-      this.index = e.detail.value
-      this.pickerBtn = true
+    /* keyInput(e) {
+      this.code = e.detail.value
+      if (this.code) {
+        console.log('值：' + this.code)
+      }
+    }, */
+    blurInput(e) {
+      let _code = e.detail.value
+      if (this.code !== _code) {
+        this.code = _code
+        this.$apply()
+        // 设备判断
+        wepy.request({
+          url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
+          method: 'GET',
+          success: res => {
+            console.log(res)
+            if (res.data.code === -1) {
+              let _msg = res.data.msg
+              wepy.showModal({
+                title: '提示',
+                content: _msg,
+                showCancel: false,
+                confirmText: '去首页',
+                success: function(res) {
+                  if (res.confirm) {
+                    wepy.redirectTo({
+                      url: '/pages/home'
+                    })
+                  }
+                }
+              })
+            } else if (res.data.code === 0) {
+            } else {
+              wepy.showToast({
+                title: res.data.msg,
+                icon: 'none',
+                duration: 2000
+              })
+            }
+          }
+        })
+      }
+    },
+    // 订单提交
+    goCharging() {
+      if (!this.code) {
+        this.input_focus = true
+        this.showTopTips('请填写二维码编号')
+      } else if (!this.time_value) {
+        this.showTopTips('请选择充电时长')
+      } else if (this.time_value >= Number(this.account)) {
+        this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值。', options: 2000 })
+      } else {
+        wepy.showLoading({
+          title: '开启充电...',
+          mask: true
+        })
+        api.post(chargrURL + 'chargeStart?rdSession=' + this._token, {
+          chargerMode: this.charger_mode,
+          chargerValue: this.time_value,
+          streamNo: this.code,
+          totalFee: this.totalFee * 100
+        }).then(res => {
+          wepy.hideLoading()
+          console.log(res)
+          if (res.code === 0) {
+            wepy.redirectTo({
+              url: '../charging?orderNo=' + res.data + '&time=' + this.time_value + '&equipNo=' + this.code
+            })
+          }
+        })
+      }
+    }
+  }
+  // 顶部提示
+  showTopTips(content) {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
+  }
+  events = {
+    // 单选项
+    zanSelectChange(value, event) {
+      let { componentId } = event.source
+      // console.log(event)
+      this[`checked_${componentId}`] = value
+      // this.time_value = value
+      this.$apply()
+      if (value === '120') {
+        this.time_value = 12
+        this.charger_mode = 3
+        this.$apply()
+      } else {
+        this.charger_mode = 0
+        this.time_value = value
+        this.$apply()
+      }
+      if (this.time_value >= Number(this.account)) {
+        this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值。', options: 2000 })
+      } else {
+        // 查询费用
+        api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value).then(res => {
+          let _data = res.data
+          let _changeFee = _data.changeFee ? _data.changeFee : 0
+          let _serviceFee = _data.serviceCharge ? _data.serviceCharge : 0
+          this.changeFee = api.fotmatMoney(_changeFee)
+          this.serviceFee = api.fotmatMoney(_serviceFee)
+          this.totalFee = api.fotmatMoney(Number(_data.changeFee) + Number(_data.serviceCharge))
+          this.$apply()
+        })
+      }
     }
   }
 }

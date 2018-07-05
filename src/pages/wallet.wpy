@@ -1,116 +1,56 @@
 <style lang="scss">
+.wallet-title{
+  overflow: hidden;
+  margin: 0 auto;
+  .iconfont{
+    font-size: 60px;
+    color: #999;
+  }
+}
+.money{
+  font-size:100rpx;
+  text{
+    font-weight: bold
+  }
+}
 
 </style>
 <template>
-  <view class="container">
-    <zanTab :tab.sync="tab" componentId="tab"></zanTab>
+  <view class="container" style="background-color:#fff;">
     <view class="page_spacing">
-      <block wx:if="{{currentTab==='record'}}">
-          <view class="zan-panel">
-            <view class="zan-cell">
-              <view class="zan-cell__bd">充值：150元</view>
-              <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">2018-05-09 10:00</view>
-            </view>
-            <view class="zan-cell">
-              <view class="zan-cell__bd">充值：50元</view>
-              <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">2018-05-05 10:00</view>
-            </view>
-            <view class="zan-cell">
-              <view class="zan-cell__bd">充值：10元</view>
-              <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">2018-05-01 10:00</view>
-            </view>
-          </view>
-      </block>
-      <block wx:elif="{{currentTab==='detail'}}">
-        <view class="zan-panel">
-          <view class="zan-cell">
-            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单编号：2018050921001001270562608302</view>
-          </view>
-          <view class="zan-cell">
-            <view class="zan-cell__bd">充值</view>
-            <view class="zan-cell__ft">￥50 元</view>
-          </view>
-          <view class="zan-cell">
-            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单时间：2018-05-09 10:10</view>
-          </view>
+      <view class="zan-panel zan-panel--without-border zan-center">
+        <view class="wallet-title">
+            <view class="iconfont icon-user-menu-money"></view>
         </view>
-        <view class="zan-panel">
-          <view class="zan-cell">
-            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单编号：2018050921001001270562608302</view>
-          </view>
-          <view class="zan-cell">
-            <view class="zan-cell__bd">充值</view>
-            <view class="zan-cell__ft">￥500 元</view>
-          </view>
-          <view class="zan-cell">
-            <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">订单时间：2018-05-09 10:10</view>
-          </view>
-        </view>
-      </block>
-      <block wx:else>
-        <view class="zan-panel zan-panel--without-border" style="background-color:transparent">
-          <view class="zan-cell">
-            <view class="zan-cell__bd">余额（元）</view>
-            <view class="zan-cell__ft zan-font-20">￥<text class="zan-font-30">50</text></view>
-          </view>
-          <button class="zan-btn zan-btn--primary" style="margin-top:120rpx;">马上充值</button>
-          <view class="zan-cell zan-cell__no-pading">
-            <view class="zan-cell__bd zan-font-12 zan-c-gray">
-              <view class="zan-pull-right">充值协议</view><view class="zan-pull-right" style="padding-right:5rpx">退款 |</view>
-            </view>
-          </view>
-        </view>
-      </block>
+        <view class="zan-c-gray-dark zan-font-14">我的余额</view>
+        <view class="money" style="color:#f15b6c">￥<text class="">{{account}}</text></view>
+        <navigator class="zan-btn zan-btn--primary" style="margin-top:120rpx;" url="./wallet-topup">马上充值</navigator>
+      </view>
     </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
+import api from '../common/api'
 
-import zanTab from '../components/zan-tab'
+const URL = 'wallet/customWallet/queryBalanceBySession'
 
 export default class Wallet extends wepy.page {
   config = {
-    'navigationBarTitleText': '我的钱包'
-  }
-  components = {
-    zanTab: zanTab
+    'navigationBarTitleText': '我的余额'
   }
   data = {
-    currentTab: 0,
-    tab: {
-      list: [
-        {
-          id: 'balance',
-          title: '账户余额'
-        },
-        {
-          id: 'record',
-          title: '充值记录'
-        },
-        {
-          id: 'detail',
-          title: '余额明细'
-        }
-      ],
-      selectedId: 'balance',
-      scroll: false
-    }
+    account: '0.00'
   }
   events = {
-    // tab事件切换
-    zanTabChange(selectedId, event) {
-      let { componentId } = event.source
-      this[componentId].selectedId = selectedId
-      this.currentTab = selectedId
-      this.$apply()
-    }
   }
-  onLoad(option) {
-    if (option.selectedId) {
-      this.tab.selectedId = option.selectedId
-      this.currentTab = option.selectedId
-    }
+  onShow() {
+    console.log(this.$parent.token)
+    // 账户余额查询
+    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
+      this.account = api.fotmatMoney(res.data)
+      this.$apply()
+    })
   }
 }
 </script>

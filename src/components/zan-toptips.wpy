@@ -10,25 +10,29 @@
   font-size: 14px;
   text-align: center;
   color: #fff;
-  background-color: #e64340;
+  background-color: #f15b6c;
   z-index: 110;
+}
+.zan-toptips-oth{
+  background-color: #f05b72;
 }
 </style>
 <template>
-  <view animation="{{animationData}}" class="zan-toptips"> {{ topTips.content }} </view>
+  <view animation="{{animationData}}" class="zan-toptips">
+    <navigator url="{{ topTips.url }}">{{ topTips.content }}</navigator>
+  </view>
 </template>
 <script>
 import wepy from 'wepy'
-
+//  open-type="redirect"
 export default class zanToptips extends wepy.component {
-  props = {}
   data = {
     topTips: {},
     animationData: {}
   }
   methods = {
-    showZanTopTips({ content = '', options = {} }, event) {
-      console.log('showZanTopTips', content, options)
+    showZanTopTips({ content = '', options = {}, url = '' }, event) {
+      console.log('showZanTopTips', content, options, url)
       let topTips = this.topTips || {}
       // 如果已经有一个计时器在了，就清理掉先
       if (topTips.timer) {
@@ -79,6 +83,7 @@ export default class zanToptips extends wepy.component {
       this.topTips = {
         show: true,
         content,
+        url,
         timer
       }
       toggle()
