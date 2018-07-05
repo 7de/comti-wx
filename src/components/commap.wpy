@@ -26,7 +26,6 @@
   height: 100%;
 }
 .markermask{
-  // widows: 100%;
   height:100%;
   color: #444;
   font-size:28rpx;
@@ -96,6 +95,7 @@ export default class Commap extends wepy.component {
   }
 
   onLoad(options) {
+    const _this = this
     wepy.getSystemInfo({
       success: (res) => {
         this.height = res.windowHeight
@@ -119,10 +119,6 @@ export default class Commap extends wepy.component {
           success: res => {
             this.latitude = res.data
             this.$apply()
-            /* wepy.openLocation({
-              latitude: this.latitude,
-              longitude: this.longitude
-            }) */
           }
         })
       },
@@ -133,10 +129,6 @@ export default class Commap extends wepy.component {
           success: (res) => {
             let latitude = res.latitude
             let longitude = res.longitude
-            /* wepy.openLocation({
-              latitude: latitude,
-              longitude: longitude
-            }) */
             wepy.setStorage({
               key: 'user_longitude',
               data: longitude
@@ -145,14 +137,14 @@ export default class Commap extends wepy.component {
               key: 'user_latitude',
               data: latitude
             })
-            this.longitude = longitude
-            this.latitude = latitude
-            this.$apply()
-            this.movetoPosition()
+            _this.longitude = longitude
+            _this.latitude = latitude
+            _this.$apply()
+            _this.movetoPosition()
           },
           fail: (rel) => {
             // wepy.hideLoading()
-            this.getScopeLocation()
+            _this.getScopeLocation()
           }
         })
       }

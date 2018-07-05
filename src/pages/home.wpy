@@ -71,7 +71,7 @@ import Commap from '../components/commap'
 import zanToptips from '../components/zan-toptips'
 import zanLoadmore from '../components/zan-loadmore'
 import api from '../common/api'
-// import Toast from 'wepy-com-toast'
+import page from '../common/page'
 
 const orderURL = 'server/'
 const URL = 'platform/platform/customer/getCustomerByKey'
@@ -97,10 +97,15 @@ export default class Home extends wepy.page {
     this.$parent.token = this.$parent.token ? this.$parent.token : wepy.getStorageSync('token_r')
     this.$apply()
     if (this.$parent.token) {
+      wepy.showLoading({
+        title: '查询中...',
+        mask: true
+      })
       api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
         // 判断是否有进行中的订单
-        api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(res => {
-          let _len = res.data.length
+        api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
+          wepy.hideLoading()
+          let _len = data.length
           console.log(_len)
           if (_len) {
             this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/order?selectedId=0' })
@@ -108,16 +113,14 @@ export default class Home extends wepy.page {
         })
       })
     } else {
-      wepy.redirectTo({
-        url: '/pages/authorize'
-      })
+      page.goauthorize()
     }
   }
   methods = {
-    // 顶部提示
-    showTopTips() {
-      this.$invoke('zanToptips', 'showZanTopTips', { content: '功能暂未开通，敬请期待...', options: 2000 })
-    }
+  }
+  // 顶部提示
+  showTopTips() {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: '功能暂未开通，敬请期待...', options: 2000 })
   }
 }
 </script>

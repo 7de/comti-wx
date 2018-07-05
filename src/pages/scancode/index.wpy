@@ -92,6 +92,7 @@ import wepy from 'wepy'
 import zanSelect from '../../components/zan-select'
 import zanToptips from '../../components/zan-toptips'
 import api from '../../common/api'
+import page from '../../common/page'
 
 const balaneURL = 'wallet/customWallet/' // 钱包
 const chargrURL = 'server/' // 开始充电
@@ -175,131 +176,70 @@ export default class ScanIndex extends wepy.page {
           this.$apply()
         }
       })
-      // 设备判断
-      wepy.request({
-        url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
-        method: 'GET',
-        success: res => {
-          wepy.hideLoading()
-          if (res.data.code === -1) {
-            let _msg = res.data.msg
-            wepy.showModal({
-              title: '提示',
-              content: _msg,
-              showCancel: false,
-              confirmText: '去首页',
-              success: function(res) {
-                if (res.confirm) {
-                  wepy.redirectTo({
-                    url: '/pages/home'
-                  })
-                }
-              }
-            })
-          } else if (res.data.code === 0) {
-
-          } else {
-            wepy.showToast({
-              title: res.data.msg,
-              icon: 'none',
-              duration: 2000
-            })
-          }
-        }
-      })
+      // 设备查询
+      this.checkEqui()
     } else {
-      wepy.redirectTo({
-        url: '/pages/authorize'
-      })
+      // 跳转授权页
+      page.goauthorize()
     }
   }
   methods = {
-    /* keyInput(e) {
-      this.code = e.detail.value
-      if (this.code) {
-        console.log('值：' + this.code)
-      }
-    }, */
     blurInput(e) {
       let _code = e.detail.value
       if (this.code !== _code) {
         this.code = _code
         this.$apply()
-        // 设备判断
-        wepy.request({
-          url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
-          method: 'GET',
-          success: res => {
-            console.log(res)
-            if (res.data.code === -1) {
-              let _msg = res.data.msg
-              wepy.showModal({
-                title: '提示',
-                content: _msg,
-                showCancel: false,
-                confirmText: '去首页',
-                success: function(res) {
-                  if (res.confirm) {
-                    wepy.redirectTo({
-                      url: '/pages/home'
-                    })
-                  }
-                }
-              })
-            } else if (res.data.code === 0) {
-            } else {
-              wepy.showToast({
-                title: res.data.msg,
-                icon: 'none',
-                duration: 2000
-              })
-            }
-          }
-        })
+        // 设备查询
+        this.checkEqui()
       }
     },
     // 订单提交
     goCharging() {
+      const _this = this
       if (!this.code) {
         this.input_focus = true
         this.showTopTips('请填写二维码编号')
       } else if (!this.time_value) {
         this.showTopTips('请选择充电时长')
       } else if (this.time_value >= Number(this.account)) {
-        this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值。', options: 2000 })
+        this.showTopTips('您的余额不足以选择此服务，请及时充值。')
       } else {
-        wepy.showLoading({
-          title: '开启充电...',
-          mask: true
-        })
-        api.post(chargrURL + 'chargeStart?rdSession=' + this._token, {
-          chargerMode: this.charger_mode,
-          chargerValue: this.time_value,
-          streamNo: this.code,
-          totalFee: this.totalFee * 100
-        }).then(res => {
-          wepy.hideLoading()
-          console.log(res)
-          if (res.code === 0) {
-            wepy.redirectTo({
-              url: '../charging?orderNo=' + res.data + '&time=' + this.time_value + '&equipNo=' + this.code
-            })
+        // 确认提示 --start
+        wepy.showModal({
+          title: '提示',
+          content: '请确认是否开始充电？',
+          success: function(res) {
+            if (res.confirm) {
+              wepy.showLoading({
+                title: '开启充电...',
+                mask: true
+              })
+              api.post(chargrURL + 'chargeStart?rdSession=' + _this._token, {
+                chargerMode: _this.charger_mode,
+                chargerValue: _this.time_value,
+                streamNo: _this.code,
+                totalFee: _this.totalFee * 100
+              }).then(res => {
+                wepy.hideLoading()
+                console.log(res)
+                if (res.code === 0) {
+                  wepy.reLaunch({
+                    url: '../charging?orderNo=' + res.data + '&time=' + _this.time_value + '&equipNo=' + _this.code
+                  })
+                }
+              })
+            }
           }
         })
+        // 确认提示 --end
       }
     }
-  }
-  // 顶部提示
-  showTopTips(content) {
-    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
   }
   events = {
     // 单选项
     zanSelectChange(value, event) {
       let { componentId } = event.source
-      // console.log(event)
       this[`checked_${componentId}`] = value
-      // this.time_value = value
       this.$apply()
       if (value === '120') {
         this.time_value = 12
@@ -313,18 +253,66 @@ export default class ScanIndex extends wepy.page {
       if (this.time_value >= Number(this.account)) {
         this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值。', options: 2000 })
       } else {
-        // 查询费用
-        api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value).then(res => {
-          let _data = res.data
-          let _changeFee = _data.changeFee ? _data.changeFee : 0
-          let _serviceFee = _data.serviceCharge ? _data.serviceCharge : 0
-          this.changeFee = api.fotmatMoney(_changeFee)
-          this.serviceFee = api.fotmatMoney(_serviceFee)
-          this.totalFee = api.fotmatMoney(Number(_data.changeFee) + Number(_data.serviceCharge))
-          this.$apply()
-        })
+        if (this.code) {
+          // 查询费用
+          wepy.showLoading({
+            title: '费用查询中...',
+            mask: true
+          })
+          api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value).then(({data}) => {
+            wepy.hideLoading()
+            let _changeFee = data.changeFee ? data.changeFee : 0
+            let _serviceFee = data.serviceCharge ? data.serviceCharge : 0
+            this.changeFee = api.fotmatMoney(_changeFee)
+            this.serviceFee = api.fotmatMoney(_serviceFee)
+            this.totalFee = api.fotmatMoney(Number(data.changeFee) + Number(data.serviceCharge))
+            this.$apply()
+          })
+        } else {
+          this.showTopTips('请确认二维码编号是否填写')
+        }
       }
     }
+  }
+  // 顶部提示
+  showTopTips(content) {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
+  }
+
+  // 设备查询
+  checkEqui() {
+    wepy.showLoading({
+      title: '设备查询中...',
+      mask: true
+    })
+    wepy.request({
+      url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
+      method: 'GET',
+      success: res => {
+        console.log(res)
+        wepy.hideLoading()
+        if (res.data.code === -1) {
+          let _msg = res.data.msg
+          wepy.showModal({
+            title: '提示',
+            content: _msg,
+            confirmText: '首页扫码',
+            success: function(res) {
+              if (res.confirm) {
+                page.goHome()
+              }
+            }
+          })
+        } else if (res.data.code === 0) {
+        } else {
+          wepy.showToast({
+            title: res.data.msg,
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      }
+    })
   }
 }
 </script>
