@@ -1,7 +1,4 @@
 <style lang="scss">
-/* page,.body,.tab_item {
-  height:100%;
-} */
 .body > .tab_con{
   margin-top: 80rpx;
 }
@@ -83,7 +80,6 @@ export default class Home extends wepy.page {
   }
   data = {
     currentTab: 0,
-    timer: '',
     token: ''
   }
   onLoad() {
@@ -98,7 +94,7 @@ export default class Home extends wepy.page {
     this.$apply()
     if (this.$parent.token) {
       wepy.showLoading({
-        title: '查询中...',
+        title: '订单查询中...',
         mask: true
       })
       api.get(URL + '?rdSession=' + this.$parent.token).then(res => {

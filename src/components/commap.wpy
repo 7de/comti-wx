@@ -55,12 +55,12 @@
         </view>
         <view class="zan-c-gray-dark margin-top-15 zan-font-12 zan-ellipsis" style="width:100%">地址：{{markersinfo["callout"].siteAddress}}</view>
         <view class="margin-top-10">
-          <text class="padding-right-30">空闲：<text class="zan-c-green">{{markersinfo["callout"].free?markersinfo["callout"].free:''}}</text></text>
-          <text>总设备：{{markersinfo["callout"].equipment?markersinfo["callout"].equipment:''}}</text>
+          <text class="padding-right-30">空闲：<text class="zan-c-green">{{markersinfo["callout"].free?markersinfo["callout"].free:0}}</text></text>
+          <text>总设备：{{markersinfo["callout"].equipment?markersinfo["callout"].equipment:0}}</text>
         </view>
         <view class="margin-top-10">
-          <text class="padding-right-30">电费：<text class="zan-c-green">{{markersinfo["callout"].electricity?markersinfo["callout"].electricity:''}}</text>元/度</text>
-          <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee?markersinfo["callout"].servicefee:''}}</text>元/度</text>
+          <text class="padding-right-30">电费：<text class="zan-c-green">{{markersinfo["callout"].electricity?markersinfo["callout"].electricity:'0.00'}}</text>元/度</text>
+          <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee?markersinfo["callout"].servicefee:'0.00'}}</text>元/度</text>
         </view>
       </view>
     </zanPopup>
@@ -266,10 +266,7 @@ export default class Commap extends wepy.component {
 
   // 扫一扫
   openCode() {
-    /* wepy.showLoading({
-      title: '正在扫描中...',
-      mask: true
-    }) */
+    const _this = this
     wepy.scanCode({
       success: (res) => {
         console.log(res)
@@ -277,12 +274,11 @@ export default class Commap extends wepy.component {
         const _num = res.result
         const _numIndex = _num.indexOf('=')
         const _numNum = _num.substring(_numIndex + 1)
-        console.log(_numNum)
         wepy.showLoading({
           title: '正在查询设备...',
           mask: true
         })
-        api.get(equiUrl + '?rdSession=' + this._token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
+        api.get(equiUrl + '?rdSession=' + _this._token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
           wepy.hideLoading()
           wepy.navigateTo({
             url: '../pages/scancode/index?num=' + _numNum
@@ -294,9 +290,9 @@ export default class Commap extends wepy.component {
 
   // 是否授权当前位置
   getScopeLocation() {
+    const _this = this
     wepy.getSetting({
       success: (res) => {
-        let that = this
         if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
           wepy.showModal({
             title: '是否授权当前位置',
@@ -314,7 +310,7 @@ export default class Commap extends wepy.component {
                         icon: 'success',
                         duration: 1000
                       })
-                      that.movetoPosition()
+                      _this.movetoPosition()
                     } else {
                       wepy.showToast({
                         title: '授权失败',

@@ -46,7 +46,7 @@
           <view class="scan-subtitle zan-pull-left">
             <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
           </view>
-          <view class="zan-pull-left"><input type="text" class="zan-field__input" style="height:28px;font-size:16px;font-weight:bold" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/></view>
+          <view class="zan-pull-left"><input type="number" class="zan-field__input" style="height:28px;font-size:16px;font-weight:bold" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/></view>
         </view>
       </view>
     </view>

@@ -9,10 +9,8 @@ export default {
   apiData : {
     // 正式
     host: 'https://www.comtti.net/',
-    api: 'https://www.comtti.net/weChat/',
     // 测试
-    /* host: 'https://actor.comtti.net/',
-    api: 'https://actor.comtti.net/weChat/', */
+    // host: 'https://actor.comtti.net/',
     receiving: false, // 是否正在获取token
     token: '',
     userInfo: null,

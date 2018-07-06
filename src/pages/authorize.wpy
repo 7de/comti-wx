@@ -42,6 +42,7 @@
   import Footer from '../components/footer'
   import zanToptips from '../components/zan-toptips'
   import api from '../common/api'
+  import page from '../common/page'
   const URL = 'platform/weChat/wechatLogin'
   export default class Authorize extends wepy.page {
     config = {
@@ -59,6 +60,7 @@
     methods = {
     }
     bindGetUserInfo(e) {
+      const _this = this
       wepy.showLoading({
         title: '正在校验信息...',
         mask: true
@@ -69,6 +71,10 @@
           if (res.code) {
             this.code = res.code
             if (e.detail.errMsg === 'getUserInfo:ok') {
+              wepy.showLoading({
+                title: '授权中...',
+                mask: true
+              })
               api.post(URL, {
                 code: this.code,
                 encryptedData: e.detail.encryptedData,
@@ -76,17 +82,12 @@
                 signature: e.detail.signature,
                 rawData: e.detail.rawData
               }).then(res => {
+                wepy.hideLoading()
                 console.log('授权信息' + res.data['rd_session'])
-                this.$parent.token = res.data['rd_session']
-                this.$apply()
-                /* wepy.setStorage({ // 返回的值放入storage中
-                  key: 'token',
-                  data: res.data['rd_session']
-                }) */
+                _this.$parent.token = res.data['rd_session']
+                _this.$apply()
                 wepy.setStorageSync('token_r', res.data['rd_session'])
-                wepy.redirectTo({
-                  url: '/pages/home'
-                })
+                page.goHome()
               })
             } else {
               this.$invoke('zanToptips', 'showZanTopTips', { content: '我们需要获取您的信息，请重新授权', options: 2000 })
