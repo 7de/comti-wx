@@ -41,4 +41,4 @@ npm install util
 wepy upgrade wepy
 ```
 ### 7、wepy小笔记
-参考这里（https://blog.csdn.net/g2526/article/details/80083243）
+[参考这里](https://blog.csdn.net/g2526/article/details/80083243)
