@@ -94,7 +94,7 @@ export default class Home extends wepy.page {
     this.$apply()
     if (this.$parent.token) {
       wepy.showLoading({
-        title: '订单查询中...',
+        title: '充电中订单...',
         mask: true
       })
       api.get(URL + '?rdSession=' + this.$parent.token).then(res => {

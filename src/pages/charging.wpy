@@ -202,12 +202,7 @@ export default class Charging extends wepy.page {
             icon: 'success',
             duration: 2000,
             success: res => {
-              wepy.redirectTo({
-                url: './home',
-                complete: () => {
-                  wepy.hideLoading()
-                }
-              })
+              page.goHome()
             }
           })
         }
