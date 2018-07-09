@@ -83,12 +83,12 @@ export default class Home extends wepy.page {
     token: ''
   }
   onLoad() {
-    this.mapCtx = wepy.createMapContext('mapCon')
-    this.mapCtx.moveToLocation()
+    /* this.mapCtx = wepy.createMapContext('mapCon')
+    this.mapCtx.moveToLocation() */
   }
   onShow() {
-    this.currentTab = 0
-    this.mapCtx.moveToLocation()
+    /* this.currentTab = 0
+    this.mapCtx.moveToLocation() */
     console.log('首页' + this.$parent.token)
     this.$parent.token = this.$parent.token ? this.$parent.token : wepy.getStorageSync('token_r')
     this.$apply()

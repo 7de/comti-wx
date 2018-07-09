@@ -135,10 +135,10 @@ export default class Order extends wepy.page {
     this.plusUpdate(this.chargData, this.chargPagtotal, this.chargPagenum, 0)
   }
   complLower() {
-    this.plusUpdate(this.complData, this.complData, this.complPagenum, 1)
+    this.plusUpdate(this.complData, this.complPagtotal, this.complPagenum, 1)
   }
   closeLower() {
-    this.plusUpdate(this.closeData, this.closePagtotal, this.closePagenum, 0)
+    this.plusUpdate(this.closeData, this.closePagtotal, this.closePagenum, 2)
   }
   // 读取订单列表
   // data 数据列表， pageNum 每页显示数，state 状态

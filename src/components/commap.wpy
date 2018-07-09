@@ -79,8 +79,8 @@ const markerURL = 'sites/sites/' // 站点
 
 export default class Commap extends wepy.component {
   data = {
-    latitude: 0,
-    longitude: 0,
+    latitude: wepy.getStorageSync('user_latitude') ? wepy.getStorageSync('user_latitude') : 0,
+    longitude: wepy.getStorageSync('user_longitude') ? wepy.getStorageSync('user_longitude') : 0,
     controls: [],
     markers: [],
     oldMarkerID: null,
@@ -102,53 +102,26 @@ export default class Commap extends wepy.component {
         this.$apply()
       }
     })
-    // this.iniMap()
-    this.mapCtx = wepy.createMapContext('mapCon')
-    this.mapCtx.moveToLocation()
-    wepy.showLoading({
-      title: '位置加载中'
-    })
-    wepy.getStorage({
-      key: 'user_longitude',
-      success: res => {
-        wepy.hideLoading()
-        this.longitude = res.data
-        this.$apply()
-        wepy.getStorage({
-          key: 'user_latitude',
-          success: res => {
-            this.latitude = res.data
-            this.$apply()
-          }
-        })
-      },
-      fail: () => {
-        wepy.hideLoading()
-        wepy.getLocation({
-          type: 'gcj02',
-          success: (res) => {
-            let latitude = res.latitude
-            let longitude = res.longitude
-            wepy.setStorage({
-              key: 'user_longitude',
-              data: longitude
-            })
-            wepy.setStorage({
-              key: 'user_latitude',
-              data: latitude
-            })
-            _this.longitude = longitude
-            _this.latitude = latitude
-            _this.$apply()
-            _this.movetoPosition()
-          },
-          fail: (rel) => {
-            // wepy.hideLoading()
-            _this.getScopeLocation()
-          }
-        })
-      }
-    })
+    if (!this.latitude) {
+      wepy.getLocation({
+        type: 'gcj02',
+        success: (res) => {
+          let latitude = res.latitude
+          let longitude = res.longitude
+          wepy.setStorageSync('user_longitude', longitude)
+          wepy.setStorageSync('user_latitude', latitude)
+          this.longitude = longitude
+          this.latitude = latitude
+          this.$apply()
+          _this.movetoPosition()
+        },
+        fail: (rel) => {
+          _this.getScopeLocation()
+        }
+      })
+    }
+    console.log('纬度2：' + this.latitude)
+    this.iniMap()
     this.getMarkers()
     this.mapControl()
     this._token = wepy.getStorageSync('token_r')
@@ -290,19 +263,19 @@ export default class Commap extends wepy.component {
 
   // 是否授权当前位置
   getScopeLocation() {
-    const _this = this
     wepy.getSetting({
       success: (res) => {
+        const _this = this
         if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
           wepy.showModal({
             title: '是否授权当前位置',
-            content: '需要获取您的地理位置，请确认授权，否则地图功能将无法使用',
+            content: '需要获取您的地理位置，请确认授权，否则地图信息可能会有误！',
             success: (res) => {
               if (res.cancel) {
                 console.info('1授权失败返回数据')
               } else if (res.confirm) {
                 wepy.openSetting({
-                  success: function (data) {
+                  success: (data) => {
                     console.log(data)
                     if (data.authSetting['scope.userLocation'] === true) {
                       wepy.showToast({

@@ -5,7 +5,7 @@
           <view class="zan-panel" wx:for="{{recordList}}" wx:key="index" wx:for-index="index" wx:for-item="item" >
             <view class="zan-cell">
               <view class="zan-cell__bd">变更内容：{{item.typeText}}</view>
-              <view class="zan-cell__ft zan-c-{{item.refundType===1?'green':'red'}}">￥{{item.refundType===1?'-':'+'}}{{item.totalFee/100}}</view>
+              <view class="zan-cell__ft zan-c-{{item.refundType===1?'green':'red'}}">￥{{item.refundType===1?'-':'+'}}<text style="padding-left:4rpx">{{item.totalFee/100}}</text></view>
             </view>
             <view class="zan-cell">
               <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">变更时间：{{item.updateTime}}</view>
