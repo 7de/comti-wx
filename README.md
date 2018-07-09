@@ -12,26 +12,21 @@
 npm install -g wepy-cli
 ```
 
-### 2. 下载源代码
-```bash
-
-```
-
-### 3. 安装开发依赖
+### 2. 安装开发依赖
 ```bash
 npm install
 ```
 
-### 4. 编译源代码
+### 3. 编译源代码
 ```bash
 npm run dev
 ```
 
-### 5.导入至开发者工具
+### 4.导入至开发者工具
 
 编译完成生成`dist`目录后，开发者工具本地开发目录指向项目根目录。
 
-### 6.错误提示
+### 5.错误提示
 
 如果出现util的错误，请先安装util,然后再更新wepy
 ```bash
@@ -40,5 +35,5 @@ npm install util
 ```bash
 wepy upgrade wepy
 ```
-### 7、wepy小笔记
+### 6、wepy小笔记
 [参考这里](https://blog.csdn.net/g2526/article/details/80083243)
