@@ -195,6 +195,7 @@ export default class Charging extends wepy.page {
           this.$apply()
         } else if (res.data.code === -1) {
           clearInterval(this.timer)
+          clearInterval(this.charg_timer)
           this.isCharging = false
           this.$apply()
           wepy.showToast({

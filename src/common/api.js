@@ -38,7 +38,7 @@ export default {
               confirmText: '去授权',
               success: function(res) {
                 if (res.confirm) {
-                  wepy.redirectTo({
+                  wepy.reLaunch({
                     url: './authorize'
                   })
                 }
@@ -116,7 +116,7 @@ export default {
               icon: 'none',
               duration: 2000
             }) */
-            wepy.redirectTo({
+            wepy.reLaunch({
               url: '/pages/authorize'
             })
           } else {
