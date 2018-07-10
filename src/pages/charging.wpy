@@ -196,6 +196,7 @@ export default class Charging extends wepy.page {
         } else if (res.data.code === -1) {
           clearInterval(this.timer)
           clearInterval(this.charg_timer)
+          // this.charg_timer = ''
           this.isCharging = false
           this.$apply()
           wepy.showToast({
@@ -214,6 +215,10 @@ export default class Charging extends wepy.page {
     clearInterval(this.timer)
     clearInterval(this.charg_timer)
     console.log('清除计时器')
+  }
+  onHide() {
+    console.log('清空30秒')
+    clearInterval(this.charg_timer)
   }
 }
 </script>
