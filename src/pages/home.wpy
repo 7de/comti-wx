@@ -71,7 +71,7 @@ import api from '../common/api'
 import page from '../common/page'
 
 const orderURL = 'server/'
-const URL = 'platform/platform/customer/getCustomerByKey'
+// const URL = 'platform/platform/customer/getCustomerByKey'
 export default class Home extends wepy.page {
   components = {
     commap: Commap,
@@ -85,8 +85,13 @@ export default class Home extends wepy.page {
   onLoad() {
     /* this.mapCtx = wepy.createMapContext('mapCon')
     this.mapCtx.moveToLocation() */
+    wepy.showLoading({
+      title: '加载中...',
+      mask: true
+    })
   }
   onShow() {
+    wepy.hideLoading()
     /* this.currentTab = 0
     this.mapCtx.moveToLocation() */
     console.log('首页' + this.$parent.token)
@@ -97,16 +102,14 @@ export default class Home extends wepy.page {
         title: '订单查询中...',
         mask: true
       })
-      api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
-        // 判断是否有进行中的订单
-        api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
-          wepy.hideLoading()
-          let _len = data.length
-          console.log(_len)
-          if (_len) {
-            this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/order?selectedId=0' })
-          }
-        })
+      // 判断是否有进行中的订单
+      api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
+        wepy.hideLoading()
+        let _len = data.length
+        console.log(_len)
+        if (_len) {
+          this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/order?selectedId=0' })
+        }
       })
     } else {
       page.goauthorize()
