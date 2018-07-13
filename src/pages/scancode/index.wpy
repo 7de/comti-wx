@@ -10,7 +10,7 @@
     font-size: 40rpx;
   }
   .scan-subtitle{
-    width: 140rpx;
+    width: 130rpx;
     height:28px;
     line-height: 28px;
     text-align: center;
