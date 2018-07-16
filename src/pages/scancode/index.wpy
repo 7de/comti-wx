@@ -96,7 +96,7 @@ import page from '../../common/page'
 
 const balaneURL = 'wallet/customWallet/' // 钱包
 const chargrURL = 'server/' // 开始充电
-const equiUrl = 'equip/equipSocket/querySocketStatus' // 判断状态
+const equiUrl = 'equip/equipSocket/querySocketStatus' // 查询设备
 
 export default class ScanIndex extends wepy.page {
   config = {

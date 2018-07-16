@@ -2,47 +2,24 @@
 </style>
 <template>
   <view class="container">
-    <zanTab :tab.sync="tab1" componentId="tab1" fixed></zanTab>
-    <view class="tab-con">
-      <block wx:if="{{currentTab===0}}">
-        <block wx:if="{{chargData.length>0}}">
-          <scroll-view scroll-y='true' bindscrolltolower="chargLower" style="height:{{height-60}}px">
-            <cardD :list.sync="chargData"></cardD>
-          </scroll-view>
-        </block>
-        <view wx:else class="zan-center" style="padding-top:20rpx"><text class="zan-c-gray-dark zan-font-12">暂无数据</text></view>
-      </block>
-      <block wx:elif="{{currentTab===1}}">
-        <block wx:if="{{complData.length>0}}">
-          <scroll-view scroll-y='true' bindscrolltolower="complLower" style="height:{{height-50}}px">
-            <cardC :list.sync="complData"></cardC>
-          </scroll-view>
-        </block>
-        <view wx:else class="zan-center" style="padding-top:20rpx"><text class="zan-c-gray-dark zan-font-12">暂无数据</text></view>
-      </block>
-      <block wx:elif="{{currentTab===2}}">
-        <block wx:if="{{closeData.length>0}}">
-          <scroll-view scroll-y='true' bindscrolltolower="closeLower" style="height:{{height-50}}px">
-            <cardB :list.sync="closeData"></cardB>
-          </scroll-view>
-        </block>
-        <view wx:else class="zan-center" style="padding-top:20rpx"><text class="zan-c-gray-dark zan-font-12">暂无数据</text></view>
-      </block>
-      <block wx:else>
-        <block wx:if="{{allData.length>0}}">
-          <scroll-view scroll-y='true' bindscrolltolower="allLower()" style="height:{{height-50}}px">
-            <cardA :list.sync="allData"></cardA>
-          </scroll-view>
-        </block>
-        <view wx:else class="zan-center" style="padding-top:20rpx"><text class="zan-c-gray-dark zan-font-12">暂无数据</text></view>
-      </block>
-    </view>
+    <block wx:if="{{loadingShow}}">
+      <zanLoadmoreA :loading="loadingShow"></zanLoadmoreA>
+    </block>
+    <block wx:else>
+      <zanTab :tab.sync="tab1" componentId="tab1" fixed></zanTab>
+      <view class="tab-con">
+        <scroll-view scroll-y='true' bindscrolltolower="allLower" style="height:{{height-50}}px">
+          <cardA :list.sync="allData"></cardA>
+        </scroll-view>
+      </view>
+    </block>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
 
 import zanTab from '../components/zan-tab'
+import zanLoadmore from '../components/zan-loadmore'
 import Card from '../components/order-card'
 import api from '../common/api'
 
@@ -53,50 +30,47 @@ export default class Order extends wepy.page {
     'navigationBarTitleText': '我的订单'
   }
   components = {
-    zanTab: zanTab,
+    zanTab,
     cardA: Card,
-    cardB: Card,
-    cardC: Card,
-    cardD: Card
+    zanLoadmoreA: zanLoadmore,
+    zanLoadmoreB: zanLoadmore
   }
   data = {
     height: '',
+    loadingShow: true,
+    loadingsubShow: true,
     currentTab: 3,
     tab1: {
       list: [
         {
           id: 3,
-          title: '全部'
+          title: '全部',
+          url: '/pages/order'
         },
         {
           id: 0,
-          title: '充电中'
+          title: '充电中',
+          url: '/pages/order-charg'
         },
         {
           id: 1,
-          title: '充电完成'
+          title: '充电完成',
+          url: '/pages/order-compl'
         },
         {
           id: 2,
-          title: '已关闭'
+          title: '已关闭',
+          url: '/pages/order-close'
         }
       ],
       selectedId: 3,
-      scroll: false
+      scroll: false,
+      url: false
     },
     pageSize: 5, // 当前页数量
     allData: [],
     allPagtotal: null, // 全部总数
-    allPagenum: 1,
-    chargData: [],
-    chargPagtotal: null, // 充电中总数
-    chargPagenum: 1,
-    complData: [],
-    complPagtotal: null, // 完成总数
-    complPagenum: 1,
-    closeData: [],
-    closePagtotal: null, // 已关闭总数
-    closePagenum: 1
+    allPagenum: 1
   }
   events = {
     // tab事件切换
@@ -104,13 +78,13 @@ export default class Order extends wepy.page {
       let { componentId } = event.source
       this[componentId].selectedId = selectedId
       this.currentTab = Number(selectedId)
+      this.allData = []
+      this.allPagenum = 1
       this.$apply()
+      this.getData(this.allData, this.allPagenum, this.currentTab, this)
     }
   }
   onLoad(option) {
-    wepy.showLoading({
-      title: '加载中'
-    })
     wepy.getSystemInfo({
       success: (res) => {
         this.height = res.windowHeight
@@ -121,64 +95,13 @@ export default class Order extends wepy.page {
       this.tab1.selectedId = option.selectedId
       this.currentTab = parseInt(option.selectedId)
     }
-    this.getData(this.chargData, this.chargPagenum, 0, this)
-    this.getData(this.complData, this.complPagenum, 1, this)
-    this.getData(this.closeData, this.closePagenum, 2, this)
-    this.getData(this.allData, this.allPagenum, 3, this)
+    this.getData(this.allData, this.allPagenum, this.currentTab, this)
   }
   onShow() {
   }
   allLower() {
-    this.plusUpdate(this.allData, this.allPagtotal, this.allPagenum, 3)
-  }
-  chargLower() {
-    this.plusUpdate(this.chargData, this.chargPagtotal, this.chargPagenum, 0)
-  }
-  complLower() {
-    this.plusUpdate(this.complData, this.complPagtotal, this.complPagenum, 1)
-  }
-  closeLower() {
-    this.plusUpdate(this.closeData, this.closePagtotal, this.closePagenum, 2)
-  }
-  // 读取订单列表
-  // data 数据列表， pageNum 每页显示数，state 状态
-  getData(data, pagenum, state, that) {
-    api.get(orderURL + 'queryOrderNoListMobile?orderStatus=' + state + '&rdSession=' + that.$parent.token + '&pageNum=' + pagenum + '&pageSize=' + that.pageSize).then(res => {
-      wepy.hideLoading()
-      console.log(res)
-      if (pagenum === 1) {
-        if (data === this.allData) {
-          that.allData = res.data
-          that.allPagtotal = res.dataCount
-        } else if (data === this.chargData) {
-          that.chargData = res.data
-          that.chargPagtotal = res.dataCount
-        } else if (data === this.complData) {
-          that.complData = res.data
-          that.complPagtotal = res.dataCount
-        } else {
-          that.closeData = res.data
-          that.closePagtotal = res.dataCount
-        }
-      } else {
-        if (data === this.allData) {
-          that.allData = this.allData.concat(res.data)
-        } else if (data === this.chargData) {
-          that.chargData = this.chargData.concat(res.data)
-        } else if (data === this.complData) {
-          that.complData = this.complData.concat(res.data)
-        } else {
-          that.closeData = this.closeData.concat(res.data)
-        }
-      }
-      that.$apply()
-    })
-  }
-  // 下拉加载
-  // data 数据列表， total 数据总数， pageNum 每页显示数，state 状态
-  plusUpdate(data, total, pageNum, state) {
-    let _length = data.length
-    if (_length === total) {
+    let _length = this.allData.length
+    if (_length === this.allPagtotal) {
       this.$apply()
       wepy.showToast({ // 如果全部加载完成了也弹一个框
         title: '全部加载完了',
@@ -187,10 +110,24 @@ export default class Order extends wepy.page {
       })
       return false
     } else {
-      pageNum = pageNum + 1
-      this.$apply()
-      this.getData(data, pageNum, state, this)
+      this.allPagenum++
+      this.getData(this.allData, this.allPagenum, this.currentTab, this)
     }
+  }
+  // 读取订单列表
+  // data 数据列表， pageNum 每页显示数，state 状态
+  getData(data, pagenum, state, that) {
+    api.get(orderURL + 'queryOrderNoListMobile?orderStatus=' + state + '&rdSession=' + that.$parent.token + '&pageNum=' + pagenum + '&pageSize=' + that.pageSize).then(res => {
+      console.log(res)
+      if (pagenum === 1) {
+        that.allData = res.data
+        that.allPagtotal = res.dataCount
+      } else {
+        that.allData = this.allData.concat(res.data)
+      }
+      that.loadingShow = false
+      that.$apply()
+    })
   }
 }
 </script>

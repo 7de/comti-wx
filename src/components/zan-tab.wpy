@@ -1,12 +1,13 @@
 <style lang="scss">
 .zan-tab {
   height: 45px;
+  border-bottom: 1rpx solid #e5e5e5;
+  overflow: hidden;
 }
 .zan-tab__bd {
   width: 750rpx;
   display: flex;
   flex-direction: row;
-  border-bottom: 1rpx solid #e5e5e5;
   background: #fff;
 }
 .zan-tab__bd--fixed {
@@ -58,6 +59,13 @@
           <view class="zan-tab__title">{{item.title}}</view>
         </view>
       </scroll-view>
+    </block>
+    <block wx:elif="{{tab.url}}">
+      <view class="zan-tab__bd zan-tab__bd--scroll {{ fixed ? 'zan-tab__bd--fixed' : '' }}" scroll-x="true">
+        <navigator wx:for="{{tab.list}}" wx:key="id" url="{{item.url}}" class="zan-tab__item {{tab.selectedId == item.id ? 'zan-tab__item--selected' : ''}}" data-component-id="{{componentId}}" data-item-id="{{item.id}}" @tap="handleZanTabChange">
+          <view class="zan-tab__title">{{item.title}}</view>
+        </navigator>
+      </view>
     </block>
     <block wx:else>
       <view class="zan-tab__bd {{fixed ? 'zan-tab__bd--fixed' : ''}}">

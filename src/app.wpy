@@ -31,6 +31,7 @@ page{
 }
 .page_spacing {
   padding: 0 30rpx 40rpx;
+  overflow: hidden;
 }
 .doc-title {
   position: relative;
@@ -81,7 +82,6 @@ export default class extends wepy.app {
       'pages/home',
       'pages/personal',
       'pages/order',
-      'pages/order-charg',
       'pages/wallet',
       'pages/wallet-detail',
       'pages/wallet-topup',

@@ -120,13 +120,13 @@ export default class Charging extends wepy.page {
       this.seconds++
       this.seconds = this.seconds < 10 ? '0' + this.seconds : this.seconds
       this.$apply()
-      if (this.seconds === 59) {
+      if (this.seconds === 60) {
         this.seconds = '00'
         this.minuters++
         this.minuters = this.minuters < 10 ? '0' + this.minuters : this.minuters
         this.$apply()
       }
-      if (this.minuters === 59) {
+      if (this.minuters === 60) {
         this.minuters = '00'
         this.hours++
         this.hours = this.hours < 10 ? '0' + this.hours : this.hours
