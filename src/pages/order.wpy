@@ -9,7 +9,12 @@
       <zanTab :tab.sync="tab1" componentId="tab1" fixed></zanTab>
       <view class="tab-con">
         <scroll-view scroll-y='true' bindscrolltolower="allLower" style="height:{{height-50}}px">
-          <cardA :list.sync="allData"></cardA>
+          <block wx:if="{{loadingsubShow}}">
+            <zanLoadmoreB :loading="loadingsubShow"></zanLoadmoreB>
+          </block>
+          <block wx:else>
+            <cardA :list.sync="allData"></cardA>
+          </block>
         </scroll-view>
       </view>
     </block>
@@ -39,6 +44,7 @@ export default class Order extends wepy.page {
     height: '',
     loadingShow: true,
     loadingsubShow: true,
+    timer: '',
     currentTab: 3,
     tab1: {
       list: [
@@ -80,7 +86,9 @@ export default class Order extends wepy.page {
       this.currentTab = Number(selectedId)
       this.allData = []
       this.allPagenum = 1
+      this.loadingsubShow = true
       this.$apply()
+      clearTimeout(this.timer)
       this.getData(this.allData, this.allPagenum, this.currentTab, this)
     }
   }
@@ -127,6 +135,10 @@ export default class Order extends wepy.page {
       }
       that.loadingShow = false
       that.$apply()
+      this.timer = setTimeout(() => {
+        that.loadingsubShow = false
+        that.$apply()
+      }, 1000)
     })
   }
 }
