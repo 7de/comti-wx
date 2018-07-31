@@ -83,11 +83,15 @@
                 rawData: e.detail.rawData
               }).then(res => {
                 wepy.hideLoading()
-                console.log('授权信息' + res.data['rd_session'])
                 _this.$parent.token = res.data['rd_session']
                 _this.$apply()
                 wepy.setStorageSync('token_r', res.data['rd_session'])
-                page.goHome()
+                console.log(this.getCurrentPages().length)
+                if (this.getCurrentPages().length > 1) {
+                  page.goBack()
+                } else {
+                  page.goHome()
+                }
               })
             } else {
               this.$invoke('zanToptips', 'showZanTopTips', { content: '我们需要获取您的信息，请重新授权', options: 2000 })

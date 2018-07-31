@@ -17,7 +17,10 @@
 </style>
 <template>
   <view class="container" style="background-color:#fff;">
-    <view class="page_spacing">
+    <block wx:if="{{showLoading}}">
+      <Loading />
+    </block>
+    <view class="page_spacing" wx:else>
       <view class="zan-panel zan-panel--without-border zan-center">
         <view class="wallet-title">
             <view class="iconfont icon-user-menu-money"></view>
@@ -31,6 +34,7 @@
 </template>
 <script>
 import wepy from 'wepy'
+import Loading from '../components/loading'
 import api from '../common/api'
 
 const URL = 'wallet/customWallet/queryBalanceBySession'
@@ -39,16 +43,20 @@ export default class Wallet extends wepy.page {
   config = {
     'navigationBarTitleText': '我的余额'
   }
+  components = {
+    Loading
+  }
   data = {
-    account: '0.00'
+    account: '加载中...',
+    showLoading: true
   }
   events = {
   }
   onShow() {
-    console.log(this.$parent.token)
     // 账户余额查询
     api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
-      this.account = api.fotmatMoney(res.data)
+      this.account = parseFloat(api.fotmatMoney(res.data))
+      this.showLoading = false
       this.$apply()
     })
   }

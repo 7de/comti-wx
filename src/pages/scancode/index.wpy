@@ -36,54 +36,62 @@
       }
     }
   }
+  .account-width{
+    width: 90%;
+  }
 }
 </style>
 <template>
   <view class="container scan-box">
-    <view class="zan-panel">
-      <view class="zan-cell scan-cell">
-        <view class="zan-cell__bd zan-clearfix">
-          <view class="scan-subtitle zan-pull-left">
-            <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
+    <block wx:if="{{loading}}">
+      <Loading />
+    </block>
+    <block wx:else>
+      <view class="zan-panel">
+        <view class="zan-cell scan-cell">
+          <view class="zan-cell__bd zan-clearfix">
+            <view class="scan-subtitle zan-pull-left">
+              <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
+            </view>
+            <view class="zan-pull-left"><input type="number" class="zan-field__input" style="height:28px;font-size:16px;font-weight:bold" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/></view>
           </view>
-          <view class="zan-pull-left"><input type="number" class="zan-field__input" style="height:28px;font-size:16px;font-weight:bold" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/></view>
         </view>
       </view>
-    </view>
-    <view class="zan-panel-title">请选择充电时长：</view>
-    <view class="zan-panel">
-      <zanSelect1 :items="items" :checkedValue.sync="checked_base" componentId="base" ></zanSelect1>
-    </view>
-    <view class="zan-panel-title">预估金额：<text class="zan-font-12">(电费{{changeFee}}+服务费{{serviceFee}})</text></view>
-    <view class="zan-panel">
-      <view class="zan-cell scan-cell">
-        <view class="zan-cell__bd zan-clearfix">
-          <view class="scan-subtitle zan-pull-left">
-            <view class="iconfont icon-uutmoney zan-font-24" style="color:#7fb80e;"></view>
+      <view class="zan-panel-title">请选择充电时长：</view>
+      <view class="zan-panel">
+        <zanSelect1 :items="items" :checkedValue.sync="checked_base" componentId="base" ></zanSelect1>
+      </view>
+      <view class="zan-panel-title">预估金额：<text class="zan-font-12">(电费{{changeFee}}+服务费{{serviceFee}})</text></view>
+      <view class="zan-panel">
+        <view class="zan-cell scan-cell">
+          <view class="zan-cell__bd zan-clearfix">
+            <view class="scan-subtitle zan-pull-left">
+              <view class="iconfont icon-uutmoney zan-font-24" style="color:#7fb80e;"></view>
+            </view>
+            <text class="zan-pull-left zan-font-22 zan-c-red scan-subtitle-txt">￥{{totalFee}}</text>
           </view>
-          <text class="zan-pull-left zan-font-22 zan-c-red scan-subtitle-txt">￥{{totalFee}}</text>
         </view>
       </view>
-    </view>
-    <view class="zan-panel-title">账户金额：</view>
-    <view class="zan-panel">
-      <view class="zan-cell">
-        <view class="zan-cell__bd" style="overflow:hidden">
-          <text class="zan-pull-left zan-font-26 zan-c-red scan-subtitle-txt zan-ellipsis" style="width:90%;">￥{{account}}</text>  
-        </view>
-        <view class="zan-cell__ft scan-btn">
-          <navigator  url="../wallet-topup">
-            <button type="button" style="overflow:hidden;font-size:12px;">
-              <view class="iconfont icon-signboard zan-font-18 zan-pull-left"></view>
-              <text class="zan-pull-left">余额充值</text>
-            </button>
-          </navigator>
+      <view class="zan-panel-title">账户金额：</view>
+      <view class="zan-panel">
+        <view class="zan-cell">
+          <view class="zan-cell__bd" style="overflow:hidden">
+            <text class="zan-pull-left zan-c-red scan-subtitle-txt zan-ellipsis zan-font-26 account-width">￥{{account}}</text>  
+          </view>
+          <view class="zan-cell__ft scan-btn">
+            <navigator  url="../wallet-topup">
+              <button type="button" style="overflow:hidden;font-size:12px;">
+                <view class="iconfont icon-signboard zan-font-18 zan-pull-left"></view>
+                <text class="zan-pull-left">余额充值</text>
+              </button>
+            </navigator>
+          </view>
         </view>
       </view>
-    </view>
-    <view class="zan-panel" style="margin:30rpx 40rpx">
-      <button class="zan-btn zan-btn--primary" @tap="goCharging">确认并提交</button>
-    </view>
+      <view class="zan-panel" style="margin:30rpx 40rpx">
+        <button class="zan-btn zan-btn--primary" @tap="goCharging">确认并提交</button>
+      </view>
+    </block>
     <zanToptips/>
   </view>
 </template>
@@ -91,6 +99,7 @@
 import wepy from 'wepy'
 import zanSelect from '../../components/zan-select'
 import zanToptips from '../../components/zan-toptips'
+import Loading from '../../components/loading'
 import api from '../../common/api'
 import page from '../../common/page'
 
@@ -104,9 +113,11 @@ export default class ScanIndex extends wepy.page {
   }
   components = {
     zanSelect1: zanSelect,
-    zanToptips
+    zanToptips,
+    Loading
   }
   data = {
+    loading: false, // 暂时不加loading
     items: [
       {
         value: '120',
@@ -145,7 +156,7 @@ export default class ScanIndex extends wepy.page {
     code: null, // 插座ID
     input_focus: false,
     time_value: 0,
-    account: '0.00',
+    account: '加载中...',
     charger_mode: null, // 充电模式
     changeFee: '0.00', // 充电费
     serviceFee: '0.00', // 服务费
@@ -170,9 +181,16 @@ export default class ScanIndex extends wepy.page {
     console.log('扫描' + this._token)
     if (this._token) {
       // 账户余额查询
+      wepy.showLoading({
+        title: '余额查询...',
+        mask: true
+      })
       api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
+        wepy.hideLoading()
+        this.loading = false
+        this.$apply()
         if (res.code === 0) {
-          this.account = api.fotmatMoney(res.data)
+          this.account = parseFloat(api.fotmatMoney(res.data))
           this.$apply()
         }
       })
@@ -180,7 +198,10 @@ export default class ScanIndex extends wepy.page {
       this.checkEqui()
     } else {
       // 跳转授权页
-      page.goauthorize()
+      wepy.navigateTo({
+        url: '/pages/authorize'
+      })
+      // page.goauthorize()
     }
   }
   methods = {
@@ -201,8 +222,8 @@ export default class ScanIndex extends wepy.page {
         this.showTopTips('请填写二维码编号')
       } else if (!this.time_value) {
         this.showTopTips('请选择充电时长')
-      } else if (this.time_value >= Number(this.account)) {
-        this.showTopTips('您的余额不足以选择此服务，请及时充值。')
+      } else if (this.totalFee > parseFloat(this.account)) {
+        this.showTopTips('您的余额不足以选择此服务，请及时充值')
       } else {
         // 确认提示 --start
         wepy.showModal({
@@ -221,7 +242,6 @@ export default class ScanIndex extends wepy.page {
                 totalFee: _this.totalFee * 100
               }).then(res => {
                 wepy.hideLoading()
-                console.log(res)
                 if (res.code === 0) {
                   wepy.reLaunch({
                     url: '../charging?orderNo=' + res.data + '&time=' + _this.time_value + '&equipNo=' + _this.code
@@ -250,27 +270,10 @@ export default class ScanIndex extends wepy.page {
         this.time_value = value
         this.$apply()
       }
-      if (this.time_value >= Number(this.account)) {
-        this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值。', options: 2000 })
+      if (this.code) {
+        this.checkMoney()
       } else {
-        if (this.code) {
-          // 查询费用
-          wepy.showLoading({
-            title: '费用查询中...',
-            mask: true
-          })
-          api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value).then(({data}) => {
-            wepy.hideLoading()
-            let _changeFee = data.changeFee ? data.changeFee : 0
-            let _serviceFee = data.serviceCharge ? data.serviceCharge : 0
-            this.changeFee = api.fotmatMoney(_changeFee)
-            this.serviceFee = api.fotmatMoney(_serviceFee)
-            this.totalFee = api.fotmatMoney(Number(data.changeFee) + Number(data.serviceCharge))
-            this.$apply()
-          })
-        } else {
-          this.showTopTips('请确认二维码编号是否填写')
-        }
+        this.showTopTips('请确认二维码编号是否填写')
       }
     }
   }
@@ -289,12 +292,12 @@ export default class ScanIndex extends wepy.page {
       url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
       method: 'GET',
       success: res => {
-        console.log(res)
         wepy.hideLoading()
-        if (res.data.code === -1) {
+        if (res.data.code === 0) {
+        } else {
           let _msg = res.data.msg
           wepy.showModal({
-            title: '提示',
+            title: '温馨提示',
             content: _msg,
             confirmText: '首页扫码',
             success: function(res) {
@@ -303,14 +306,28 @@ export default class ScanIndex extends wepy.page {
               }
             }
           })
-        } else if (res.data.code === 0) {
-        } else {
-          wepy.showToast({
-            title: res.data.msg,
-            icon: 'none',
-            duration: 2000
-          })
         }
+      }
+    })
+  }
+
+  // 预估金额查询
+  checkMoney() {
+    // const _this = this
+    wepy.showLoading({
+      title: '费用查询中...',
+      mask: true
+    })
+    api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value).then(({data}) => {
+      wepy.hideLoading()
+      let _changeFee = data.changeFee ? data.changeFee : 0
+      let _serviceFee = data.serviceCharge ? data.serviceCharge : 0
+      this.changeFee = api.fotmatMoney(_changeFee)
+      this.serviceFee = api.fotmatMoney(_serviceFee)
+      this.totalFee = api.fotmatMoney(Number(data.changeFee) + Number(data.serviceCharge))
+      this.$apply()
+      if (this.totalFee > parseFloat(this.account)) {
+        this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值', options: 2000 })
       }
     })
   }

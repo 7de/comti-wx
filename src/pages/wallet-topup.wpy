@@ -11,31 +11,37 @@
 
 <template>
     <view class="container">
-      <view class="zan-panel-title">账户余额：</view>
-      <view class="zan-panel">
-        <view class="zan-cell">
-          <view class="zan-cell__bd zan-clearfix">
-            <view class="scan-subtitle zan-pull-left">
-              <view class="iconfont icon-uutmoney zan-font-30" style="color:#7fb80e;"></view>
+      <block wx:if="{{showLoading}}">
+        <Loading />
+      </block>
+      <block wx:else>
+        <view class="zan-panel-title">账户余额：</view>
+        <view class="zan-panel">
+          <view class="zan-cell">
+            <view class="zan-cell__bd zan-clearfix">
+              <view class="scan-subtitle zan-pull-left">
+                <view class="iconfont icon-uutmoney zan-font-30" style="color:#7fb80e;"></view>
+              </view>
+              <text class="zan-pull-left zan-c-red scan-subtitle-txt zan-font-26">￥{{account}}</text>
             </view>
-            <text class="zan-pull-left zan-font-28 zan-c-red scan-subtitle-txt">￥{{account}}</text>
           </view>
         </view>
-      </view>
-      <view class="zan-panel-title">充值金额：</view>
-      <view class="zan-panel">
-        <zanSelect1 :items="items" :checkedValue.sync="checked_base" componentId="base" ></zanSelect1>
-      </view>
-      <view class="page_spacing">
-        <button class="zan-btn zan-btn--primary" style="margin-top:120rpx;" @tap="goTopup">马上充值</button>
-      </view>
-      <zanToptips/>
+        <view class="zan-panel-title">充值金额：</view>
+        <view class="zan-panel">
+          <zanSelect1 :items="items" :checkedValue.sync="checked_base" componentId="base"></zanSelect1>
+        </view>
+        <view class="page_spacing">
+          <button class="zan-btn zan-btn--primary" style="margin-top:120rpx;" @tap="goTopup">马上充值</button>
+        </view>
+      </block>
+      <zanToptips />
     </view>
 </template>
 <script>
 import wepy from 'wepy'
 import zanSelect from '../components/zan-select'
 import zanToptips from '../components/zan-toptips'
+import Loading from '../components/loading'
 import api from '../common/api'
 
 const URL = 'wallet/customWallet/queryBalanceBySession'
@@ -46,33 +52,35 @@ export default class WalletTopup extends wepy.page {
   }
   components = {
     zanSelect1: zanSelect,
-    zanToptips
+    zanToptips,
+    Loading
   }
   data = {
+    showLoading: true,
     items: [
       {
         value: '1000',
-        name: '冲￥1000'
+        name: '充￥1000'
       },
       {
         value: '800',
-        name: '冲￥800'
+        name: '充￥800'
       },
       {
         value: '600',
-        name: '冲￥600'
+        name: '充￥600'
       },
       {
         value: '500',
-        name: '冲￥500'
+        name: '充￥500'
       },
       {
         value: '200',
-        name: '冲￥200'
+        name: '充￥200'
       },
       {
         value: '100',
-        name: '冲￥100'
+        name: '充￥100'
       },
       {
         value: '50',
@@ -80,45 +88,45 @@ export default class WalletTopup extends wepy.page {
       },
       {
         value: '20',
-        name: '冲￥20'
+        name: '充￥20'
       },
       {
         value: '15',
-        name: '冲￥15'
+        name: '充￥15'
       },
       {
         value: '10',
-        name: '冲￥10'
+        name: '充￥10'
       },
       {
         value: '8',
-        name: '冲￥8'
+        name: '充￥8'
       },
       {
         value: '5',
-        name: '冲￥5'
-      },
+        name: '充￥5'
+      }/* ,
       {
         value: '0.01',
         name: '冲￥0.01'
-      }
+      } */
     ],
     checked_base: -1,
     time_value: 0,
     value_txt: '',
-    account: 0 // 账户余额
+    account: '加载中...' // 账户余额
   }
   onLoad() {
   }
   onShow() {
     wepy.showLoading({
-      title: '余额查询中...',
-      mask: true
+      content: '余额查询中...'
     })
     // 账户余额查询
     api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
       wepy.hideLoading()
-      this.account = api.fotmatMoney(res.data)
+      this.account = parseFloat(api.fotmatMoney(res.data))
+      this.showLoading = false
       this.$apply()
     })
   }
@@ -132,33 +140,35 @@ export default class WalletTopup extends wepy.page {
           title: '提示',
           content: '请确认是否充值？',
           success: res => {
-            let Url = 'wxpay/wxpay/jsapi/pay?rdSession=' + this.$parent.token
-            api.post(Url, {
-              goodsId: parseInt(this.time_value), // 商品ID
-              goodsName: '充值' + this.time_value + '元', // 商品名称
-              totalfee: this.time_value * 100  // 充值金额 转为分为单位
-            }).then(res => {
-              console.log(res)
-              let _data = res.data
-              // 调用支付接口
-              wepy.requestPayment({
-                'timeStamp': _data.timeStamp,
-                'nonceStr': _data.nonceStr,
-                'package': _data.package,
-                'signType': 'MD5',
-                'paySign': _data.paySign,
-                'success': function(res) {
-                  console.log(res)
-                  wepy.navigateBack({
-                    delta: 1
-                  })
-                },
-                'fail': err => {
-                  this.$invoke('zanToptips', 'showZanTopTips', { content: '充值失败，请重新充值', options: 2000 })
-                  console.log('失败:' + err)
-                }
+            if (res.confirm) {
+              let Url = 'wxpay/wxpay/jsapi/pay?rdSession=' + this.$parent.token
+              api.post(Url, {
+                goodsId: parseInt(this.time_value), // 商品ID
+                goodsName: '充值' + this.time_value + '元', // 商品名称
+                totalfee: this.time_value * 100  // 充值金额 转为分为单位
+              }).then(res => {
+                console.log(res)
+                let _data = res.data
+                // 调用支付接口
+                wepy.requestPayment({
+                  'timeStamp': _data.timeStamp,
+                  'nonceStr': _data.nonceStr,
+                  'package': _data.package,
+                  'signType': 'MD5',
+                  'paySign': _data.paySign,
+                  'success': function(res) {
+                    console.log(res)
+                    wepy.navigateBack({
+                      delta: 1
+                    })
+                  },
+                  'fail': err => {
+                    this.$invoke('zanToptips', 'showZanTopTips', { content: '充值失败，请重新充值', options: 2000 })
+                    console.log('失败:' + err)
+                  }
+                })
               })
-            })
+            }
           }
         })
       }

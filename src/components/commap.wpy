@@ -1,5 +1,5 @@
 <style lang="scss">
-.con{
+/* .con{
   position: relative;
   transition: all .15s;
   .close{
@@ -40,7 +40,7 @@
     content:'';
     border-width:0
   }
-}
+} */
 </style>
 
 <template>
@@ -60,7 +60,7 @@
         </view>
         <view class="margin-top-10">
           <text class="padding-right-30">电费：<text class="zan-c-green">{{markersinfo["callout"].electricity?markersinfo["callout"].electricity:'0.00'}}</text>元/度</text>
-          <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee?markersinfo["callout"].servicefee:'0.00'}}</text>元/度</text>
+          <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee?markersinfo["callout"].servicefee:'0.00'}}</text>元/次</text>
         </view>
       </view>
     </zanPopup>
@@ -78,9 +78,19 @@ const equiUrl = 'equip/equipSocket/querySocketStatus' // 扫描设备状态
 const markerURL = 'sites/sites/' // 站点
 
 export default class Commap extends wepy.component {
+  props = {
+    latitude: {
+      type: String,
+      default: '22.60561'
+    },
+    longitude: {
+      type: String,
+      default: '113.838300'
+    }
+  }
   data = {
-    latitude: wepy.getStorageSync('user_latitude') ? wepy.getStorageSync('user_latitude') : 0,
-    longitude: wepy.getStorageSync('user_longitude') ? wepy.getStorageSync('user_longitude') : 0,
+    /* latitude: wepy.getStorageSync('user_latitude') ? wepy.getStorageSync('user_latitude') : '22.60561',
+    longitude: wepy.getStorageSync('user_longitude') ? wepy.getStorageSync('user_longitude') : '113.838300', */
     controls: [],
     markers: [],
     oldMarkerID: null,
@@ -103,6 +113,7 @@ export default class Commap extends wepy.component {
       }
     })
     if (!this.latitude) {
+      console.log('没有位置2')
       wepy.getLocation({
         type: 'gcj02',
         success: (res) => {
@@ -122,6 +133,7 @@ export default class Commap extends wepy.component {
     }
     console.log('纬度2：' + this.latitude)
     this.iniMap()
+    this.movetoPosition()
     this.getMarkers()
     this.mapControl()
     this._token = wepy.getStorageSync('token_r')
@@ -165,7 +177,6 @@ export default class Commap extends wepy.component {
   // 初始化地图
   iniMap() {
     this.mapCtx = wepy.createMapContext('mapCon')
-    this.movetoPosition()
   }
   toggleTopPopup() {
     this.$invoke('zanPopup', 'togglePopup')
@@ -242,8 +253,6 @@ export default class Commap extends wepy.component {
     const _this = this
     wepy.scanCode({
       success: (res) => {
-        console.log(res)
-        console.log(res.result)
         const _num = res.result
         const _numIndex = _num.indexOf('=')
         const _numNum = _num.substring(_numIndex + 1)
@@ -254,7 +263,7 @@ export default class Commap extends wepy.component {
         api.get(equiUrl + '?rdSession=' + _this._token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
           wepy.hideLoading()
           wepy.navigateTo({
-            url: '../pages/scancode/index?num=' + _numNum
+            url: '/pages/scancode/index?num=' + _numNum
           })
         })
       }

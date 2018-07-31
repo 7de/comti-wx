@@ -123,7 +123,7 @@ export default class extends wepy.app {
         success: function (res) {
           if (res.confirm) {
             // 新的版本已经下载好，调用 applyUpdate 应用新版本并重启
-            wepy.clearStorage()
+            wepy.clearStorageSync()
             updateManager.applyUpdate()
           }
         }
@@ -143,29 +143,85 @@ export default class extends wepy.app {
     try {
       this.token = this.token ? this.token : wepy.getStorageSync('token_r')
       if (this.token) {
-        // Do something with return value
         console.log('token主页:' + this.token)
         // 判断token是否有效
         api.get(URL + '?rdSession=' + this.token).then(res => {
+          // console.log(res)
+          if (res.code === 0) {
+            if (!this.longitude) {
+              this.getLocation()
+            }
+          }
         })
       } else {
-        console.log('空L:')
+        console.log('主页没token授权')
         page.goauthorize()
       }
     } catch (e) {
       // Do something when catch error
-      console.log('错误:' + e)
       wepy.showToast({
         title: '未登录',
         icon: 'none',
         duration: 2000,
         success: res => {
+          console.log('主页没授权')
           page.goauthorize()
         }
       })
     }
   }
-
+  // 获取地理位置
+  getLocation() {
+    wepy.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        let latitude = res.latitude
+        let longitude = res.longitude
+        this.globalData.longitude = longitude
+        this.globalData.latitude = latitude
+      },
+      fail: (res) => {
+        this.getScopeLocation()
+      }
+    })
+  }
+  // 是否授权当前位置
+  getScopeLocation() {
+    wepy.getSetting({
+      success: (res) => {
+        if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
+          wepy.showModal({
+            title: '是否授权当前位置',
+            content: '需要获取您的地理位置，否则地图信息可能会有误！',
+            success: (res) => {
+              if (res.confirm) {
+                wepy.openSetting({
+                  success: (data) => {
+                    if (data.authSetting['scope.userLocation'] === true) {
+                      wepy.showToast({
+                        title: '授权成功',
+                        icon: 'success',
+                        duration: 1000
+                      })
+                      wepy.navigateBack({
+                        delta: 2
+                      })
+                    } else {
+                      wepy.showToast({
+                        title: '授权失败',
+                        icon: 'none',
+                        duration: 2000
+                      })
+                    }
+                  }
+                })
+              }
+            }
+          })
+        }
+      }
+    })
+  }
   constructor () {
     super()
     // this.use('promisify')

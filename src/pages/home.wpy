@@ -2,48 +2,79 @@
 .body > .tab_con{
   margin-top: 80rpx;
 }
-  $fontcolor: #7b7b7b;
-  $activecolor: #1AAD19;
-  .tab {
-      color: $fontcolor;
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 80rpx;
-      line-height: 80rpx;
-      width: 100%;
-      background-color: #fff;
-      font-size: 33rpx;
-      white-space: nowrap;
-      box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
-      -webkit-box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
-      .tab_item {
-          &.active {
-              color: $activecolor;
-              &:after{
-                  background-color: $activecolor;
-              }
-          }
-          display: inline-block;
-          width: 50%;
-          text-align: center;
-          position: relative;
-          &:after{
-              content:'';
-              position: absolute;
-              left: 0;
-              right: 0;
-              bottom: 2rpx;
-              width: 30%;
-              height: 5rpx;
-              margin: 0 auto;
-              background-color: #fff;
-          }
-      }
-      .title {
-          display: block;
-      }
+$fontcolor: #7b7b7b;
+$activecolor: #1AAD19;
+.tab {
+    color: $fontcolor;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 80rpx;
+    line-height: 80rpx;
+    width: 100%;
+    background-color: #fff;
+    font-size: 33rpx;
+    white-space: nowrap;
+    box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+    -webkit-box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+    .tab_item {
+        &.active {
+            color: $activecolor;
+            &:after{
+                background-color: $activecolor;
+            }
+        }
+        display: inline-block;
+        width: 50%;
+        text-align: center;
+        position: relative;
+        &:after{
+            content:'';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 2rpx;
+            width: 30%;
+            height: 5rpx;
+            margin: 0 auto;
+            background-color: #fff;
+        }
+    }
+    .title {
+        display: block;
+    }
+}
+.con{
+  position: relative;
+  transition: all .15s;
+  .close{
+    position: absolute;
+    bottom:-9.8%;
+    right: 0;
+    width: 80rpx;
+    height:80rpx;
+    line-height: 80rpx;
+    z-index: 20;
+    color: #1AAD19;
+    >text{
+      font-size: 48rpx;
+    }
   }
+}
+#mapCon{
+  position: absolute;
+  top:0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.map-nav{
+  position:absolute;
+  bottom:5%;
+  right:2%
+}
 </style>
 <template>
   <view class="body">
@@ -56,7 +87,29 @@
       </view>
     </view>
     <view class="tab_con">
-      <commap :markers="markers"/>
+      <view class="con" style="height:{{showMap?71:93}}vh">
+        <map id="mapCon" class="" latitude="{{latitude}}" longitude="{{longitude}}" markers="{{markers}}" controls="{{controls}}" polyline="{{polyline}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location></map>
+        <zanPopup direction="bottom" :showPopup.sync="showMap">
+          <view class="markermask">
+            <view class="zan-font-16">
+              {{markersinfo["callout"].siteName}}充电站
+              <view class="zan-tag zan-tag--primary map-tag">慢充</view>
+              <view class="zan-tag zan-tag--warn zan-tag--plain">24h</view>
+            </view>
+            <view class="zan-c-gray-dark margin-top-15 zan-font-12 zan-ellipsis" style="width:100%">地址：{{markersinfo["callout"].siteAddress}}</view>
+            <view class="margin-top-10">
+              <text class="padding-right-30">空闲：<text class="zan-c-green">{{markersinfo["callout"].free?markersinfo["callout"].free:0}}</text></text>
+              <text>总设备：{{markersinfo["callout"].equipment?markersinfo["callout"].equipment:0}}</text>
+            </view>
+            <view class="margin-top-10">
+              <text class="padding-right-30">电费：<text class="zan-c-green">{{markersinfo["callout"].electricity?markersinfo["callout"].electricity:'0.00'}}</text>元/度</text>
+              <text>服务费：<text class="zan-c-green">{{markersinfo["callout"].servicefee?markersinfo["callout"].servicefee:'0.00'}}</text>元/次</text>
+              <button class="zan-btn zan-btn--small zan-btn--primary" style="float:right;margin-top:-30rpx;" @tap="goSite">点击前往</button>
+            </view>
+          </view>
+        </zanPopup>
+        <view class="close zan-center" @tap="toggleTopPopup" wx:if="{{showMap}}"><text class="iconfont icon-wrong"></text></view>
+      </view>
     </view>
     <zanToptips/>
   </view>
@@ -64,50 +117,67 @@
 <script>
 import wepy from 'wepy'
 
-import Commap from '../components/commap'
 import zanToptips from '../components/zan-toptips'
 import zanLoadmore from '../components/zan-loadmore'
+import zanPopup from '../components/zan-popup'
 import api from '../common/api'
 import page from '../common/page'
 
-const orderURL = 'server/'
+const orderURL = 'server/' // 订单
+const equiUrl = 'equip/equipSocket/querySocketStatus' // 扫描设备状态
+const markerURL = 'sites/sites/' // 站点
 // const URL = 'platform/platform/customer/getCustomerByKey'
 export default class Home extends wepy.page {
   components = {
-    commap: Commap,
     zanToptips,
-    zanLoadmore
+    zanLoadmore,
+    zanPopup
   }
   data = {
     currentTab: 0,
-    token: ''
+    latitude: 22.60545,
+    longitude: 113.83692,
+    controls: [],
+    markers: [],
+    currentMarkersLong: 0,
+    currentMarkersLati: 0,
+    currentMarkerName: '',
+    currentMarkerAddr: '',
+    polyline: [],
+    oldMarkerID: null,
+    markersinfo: {},
+    showMap: false,
+    showPopup: false
   }
   onLoad() {
-    /* this.mapCtx = wepy.createMapContext('mapCon')
-    this.mapCtx.moveToLocation() */
-    wepy.showLoading({
-      title: '加载中...',
-      mask: true
-    })
+    if (this.$parent.globalData.longitude) {
+      this.latitude = this.$parent.globalData.latitude
+      this.longitude = this.$parent.globalData.longitude
+    } else {
+      this.getLocation()
+      console.log('没有位置')
+      console.log(this.$parent.globalData.longitude)
+    }
+  }
+  onReady() {
+    this.mapCtx = wepy.createMapContext('mapCon')
+    this.movetoPosition()
+    this.getMarkers()
+    this.mapControl()
   }
   onShow() {
-    wepy.hideLoading()
-    /* this.currentTab = 0
-    this.mapCtx.moveToLocation() */
-    console.log('首页' + this.$parent.token)
     this.$parent.token = this.$parent.token ? this.$parent.token : wepy.getStorageSync('token_r')
-    this.$apply()
     if (this.$parent.token) {
       wepy.showLoading({
-        title: '订单查询中...',
+        title: '加载中...',
         mask: true
       })
       // 判断是否有进行中的订单
       api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
         wepy.hideLoading()
         let _len = data.length
-        console.log(_len)
-        if (_len) {
+        console.log('订单' + _len)
+        if (_len > 0) {
           this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/order?selectedId=0' })
         }
       })
@@ -116,6 +186,212 @@ export default class Home extends wepy.page {
     }
   }
   methods = {
+    // 地图控件点击处理
+    bindcontroltap(e) {
+      switch (e.controlId) {
+        case 1: this.mapCtx.moveToLocation()
+          break
+        case 2: this.openCode()
+          break
+        case 3: wepy.navigateTo({
+          url: '/pages/personal'
+        })
+      }
+    },
+    // 标点点击
+    bindmarkertap(e) {
+      let _markers = this.markers
+      let markerId = e.markerId
+      for (let v in _markers) {
+        if (_markers[v].id === markerId) {
+          this.markersinfo = _markers[v]
+          this.currentMarkersLong = _markers[v].longitude
+          this.currentMarkersLati = _markers[v].latitude
+          this.currentMarkerName = _markers[v]['callout'].siteName
+          this.currentMarkerAddr = _markers[v]['callout'].siteAddress
+          this.polyline = [{
+            points: [{ // 连线起点
+              longitude: this.data.longitude,
+              latitude: this.data.latitude
+            }, { // 连线终点(当前点击的标记)
+              longitude: _markers[v].longitude,
+              latitude: _markers[v].latitude
+            }],
+            color: '#1AAD19', // 连线颜色
+            width: 3, // 连线宽度
+            dottedLine: true, // 虚线
+            arrowLine: true
+          }]
+        }
+      }
+      if (!this.showMap && this.oldMarkerID !== markerId) {
+        this.showMap = true
+        this.oldMarkerID = markerId
+      } else if (!this.showMap && this.oldMarkerID === markerId) {
+        this.showMap = true
+      }
+    }
+  }
+  toggleTopPopup() {
+    this.showMap = false
+    this.polyline = []
+  }
+  goSite() {
+    wepy.openLocation({
+      latitude: parseFloat(this.currentMarkersLati),
+      longitude: parseFloat(this.currentMarkersLong),
+      name: this.currentMarkerName + '充电站',
+      address: this.currentMarkerAddr
+    })
+  }
+  // 初始化地图
+  iniMap() {
+    this.mapCtx = wepy.createMapContext('mapCon')
+  }
+  // 定位到本地坐标
+  movetoPosition() {
+    // this.mapCtx = wepy.createMapContext('mapCon')
+    this.mapCtx.moveToLocation()
+    this.mapCtx.getCenterLocation({
+      success: (res) => {
+        console.log('本地' + res.longitude)
+        console.log(res.latitude)
+      }
+    })
+  }
+  // 获取地图标记
+  getMarkers() {
+    api.get(markerURL + 'queryMapSiteList').then(res => {
+      this.markers = res.data
+      this.$apply()
+    })
+  }
+  // 地图控件
+  mapControl() {
+    wepy.getSystemInfo({
+      success: res => {
+        this.controls = [{
+          id: 1,
+          iconPath: '/images/location_2.png',
+          position: {
+            left: 5,
+            top: res.windowHeight - 165,
+            width: 60,
+            height: 60
+          },
+          clickable: true
+        }, {
+          id: 2,
+          iconPath: '/images/code_2.png',
+          position: {
+            left: res.windowWidth / 2 - 70,
+            top: res.windowHeight - 162,
+            width: 138,
+            height: 55
+          },
+          clickable: true
+        }, {
+          id: 3,
+          iconPath: '/images/user_2.png',
+          position: {
+            left: res.windowWidth - 65,
+            top: res.windowHeight - 165,
+            width: 60,
+            height: 60
+          },
+          clickable: true
+        }, {
+          id: 4,
+          iconPath: '/images/pos.png',
+          position: {
+            left: res.windowWidth / 2 - 14,
+            top: res.windowHeight / 2 - 32,
+            width: 28,
+            height: 28
+          },
+          clickable: false
+        }]
+        this.$apply()
+      }
+    })
+  }
+  // 扫一扫
+  openCode() {
+    const _this = this
+    wepy.scanCode({
+      success: (res) => {
+        const _num = res.result
+        const _numIndex = _num.indexOf('=')
+        const _numNum = _num.substring(_numIndex + 1)
+        wepy.showLoading({
+          title: '正在查询设备...',
+          mask: true
+        })
+        api.get(equiUrl + '?rdSession=' + _this.$parent.token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
+          wepy.hideLoading()
+          wepy.navigateTo({
+            url: '/pages/scancode/index?num=' + _numNum
+          })
+        })
+      }
+    })
+  }
+  // 获取地理位置
+  getLocation() {
+    wepy.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        let latitude = res.latitude
+        let longitude = res.longitude
+        this.longitude = longitude
+        this.latitude = latitude
+        this.$parent.globalData.longitude = longitude
+        this.$parent.globalData.latitude = latitude
+        this.$apply()
+      },
+      fail: (res) => {
+        this.getScopeLocation()
+      }
+    })
+  }
+  // 是否授权当前位置
+  getScopeLocation() {
+    wepy.getSetting({
+      success: (res) => {
+        const _this = this
+        if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
+          wepy.showModal({
+            title: '是否授权当前位置',
+            content: '需要获取您的地理位置，否则您的位置信息可能有误！',
+            success: (res) => {
+              if (res.confirm) {
+                wepy.openSetting({
+                  success: (data) => {
+                    if (data.authSetting['scope.userLocation'] === true) {
+                      wepy.showToast({
+                        title: '授权成功',
+                        icon: 'success',
+                        duration: 1000
+                      })
+                      wepy.navigateBack({
+                        delta: 1
+                      })
+                      _this.movetoPosition()
+                    } else {
+                      wepy.showToast({
+                        title: '授权失败',
+                        icon: 'none',
+                        duration: 2000
+                      })
+                    }
+                  }
+                })
+              }
+            }
+          })
+        }
+      }
+    })
   }
   // 顶部提示
   showTopTips() {

@@ -11,5 +11,11 @@ export default {
     wepy.reLaunch({
       url: '/pages/authorize'
     })
+  },
+  // 返回上一级
+  goBack() {
+    wepy.navigateBack({
+      delta: 1
+    })
   }
 }

@@ -24,7 +24,7 @@
             <view class="zan-cell__bd">订单金额：￥<text class="zan-c-red zan-font-16">{{item.chargeMoney/100}}</text></view>
           </view>
           <view class="zan-cell zan-font-12">
-            <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">{{item.serviceMoney?item.serviceMoney:'0.00'}}</text></view>
+            <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">{{item.serviceMoney/100}}</text></view>
             <view class="zan-cell__ft" wx:if="{{item.orderStatus!==0}}">结算金额：￥<text class="zan-c-red zan-font-16">{{item.totalFee/100}}</text></view>
           </view>
           <view class="zan-cell zan-font-12" wx:if="{{item.orderStatus===2}}">

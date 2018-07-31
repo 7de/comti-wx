@@ -7,7 +7,6 @@
 .cir{
  display: inline-block;
  margin-top:20rpx;
-  
 }
 .cc{
   margin-top:-77px;
@@ -43,13 +42,11 @@
 
 <template>
     <view class="container">
-      <view wx:if="isCharging">
+      <block wx:if="{{showLoading}}">
+        <Loading />
+      </block>
+      <block wx:else>
         <view class="margin-top-30 zan-center" style="height:30px; padding:10px;">
-          <!-- <canvas class="cir" style="width:120px; height:120px;" canvas-id="canvasArc"></canvas>
-          <view class="cc">10%</view> -->
-          <!-- <view class="round-box">
-            <view class="round-sub">50%</view>
-          </view> -->
           <progress percent="{{charg_longtime}}" active-mode="forwards" show-info active></progress>
         </view>
         <view class="zan-panel">
@@ -68,26 +65,25 @@
         </view>
         <view style="margin:60rpx 40rpx 20rpx">
           <view>
-            <navigator open-type="reLaunch" url="/pages/home" class="zan-btn zan-btn--primary">返回首页</navigator>
+            <button class="zan-btn zan-btn--primary" @tap="goHome">返回首页</button>
           </view>
           <view class="margin-top-30"><button class="zan-btn zan-btn--primary zan-btn--plain" @tap="goClose">结束充电</button></view>
         </view>
-      </view>
-      <view wx:else>
-        <view class="margin-top-30 zan-center" style="height:30px; padding:10px;">
+        <!-- <view class="margin-top-30 zan-center" style="height:30px; padding:10px;">
           <progress percent="100" show-info></progress>
         </view>
         <view class="zan-font-12 zan-center" style="color:#999">充电已结束，马上来一场说走就走的旅行吧。</view>
         <view style="margin:60rpx 40rpx 20rpx">
           <navigator open-type="reLaunch" url="/pages/home"  class="zan-btn zan-btn--primary">返回首页</navigator>
-        </view>
-      </view>
+        </view> -->
+      </block>
     </view>
 </template>
 <script>
 import wepy from 'wepy'
 import api from '../common/api'
 import page from '../common/page'
+import Loading from '../components/loading'
 const orderURL = 'server/'
 
 export default class Charging extends wepy.page {
@@ -95,7 +91,7 @@ export default class Charging extends wepy.page {
     navigationBarTitleText: '充电中'
   }
   data = {
-    isCharging: true,
+    showLoading: true,
     chargData: {},
     hours: '00',
     minuters: '00',
@@ -111,9 +107,11 @@ export default class Charging extends wepy.page {
     money: 0, // 预计金额
     progress_num: 0
   }
+  components = {
+    Loading
+  }
   onLoad (option) {
     this.order_no = option.orderNo
-    console.log(this.order_no)
     this.time = option.time
     this.equip_no = option.equipNo
     this.timer = setInterval(() => {
@@ -143,6 +141,9 @@ export default class Charging extends wepy.page {
     }, 30000)
   }
   methods = {
+    goHome() {
+      page.goHome()
+    },
     // 结束充电
     goClose() {
       const _this = this
@@ -179,7 +180,8 @@ export default class Charging extends wepy.page {
       url: api.apiData.host + orderURL + 'queryOrderBrief/' + this.order_no,
       method: 'GET',
       success: res => {
-        console.log(res.data)
+        this.showLoading = false
+        this.$apply()
         if (res.data.code === 0) {
           this.chargData = res.data.data
           this.money = api.fotmatMoney(this.chargData.predictFee)
@@ -196,11 +198,8 @@ export default class Charging extends wepy.page {
         } else if (res.data.code === -1) {
           clearInterval(this.timer)
           clearInterval(this.charg_timer)
-          // this.charg_timer = ''
-          this.isCharging = false
-          this.$apply()
           wepy.showToast({
-            title: '充电完成',
+            title: res.data.msg,
             icon: 'success',
             duration: 2000,
             success: res => {

@@ -1,0 +1,136 @@
+<style lang="scss">
+.body > .tab_con{
+  margin-top: 80rpx;
+}
+  $fontcolor: #7b7b7b;
+  $activecolor: #1AAD19;
+  .tab {
+      color: $fontcolor;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 80rpx;
+      line-height: 80rpx;
+      width: 100%;
+      background-color: #fff;
+      font-size: 33rpx;
+      white-space: nowrap;
+      box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+      -webkit-box-shadow: 0rpx 1rpx 20rpx 5rpx #ddd;
+      .tab_item {
+          &.active {
+              color: $activecolor;
+              &:after{
+                  background-color: $activecolor;
+              }
+          }
+          display: inline-block;
+          width: 50%;
+          text-align: center;
+          position: relative;
+          &:after{
+              content:'';
+              position: absolute;
+              left: 0;
+              right: 0;
+              bottom: 2rpx;
+              width: 30%;
+              height: 5rpx;
+              margin: 0 auto;
+              background-color: #fff;
+          }
+      }
+      .title {
+          display: block;
+      }
+  }
+</style>
+<template>
+  <view class="body">
+    <view class="tab">
+      <view class="tab_item tab_message{{currentTab == 0 ? ' active' : ''}}">
+          <text class="title">电单车</text>
+      </view>
+      <view class="tab_item tab_contact" @tap="showTopTips">
+          <text class="title">电动汽车</text>
+      </view>
+    </view>
+    <view class="tab_con">
+      <commap :latitude.sync="latitude" :longitude.sync="longitude"/>
+    </view>
+    <zanToptips/>
+  </view>
+</template>
+<script>
+import wepy from 'wepy'
+
+import Commap from '../components/commap'
+import zanToptips from '../components/zan-toptips'
+import zanLoadmore from '../components/zan-loadmore'
+import api from '../common/api'
+import page from '../common/page'
+
+const orderURL = 'server/'
+// const URL = 'platform/platform/customer/getCustomerByKey'
+export default class Home extends wepy.page {
+  components = {
+    commap: Commap,
+    zanToptips,
+    zanLoadmore
+  }
+  data = {
+    currentTab: 0,
+    token: '',
+    latitude: '22.60561',
+    longitude: '113.838300'
+  }
+  onLoad() {
+    wepy.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        let latitude = res.latitude
+        let longitude = res.longitude
+        wepy.setStorageSync('user_longitude', longitude)
+        wepy.setStorageSync('user_latitude', latitude)
+        this.longitude = longitude
+        this.latitude = latitude
+        this.$apply()
+      }
+    })
+  }
+  onShow() {
+    if (!this.latitude) {
+      this.longitude = wepy.getStorageSync('user_longitude')
+      this.latitude = wepy.getStorageSync('user_latitude')
+      console.log('没有位置')
+    } else {
+      console.log('位置经纬度：' + this.longitude + '-' + this.latitude)
+    }
+    // this.currentTab = 0
+    this.$parent.token = this.$parent.token ? this.$parent.token : wepy.getStorageSync('token_r')
+    if (this.$parent.token) {
+      wepy.showLoading({
+        title: '加载中...',
+        mask: true
+      })
+      // 判断是否有进行中的订单
+      api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
+        wepy.hideLoading()
+        let _len = data.length
+        console.log(_len)
+        if (_len) {
+          this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/order?selectedId=0' })
+        }
+      })
+    } else {
+      page.goauthorize()
+    }
+  }
+  methods = {
+  }
+  // 顶部提示
+  showTopTips() {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: '功能暂未开通，敬请期待...', options: 2000 })
+  }
+}
+</script>

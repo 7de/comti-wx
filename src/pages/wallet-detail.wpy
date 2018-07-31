@@ -55,7 +55,6 @@ export default class WalletDetail extends wepy.page {
   lower(e) {
     let _length = this.recordList.length
     if (_length === this.pagtotal) {
-      this.$apply()
       wepy.showToast({
         title: '全部加载完了',
         icon: 'success',
@@ -70,8 +69,6 @@ export default class WalletDetail extends wepy.page {
   // 获取数据
   getData() {
     api.get(recordURL + 'queryBalanceSub?rdSession=' + this.$parent.token + '&start=' + this.pageNum + '&size=' + this.pageSize + '&sortStr=update_time&sortType=desc').then(({data}) => {
-      console.log(data.list)
-      console.log(data.totalRow)
       if (this.pagenum === 1) {
         this.recordList = data.list
         this.pagtotal = data.totalRow

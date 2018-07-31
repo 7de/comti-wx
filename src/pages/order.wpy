@@ -110,7 +110,6 @@ export default class Order extends wepy.page {
   allLower() {
     let _length = this.allData.length
     if (_length === this.allPagtotal) {
-      this.$apply()
       wepy.showToast({ // 如果全部加载完成了也弹一个框
         title: '全部加载完了',
         icon: 'success',
@@ -126,7 +125,6 @@ export default class Order extends wepy.page {
   // data 数据列表， pageNum 每页显示数，state 状态
   getData(data, pagenum, state, that) {
     api.get(orderURL + 'queryOrderNoListMobile?orderStatus=' + state + '&rdSession=' + that.$parent.token + '&pageNum=' + pagenum + '&pageSize=' + that.pageSize).then(res => {
-      console.log(res)
       if (pagenum === 1) {
         that.allData = res.data
         that.allPagtotal = res.dataCount
@@ -138,7 +136,7 @@ export default class Order extends wepy.page {
       this.timer = setTimeout(() => {
         that.loadingsubShow = false
         that.$apply()
-      }, 1000)
+      }, 500)
     })
   }
 }

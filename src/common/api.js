@@ -1,6 +1,4 @@
-/* import m_contacts from '../mocks/contact';
-import m_history from '../mocks/history';
-import m_reply from '../mocks/reply';*/
+
 import global from './global'
 
 import wepy from 'wepy'
@@ -8,9 +6,9 @@ import wepy from 'wepy'
 export default {
   apiData : {
     // 正式
-    // host: 'https://www.comtti.net/',
+    host: 'https://www.comtti.net/',
     // 测试
-    host: 'https://actor.comtti.net/',
+    // host: 'https://actor.comtti.net/',
     receiving: false, // 是否正在获取token
     token: '',
     userInfo: null,

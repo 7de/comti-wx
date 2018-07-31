@@ -104,6 +104,22 @@
   left: 0;
   right: 0;
 }
+.markermask{
+  height:16vh;
+  color: #444;
+  font-size:28rpx;
+  padding:0 30rpx 40rpx;
+  background-color: #fff;
+}
+.map-tag{
+  margin: 0 20rpx;
+  border-radius: 20px;
+  border-bottom-left-radius: 0;
+  &::after{
+    content:'';
+    border-width:0
+  }
+}
 </style>
 <template>
   <view class="zan-popup {{direction ? 'popup-example--' + direction + ' zan-popup--' + direction : ''}} {{ showPopup ? 'zan-popup--show' : ''}}">
@@ -121,10 +137,11 @@ export default class zanToast extends wepy.component {
     direction: {
       type: String,
       default: ''
+    },
+    showPopup: {
+      type: Boolean,
+      default: false
     }
-  }
-  data = {
-    showPopup: false
   }
   methods = {
     togglePopup() {
