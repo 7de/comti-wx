@@ -156,7 +156,6 @@ export default class Home extends wepy.page {
     } else {
       this.getLocation()
       console.log('没有位置')
-      console.log(this.$parent.globalData.longitude)
     }
   }
   onReady() {
@@ -189,7 +188,7 @@ export default class Home extends wepy.page {
     // 地图控件点击处理
     bindcontroltap(e) {
       switch (e.controlId) {
-        case 1: this.mapCtx.moveToLocation()
+        case 1: this.movetoPosition()
           break
         case 2: this.openCode()
           break
@@ -211,8 +210,8 @@ export default class Home extends wepy.page {
           this.currentMarkerAddr = _markers[v]['callout'].siteAddress
           this.polyline = [{
             points: [{ // 连线起点
-              longitude: this.data.longitude,
-              latitude: this.data.latitude
+              longitude: this.longitude,
+              latitude: this.latitude
             }, { // 连线终点(当前点击的标记)
               longitude: _markers[v].longitude,
               latitude: _markers[v].latitude
@@ -250,14 +249,7 @@ export default class Home extends wepy.page {
   }
   // 定位到本地坐标
   movetoPosition() {
-    // this.mapCtx = wepy.createMapContext('mapCon')
     this.mapCtx.moveToLocation()
-    this.mapCtx.getCenterLocation({
-      success: (res) => {
-        console.log('本地' + res.longitude)
-        console.log(res.latitude)
-      }
-    })
   }
   // 获取地图标记
   getMarkers() {

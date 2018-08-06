@@ -8,76 +8,11 @@ export default {
     // 正式
     host: 'https://www.comtti.net/',
     // 测试
-    // host: 'https://actor.comtti.net/',
+    // host: 'https://actor.comtti.net/pc/',
     receiving: false, // 是否正在获取token
     token: '',
     userInfo: null,
     code: null
-  },
-  _login() {
-    let {
-      code,
-      userInfo
-    } = this.$parent
-    return new Promise((resolve, reject) => {
-      if (code && userInfo){
-        resolve({
-          code,
-          userInfo
-        })
-      } else {
-        wepy.login({
-          success: res => {
-            this.$parent.code = res.code
-            wepy.showModal({
-              title: '提示',
-              content: '我们需要获得您的授权，才能进行下一步操作，请点击去授权',
-              showCancel: false,
-              confirmText: '去授权',
-              success: function(res) {
-                if (res.confirm) {
-                  wepy.reLaunch({
-                    url: './authorize'
-                  })
-                }
-              }
-            })
-          }
-        })
-      }
-    })
-  },
-  _getToken() {
-    const {
-      api,
-      token,
-      receiving
-    } = this.apiData
-    return new Promise((resolve,reject) => {
-      if (receiving) { // 请求中
-        console.log('token请求中,等待1s后重新发送新的请求')
-        setTimeout(() => {
-          resolve(this._getToken())
-        }, 1000)
-      } else if (token) { // 如果缓存有token，直接获取缓存中的token
-        resolve(token)
-      } else {
-        this.apiData.receiving = true
-        this._login()
-      }
-    })
-
-  },
-  _token(){
-      // let _keydata = null
-    return new Promise((resolve, reject) => {
-      wepy.getStorage({
-        key: 'token',
-        success: res => {
-          resolve(res.data)
-        }
-      })
-    })
   },
   _request(method, url, params, header = {}) {
     const {
@@ -109,12 +44,7 @@ export default {
               duration: 2000
             })
           } else if (data.code === -100) {
-            /* wepy.showToast({
-              title: '授权过期',
-              icon: 'none',
-              duration: 2000
-            }) */
-            wepy.reLaunch({
+            wepy.navigateTo({
               url: '/pages/authorize'
             })
           } else {

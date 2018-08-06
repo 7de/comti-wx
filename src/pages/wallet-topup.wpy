@@ -7,6 +7,11 @@
 .scan-subtitle-txt{
     line-height: 42px;
   }
+  .oth-input{
+    height: 32px;
+    line-height: 32px;
+    border:none;
+  }
 </style>
 
 <template>
@@ -29,6 +34,14 @@
         <view class="zan-panel-title">充值金额：</view>
         <view class="zan-panel">
           <zanSelect1 :items="items" :checkedValue.sync="checked_base" componentId="base"></zanSelect1>
+          <view class="zan-cell" style="padding-top:0;padding-bottom:0;padding-left:.5rem;" wx:if="{{othShow}}">
+            <view class="zan-cell__bd zan-clearfix" style="overflow:hidden;">
+              <view class="scan-subtitle zan-pull-left">
+                <view class="iconfont icon-money1 zan-font-20" style="color:#7fb80e;"></view>
+              </view>
+              <input class="zan-pull-left oth-input" type="digit" value="{{money_input}}" name="moneyinp" placeholder="自定义充值金额" bindblur="bindblur" focus="{{othShow}}"/>
+            </view>
+          </view>
         </view>
         <view class="page_spacing">
           <button class="zan-btn zan-btn--primary" style="margin-top:120rpx;" @tap="goTopup">马上充值</button>
@@ -63,20 +76,8 @@ export default class WalletTopup extends wepy.page {
         name: '充￥1000'
       },
       {
-        value: '800',
-        name: '充￥800'
-      },
-      {
-        value: '600',
-        name: '充￥600'
-      },
-      {
         value: '500',
         name: '充￥500'
-      },
-      {
-        value: '200',
-        name: '充￥200'
       },
       {
         value: '100',
@@ -91,20 +92,8 @@ export default class WalletTopup extends wepy.page {
         name: '充￥20'
       },
       {
-        value: '15',
-        name: '充￥15'
-      },
-      {
-        value: '10',
-        name: '充￥10'
-      },
-      {
-        value: '8',
-        name: '充￥8'
-      },
-      {
-        value: '5',
-        name: '充￥5'
+        value: 'oth',
+        name: '其他'
       }/* ,
       {
         value: '0.01',
@@ -114,7 +103,9 @@ export default class WalletTopup extends wepy.page {
     checked_base: -1,
     time_value: 0,
     value_txt: '',
-    account: '加载中...' // 账户余额
+    account: '--', // 账户余额
+    othShow: false,
+    money_input: ''
   }
   onLoad() {
   }
@@ -134,43 +125,14 @@ export default class WalletTopup extends wepy.page {
     // 马上充值
     goTopup() {
       if (!this.time_value) {
-        this.$invoke('zanToptips', 'showZanTopTips', { content: '请选择充值金额', options: 2000 })
+        this.showTopTips('请选择充值金额')
+      } else if (this.time_value === 'oth' && !this.money_input) {
+        this.showTopTips('请输入充值金额')
+      } else if (this.time_value === 'oth' && (this.money_input < 0.01)) {
+        this.showTopTips('请输入大于或等于0.01的金额')
+        this.money_input = ''
       } else {
-        wepy.showModal({
-          title: '提示',
-          content: '请确认是否充值？',
-          success: res => {
-            if (res.confirm) {
-              let Url = 'wxpay/wxpay/jsapi/pay?rdSession=' + this.$parent.token
-              api.post(Url, {
-                goodsId: parseInt(this.time_value), // 商品ID
-                goodsName: '充值' + this.time_value + '元', // 商品名称
-                totalfee: this.time_value * 100  // 充值金额 转为分为单位
-              }).then(res => {
-                console.log(res)
-                let _data = res.data
-                // 调用支付接口
-                wepy.requestPayment({
-                  'timeStamp': _data.timeStamp,
-                  'nonceStr': _data.nonceStr,
-                  'package': _data.package,
-                  'signType': 'MD5',
-                  'paySign': _data.paySign,
-                  'success': function(res) {
-                    console.log(res)
-                    wepy.navigateBack({
-                      delta: 1
-                    })
-                  },
-                  'fail': err => {
-                    this.$invoke('zanToptips', 'showZanTopTips', { content: '充值失败，请重新充值', options: 2000 })
-                    console.log('失败:' + err)
-                  }
-                })
-              })
-            }
-          }
-        })
+        this.topup()
       }
     }
   }
@@ -181,9 +143,61 @@ export default class WalletTopup extends wepy.page {
       // console.log(event)
       this[`checked_${componentId}`] = value
       this.time_value = value
-      this.$apply()
-      console.log(this.time_value)
+      if (value === 'oth') {
+        this.othShow = true
+      } else {
+        this.othShow = false
+        this.money_input = ''
+      }
     }
+  }
+  // input失去焦距
+  bindblur(e) {
+    let _value = parseFloat(e.detail.value)
+    this.money_input = _value
+    console.log(this.money_input)
+  }
+  // 顶部提示
+  showTopTips(content) {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
+  }
+  // 充值
+  topup() {
+    const _money = this.money_input ? this.money_input : this.time_value
+    wepy.showModal({
+      title: '温馨提示',
+      content: `请确认是否充值${_money}元？`,
+      success: res => {
+        if (res.confirm) {
+          let Url = 'wxpay/wxpay/jsapi/pay?rdSession=' + this.$parent.token
+          api.post(Url, {
+            goodsId: parseInt(this.time_value), // 商品ID
+            goodsName: '充值' + _money + '元', // 商品名称
+            totalfee: _money * 100  // 充值金额 转为分为单位
+          }).then(res => {
+            console.log(res)
+            let _data = res.data
+            // 调用支付接口
+            wepy.requestPayment({
+              'timeStamp': _data.timeStamp,
+              'nonceStr': _data.nonceStr,
+              'package': _data.package,
+              'signType': 'MD5',
+              'paySign': _data.paySign,
+              'success': function(res) {
+                wepy.navigateBack({
+                  delta: 1
+                })
+              },
+              'fail': err => {
+                this.showTopTips('充值失败，请稍后再试')
+                console.log(err.errMsg)
+              }
+            })
+          })
+        }
+      }
+    })
   }
 }
 </script>
