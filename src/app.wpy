@@ -80,26 +80,36 @@ export default class extends wepy.app {
   config = {
     pages: [
       'pages/home',
-      'pages/personal',
-      'pages/order',
-      'pages/wallet',
-      'pages/wallet-detail',
-      'pages/wallet-topup',
-      'pages/wallet-topup-record',
-      'pages/message',
-      'pages/setting',
-      'pages/help',
-      'pages/about',
       'pages/scancode/index',
-      'pages/charging',
-      'pages/authorize',
-      'pages/setting-user'
+      'pages/authorize'
     ],
     window: {
       backgroundTextStyle: 'light',
       navigationBarTextStyle: 'white',
       navigationBarBackgroundColor: '#1AAD19',
       navigationBarTitleText: '康体佳充电'
+    },
+    subPackages: [
+      {
+        root: 'pages/subpages/',
+        pages: [
+          'pages/personal',
+          'pages/order',
+          'pages/wallet',
+          'pages/wallet-detail',
+          'pages/wallet-topup',
+          'pages/wallet-topup-record',
+          'pages/message',
+          'pages/setting',
+          'pages/help',
+          'pages/about',
+          'pages/charging',
+          'pages/setting-user'
+        ]
+      }
+    ],
+    networkTimeout: {
+      request: 10000
     }
   }
   globalData = {

@@ -52,12 +52,12 @@
 </template>
 <script>
 import wepy from 'wepy'
-import zanSelect from '../components/zan-select'
-import zanToptips from '../components/zan-toptips'
-import Loading from '../components/loading'
-import api from '../common/api'
+import zanSelect from '../../../components/zan-select'
+import zanToptips from '../../../components/zan-toptips'
+import Loading from '../../../components/loading'
+import api from '../../../common/api'
 
-const URL = 'wallet/customWallet/queryBalanceBySession'
+// const URL = 'wallet/customWallet/queryBalanceBySession'
 
 export default class WalletTopup extends wepy.page {
   config = {
@@ -69,7 +69,7 @@ export default class WalletTopup extends wepy.page {
     Loading
   }
   data = {
-    showLoading: true,
+    showLoading: false,
     items: [
       {
         value: '1000',
@@ -107,10 +107,12 @@ export default class WalletTopup extends wepy.page {
     othShow: false,
     money_input: ''
   }
-  onLoad() {
+  onLoad(option) {
+    this.account = option.account
+    this.$apply()
   }
   onShow() {
-    wepy.showLoading({
+    /* wepy.showLoading({
       content: '余额查询中...'
     })
     // 账户余额查询
@@ -119,7 +121,7 @@ export default class WalletTopup extends wepy.page {
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.showLoading = false
       this.$apply()
-    })
+    }) */
   }
   methods = {
     // 马上充值
@@ -167,6 +169,7 @@ export default class WalletTopup extends wepy.page {
     wepy.showModal({
       title: '温馨提示',
       content: `请确认是否充值${_money}元？`,
+      confirmText: '马上充值',
       success: res => {
         if (res.confirm) {
           let Url = 'wxpay/wxpay/jsapi/pay?rdSession=' + this.$parent.token

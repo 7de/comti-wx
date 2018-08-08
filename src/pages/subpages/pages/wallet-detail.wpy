@@ -23,8 +23,8 @@
 </template>
 <script>
 import wepy from 'wepy'
-import zanLoadmore from '../components/zan-loadmore'
-import api from '../common/api'
+import zanLoadmore from '../../../components/zan-loadmore'
+import api from '../../../common/api'
 const recordURL = 'order/refundOrder/'
 export default class WalletDetail extends wepy.page {
   config = {

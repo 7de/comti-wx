@@ -43,7 +43,7 @@
 </style>
 <template>
   <view class="container scan-box">
-    <block wx:if="{{loading}}">
+    <block wx:if="{{showLoading}}">
       <Loading />
     </block>
     <block wx:else>
@@ -79,7 +79,7 @@
             <text class="zan-pull-left zan-c-red scan-subtitle-txt zan-ellipsis zan-font-26 account-width">￥{{account}}</text>  
           </view>
           <view class="zan-cell__ft scan-btn">
-            <navigator  url="../wallet-topup">
+            <navigator  url="../wallet-topup?account={{account}}">
               <button type="button" style="overflow:hidden;font-size:12px;">
                 <view class="iconfont icon-signboard zan-font-18 zan-pull-left"></view>
                 <text class="zan-pull-left">余额充值</text>
@@ -117,7 +117,7 @@ export default class ScanIndex extends wepy.page {
     Loading
   }
   data = {
-    loading: false, // 暂时不加loading
+    showLoading: true,
     items: [
       {
         value: '120',
@@ -156,7 +156,7 @@ export default class ScanIndex extends wepy.page {
     code: null, // 插座ID
     input_focus: false,
     time_value: 0,
-    account: '加载中...',
+    account: '--',
     charger_mode: null, // 充电模式
     changeFee: '0.00', // 充电费
     serviceFee: '0.00', // 服务费
@@ -176,18 +176,21 @@ export default class ScanIndex extends wepy.page {
     }
   }
   onShow() {
+    setTimeout(() => {
+      this.showLoading = false
+      this.$apply()
+    }, 1500)
     this._token = this.$parent.token
     this.$apply()
-    console.log('扫描' + this._token)
     if (this._token) {
       // 账户余额查询
-      wepy.showLoading({
+      /* wepy.showLoading({
         title: '余额查询...',
         mask: true
-      })
+      }) */
       api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
         wepy.hideLoading()
-        this.loading = false
+        this.showLoading = false
         this.$apply()
         if (res.code === 0) {
           this.account = parseFloat(api.fotmatMoney(res.data))
@@ -201,7 +204,6 @@ export default class ScanIndex extends wepy.page {
       wepy.navigateTo({
         url: '/pages/authorize'
       })
-      // page.goauthorize()
     }
   }
   methods = {
@@ -292,8 +294,12 @@ export default class ScanIndex extends wepy.page {
       url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
       method: 'GET',
       success: res => {
+        console.log(res)
         wepy.hideLoading()
         if (res.data.code === 0) {
+        } else if (res.data.code === -50) {
+          this.timeoutEqui(res.data.msg)
+          console.log('超时')
         } else {
           let _msg = res.data.msg
           wepy.showModal({
@@ -329,6 +335,26 @@ export default class ScanIndex extends wepy.page {
       if (this.totalFee > parseFloat(this.account)) {
         this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值', options: 2000 })
       }
+    })
+  }
+  // 设备超时
+  timeoutEqui(msg) {
+    wepy.showModal({
+      title: '温馨提示',
+      content: msg,
+      showCancel: false,
+      confirmText: '重试',
+      success: function(res) {
+        if (res.confirm) {
+          this.checkEqui()
+        }
+      }
+    })
+  }
+  // 跳转在线充值
+  goTopup() {
+    wepy.navigateTo({
+      url: '/page/wallet-topup/wallet-topup?account=' + this.account
     })
   }
 }

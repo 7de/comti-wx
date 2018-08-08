@@ -45,7 +45,7 @@
       <block wx:if="{{showLoading}}">
         <Loading />
       </block>
-      <block wx:else>
+      <block wx:else >
         <view class="margin-top-30 zan-center" style="height:30px; padding:10px;">
           <progress percent="{{charg_longtime}}" active-mode="forwards" show-info active></progress>
         </view>
@@ -69,21 +69,14 @@
           </view>
           <view class="margin-top-30"><button class="zan-btn zan-btn--primary zan-btn--plain" @tap="goClose">结束充电</button></view>
         </view>
-        <!-- <view class="margin-top-30 zan-center" style="height:30px; padding:10px;">
-          <progress percent="100" show-info></progress>
-        </view>
-        <view class="zan-font-12 zan-center" style="color:#999">充电已结束，马上来一场说走就走的旅行吧。</view>
-        <view style="margin:60rpx 40rpx 20rpx">
-          <navigator open-type="reLaunch" url="/pages/home"  class="zan-btn zan-btn--primary">返回首页</navigator>
-        </view> -->
       </block>
     </view>
 </template>
 <script>
 import wepy from 'wepy'
-import api from '../common/api'
-import page from '../common/page'
-import Loading from '../components/loading'
+import api from '../../../common/api'
+import page from '../../../common/page'
+import Loading from '../../../components/loading'
 const orderURL = 'server/'
 
 export default class Charging extends wepy.page {
@@ -110,7 +103,11 @@ export default class Charging extends wepy.page {
   components = {
     Loading
   }
-  onLoad (option) {
+  onLoad(option) {
+    setTimeout(() => {
+      this.showLoading = false
+      this.$apply()
+    }, 2000)
     this.order_no = option.orderNo
     this.time = option.time
     this.equip_no = option.equipNo

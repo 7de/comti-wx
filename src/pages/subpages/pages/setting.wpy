@@ -14,7 +14,7 @@
 </template>
 <script>
 import wepy from 'wepy'
-import Footer from '../components/footer'
+import Footer from '../../../components/footer'
 export default class Message extends wepy.page {
   config = {
     'navigationBarTitleText': '系统设置'

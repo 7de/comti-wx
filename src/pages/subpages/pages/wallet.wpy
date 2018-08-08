@@ -27,15 +27,15 @@
         </view>
         <view class="zan-c-gray-dark zan-font-14">我的余额</view>
         <view class="money" style="color:#f15b6c">￥<text class="">{{account}}</text></view>
-        <navigator class="zan-btn zan-btn--primary" style="margin-top:120rpx;" url="./wallet-topup">马上充值</navigator>
+        <navigator class="zan-btn zan-btn--primary" style="margin-top:120rpx;" url="./wallet-topup?account={{account}}">马上充值</navigator>
       </view>
     </view>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
-import Loading from '../components/loading'
-import api from '../common/api'
+import Loading from '../../../components/loading'
+import api from '../../../common/api'
 
 const URL = 'wallet/customWallet/queryBalanceBySession'
 
@@ -47,10 +47,16 @@ export default class Wallet extends wepy.page {
     Loading
   }
   data = {
-    account: '加载中...',
+    account: '--',
     showLoading: true
   }
   events = {
+  }
+  onLoad() {
+    setTimeout(() => {
+      this.showLoading = false
+      this.$apply()
+    }, 1000)
   }
   onShow() {
     // 账户余额查询

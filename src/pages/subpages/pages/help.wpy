@@ -31,7 +31,7 @@
 </template>
 <script>
 import wepy from 'wepy'
-import zanField from '../components/zan-field'
+import zanField from '../../../components/zan-field'
 export default class Message extends wepy.page {
   config = {
     'navigationBarTitleText': '帮助反馈'

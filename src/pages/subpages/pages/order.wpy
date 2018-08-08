@@ -23,10 +23,10 @@
 <script>
 import wepy from 'wepy'
 
-import zanTab from '../components/zan-tab'
-import zanLoadmore from '../components/zan-loadmore'
-import Card from '../components/order-card'
-import api from '../common/api'
+import zanTab from '../../../components/zan-tab'
+import zanLoadmore from '../../../components/zan-loadmore'
+import Card from '../../../components/order-card'
+import api from '../../../common/api'
 
 const orderURL = 'server/' // 订单列表
 

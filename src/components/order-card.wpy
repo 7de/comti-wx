@@ -14,7 +14,7 @@
           <view class="zan-cell zan-font-12">
             <view class="zan-cell__bd zan-c-gray-dark">订单状态：{{item.orderStatus===1?'充电完成':item.orderStatus===2?'已关闭':item.orderStatus===3?'全部':'充电中'}}</view>
             <view class="zan-cell__ft" wx:if="{{item.orderStatus===0}}">
-              <navigator class="zan-btn zan-btn--small zan-btn--primary" url="/pages/charging?orderNo={{item.orderNo}}&time={{item.actPeriod/60}}">查看充电详情</navigator>
+              <navigator class="zan-btn zan-btn--small zan-btn--primary" url="/pages/subpages/pages/charging?orderNo={{item.orderNo}}&time={{item.actPeriod/60}}">查看充电详情</navigator>
             </view>
             <view wx:else>
               <view class="zan-cell__ft">充电时长：<text class="zan-c-green zan-font-16">{{item.actChargerTime}}</text>分钟</view>

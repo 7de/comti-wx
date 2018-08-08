@@ -15,7 +15,7 @@
 <template>
   <view class="container">
     <view class="logo-hd zan-center">
-      <image src="../images/logo.png" mode="aspectFit" class="logo-img" />
+      <image src="../../../images/logo.png" mode="aspectFit" class="logo-img" />
     </view>
     <view class="logo-bd">
       <view class="zan-font-12 zan-c-gray-darker zan-left">
@@ -29,7 +29,7 @@
 </template>
 <script>
 import wepy from 'wepy'
-import Footer from '../components/footer'
+import Footer from '../../../components/footer'
 export default class Message extends wepy.page {
   config = {
     'navigationBarTitleText': '关于我们'

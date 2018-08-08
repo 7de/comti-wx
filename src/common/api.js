@@ -6,9 +6,9 @@ import wepy from 'wepy'
 export default {
   apiData : {
     // 正式
-    host: 'https://www.comtti.net/',
+    // host: 'https://www.comtti.net/',
     // 测试
-    // host: 'https://actor.comtti.net/pc/',
+    host: 'https://actor.comtti.net/pc/',
     receiving: false, // 是否正在获取token
     token: '',
     userInfo: null,
@@ -30,6 +30,7 @@ export default {
           const {
             data
           } = res
+          wepy.hideLoading()
           if (data.code === 500 || data.status === 500) {
             wepy.showToast({
               title: '服务器错误，请联系管理员',
@@ -51,8 +52,20 @@ export default {
             resolve(data)
           }
         },
-        fail: err => {
-          console.log('请求失败：' + err)
+        fail: res => {
+          wepy.hideLoading()
+          console.log(res.data.error)
+          wx.showModal({
+            title: '错误提示',
+            content: res.data.error + ' ' + res.status,
+            showCancel: false,
+            confirmText: '我知道了',
+            success: (res) => {
+              if (res.confirm) {
+                console.log('用户点击确定')
+              }
+            }
+          })
         }
       })
     })
@@ -74,11 +87,9 @@ export default {
   },
   // 毫秒转换成时分秒
   formatDuring (mss) {
-    // var days = parseInt(mss / (1000 * 60 * 60 * 24));
     var hours = parseInt((mss % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     var minutes = parseInt((mss % (1000 * 60 * 60)) / (1000 * 60));
     var seconds = parseInt((mss % (1000 * 60)) / 1000);
-    // return days + " : " + hours + " : " + minutes + " : " + seconds;
     return  (hours < 10 ? '0' + hours : hours) + " : " + (minutes < 10 ? '0' + minutes : minutes) + " : " + (seconds < 10 ? '0' + seconds : seconds);
   },
   // 毫秒转分钟
@@ -91,12 +102,12 @@ export default {
         fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length));
     }
     let o = {
-        'M+': date.getMonth() + 1,
-        'd+': date.getDate(),
-        'h+': date.getHours(),
-        'm+': date.getMinutes(),
-        's+': date.getSeconds()
-    };
+      'M+': date.getMonth() + 1,
+      'd+': date.getDate(),
+      'h+': date.getHours(),
+      'm+': date.getMinutes(),
+      's+': date.getSeconds()
+    }
     for (let k in o) {
         if (new RegExp(`(${k})`).test(fmt)) {
             let str = o[k] + '';

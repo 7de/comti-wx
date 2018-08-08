@@ -43,53 +43,59 @@
 </style>
 <template>
   <view class="container personal">
-    <view class="info item">
-      <view class="me_icon round">
-        <view class="img-mask"></view>
-        <open-data type="userAvatarUrl"></open-data>
-      </view>
-      <view class="wechat_info">
-        <view class="wechat_name">昵称：<open-data type="userNickName" lang="zh_CN"></open-data></view>
-        <view class="wechat_id">城市：<open-data type="userCity" lang="zh_CN"></open-data></view>
-      </view>
-    </view>
-    <view class="page_spacing">
-      <view class="zan-panel">
-        <navigator class="zan-cell zan-cell--access" url="./order?selectedId=3">
-          <view class="zan-cell__bd">我的订单</view>
-          <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">查看更多订单</view>
-        </navigator>
-        <view class="zan-cell">
-          <navigator class="zan-col zan-col-8" url="./order?selectedId=0">
-            <view class="iconfont icon-electrical"></view>
-            <text class="icon-classname">充电中</text>
-          </navigator>
-          <navigator class="zan-col zan-col-8" url="./order?selectedId=1">
-            <view class="iconfont icon-trust"></view>
-            <text class="icon-classname">充电完成</text>
-          </navigator>
-          <navigator class="zan-col zan-col-8" url="./order?selectedId=2">
-            <view class="iconfont icon-history"></view>
-            <text class="icon-classname">已关闭</text>
-          </navigator>
+    <block wx:if="{{showLoading}}">
+      <Loading />
+    </block>
+    <block wx:else>
+      <view class="info item">
+        <view class="me_icon round">
+          <view class="img-mask"></view>
+          <open-data type="userAvatarUrl"></open-data>
+        </view>
+        <view class="wechat_info">
+          <view class="wechat_name"><text class="zan-c-gray-darker">昵称：</text><open-data type="userNickName" lang="zh_CN"></open-data></view>
+          <view class="wechat_id"><text class="zan-c-gray-darker">城市：</text><open-data type="userCity" lang="zh_CN"></open-data></view>
         </view>
       </view>
-      <order :list="walletData"/>
-      <wallet :list="settingData" />
-      <view class="zan-panel">
-        <view class="zan-cell" @tap="clearStorageSyn">
-          <view class="zan-cell__icon iconfont icon-remind" style="color:#38f;"></view>
-          <view class="zan-cell__bd">清除本地缓存</view>
+      <view class="page_spacing">
+        <view class="zan-panel">
+          <navigator class="zan-cell zan-cell--access" url="./order?selectedId=3">
+            <view class="zan-cell__bd">我的订单</view>
+            <view class="zan-cell__ft zan-font-12 zan-c-gray-dark">查看更多订单</view>
+          </navigator>
+          <view class="zan-cell">
+            <navigator class="zan-col zan-col-8" url="./order?selectedId=0">
+              <view class="iconfont icon-electrical"></view>
+              <text class="icon-classname">充电中</text>
+            </navigator>
+            <navigator class="zan-col zan-col-8" url="./order?selectedId=1">
+              <view class="iconfont icon-trust"></view>
+              <text class="icon-classname">充电完成</text>
+            </navigator>
+            <navigator class="zan-col zan-col-8" url="./order?selectedId=2">
+              <view class="iconfont icon-history"></view>
+              <text class="icon-classname">已关闭</text>
+            </navigator>
+          </view>
+        </view>
+        <order :list="walletData"/>
+        <wallet :list="settingData" />
+        <view class="zan-panel">
+          <view class="zan-cell" @tap="clearStorageSyn">
+            <view class="zan-cell__icon iconfont icon-remind" style="color:#38f;"></view>
+            <view class="zan-cell__bd">清除本地缓存</view>
+          </view>
         </view>
       </view>
-    </view>
+    </block>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
 
-import List from '../components/comlist'
-import page from '../common/page'
+import List from '../../../components/comlist'
+import Loading from '../../../components/loading'
+import page from '../../../common/page'
 
 export default class Personal extends wepy.page {
   config = {
@@ -98,7 +104,8 @@ export default class Personal extends wepy.page {
   components = {
     order: List,
     wallet: List,
-    setting: List
+    setting: List,
+    Loading
   }
   data = {
     walletData: [
@@ -119,27 +126,26 @@ export default class Personal extends wepy.page {
       }
     ],
     settingData: [
-      /* {
-        iconfont: 'email',
-        title: '系统消息',
-        path: './message'
-      }, */
       {
         iconfont: 'set',
         title: '系统设置',
         path: './setting'
       },
-      /* {
-        iconfont: 'remind',
-        title: '帮助反馈',
-        path: './help'
-      }, */
       {
         iconfont: 'information',
         title: '关于我们',
         path: './about'
       }
-    ]
+    ],
+    showLoading: true
+  }
+  onLoad() {
+  }
+  onShow() {
+    setTimeout(() => {
+      this.showLoading = false
+      this.$apply()
+    }, 1000)
   }
   methods = {
     clearStorageSyn() {
