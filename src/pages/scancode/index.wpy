@@ -10,13 +10,19 @@
     font-size: 40rpx;
   }
   .scan-subtitle{
-    width: 130rpx;
+    width: 120rpx;
     height:28px;
     line-height: 28px;
     text-align: center;
   }
   .scan-subtitle-txt{
     line-height: 28px;
+  }
+  .scan-input{
+    width: 80%;
+    height:28px;
+    font-size:16px;
+    font-weight:bold
   }
   .scan-cell{
     padding-top:10px;
@@ -36,6 +42,11 @@
       }
     }
   }
+.scan-btn button.zan-btn--disabled{
+  background-color: #f8f8f8;
+  border-color:#e5e5e5;
+  color:#999;
+}
   .account-width{
     width: 90%;
   }
@@ -53,7 +64,7 @@
             <view class="scan-subtitle zan-pull-left">
               <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
             </view>
-            <view class="zan-pull-left"><input type="number" class="zan-field__input" style="height:28px;font-size:16px;font-weight:bold" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/></view>
+            <input type="number" class="zan-pull-left zan-field__input scan-input" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/>
           </view>
         </view>
       </view>
@@ -79,12 +90,10 @@
             <text class="zan-pull-left zan-c-red scan-subtitle-txt zan-ellipsis zan-font-26 account-width">￥{{account}}</text>  
           </view>
           <view class="zan-cell__ft scan-btn">
-            <navigator  url="../wallet-topup?account={{account}}">
-              <button type="button" style="overflow:hidden;font-size:12px;">
-                <view class="iconfont icon-signboard zan-font-18 zan-pull-left"></view>
-                <text class="zan-pull-left">余额充值</text>
-              </button>
-            </navigator>
+            <button type="button" style="overflow:hidden;font-size:12px;" class="{{showTopup?'zan-btn--disabled':''}}" disabled="{{showTopup}}" @tap="goTopup">
+              <view class="iconfont icon-signboard zan-font-18 zan-pull-left"></view>
+              <text class="zan-pull-left">余额充值</text>
+            </button>
           </view>
         </view>
       </view>
@@ -117,7 +126,8 @@ export default class ScanIndex extends wepy.page {
     Loading
   }
   data = {
-    showLoading: true,
+    showLoading: false,
+    showTopup: true,
     items: [
       {
         value: '120',
@@ -156,7 +166,7 @@ export default class ScanIndex extends wepy.page {
     code: null, // 插座ID
     input_focus: false,
     time_value: 0,
-    account: '--',
+    account: '加载中...',
     charger_mode: null, // 充电模式
     changeFee: '0.00', // 充电费
     serviceFee: '0.00', // 服务费
@@ -164,6 +174,10 @@ export default class ScanIndex extends wepy.page {
     _token: null
   }
   onLoad(option) {
+    /* setTimeout(() => {
+      this.showLoading = false
+      this.$apply()
+    }, 1500) */
     // 页面传值
     if (option.num) {
       this.code = option.num
@@ -176,23 +190,14 @@ export default class ScanIndex extends wepy.page {
     }
   }
   onShow() {
-    setTimeout(() => {
-      this.showLoading = false
-      this.$apply()
-    }, 1500)
     this._token = this.$parent.token
     this.$apply()
     if (this._token) {
-      // 账户余额查询
-      /* wepy.showLoading({
-        title: '余额查询...',
-        mask: true
-      }) */
       api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
-        wepy.hideLoading()
         this.showLoading = false
         this.$apply()
         if (res.code === 0) {
+          this.showTopup = false
           this.account = parseFloat(api.fotmatMoney(res.data))
           this.$apply()
         }
@@ -245,8 +250,8 @@ export default class ScanIndex extends wepy.page {
               }).then(res => {
                 wepy.hideLoading()
                 if (res.code === 0) {
-                  wepy.reLaunch({
-                    url: '../charging?orderNo=' + res.data + '&time=' + _this.time_value + '&equipNo=' + _this.code
+                  wepy.navigateTo({
+                    url: '/pages/subpages/pages/charging?orderNo=' + res.data + '&time=' + _this.time_value + '&equipNo=' + _this.code
                   })
                 }
               })
@@ -313,6 +318,12 @@ export default class ScanIndex extends wepy.page {
             }
           })
         }
+      },
+      fail: ({data}) => {
+        console.log(data)
+        if (data.code === -50) {
+          this.timeoutEqui(data.message)
+        }
       }
     })
   }
@@ -354,7 +365,7 @@ export default class ScanIndex extends wepy.page {
   // 跳转在线充值
   goTopup() {
     wepy.navigateTo({
-      url: '/page/wallet-topup/wallet-topup?account=' + this.account
+      url: '/pages/subpages/pages/wallet-topup?account=' + this.account
     })
   }
 }

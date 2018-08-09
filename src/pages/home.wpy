@@ -88,7 +88,7 @@ $activecolor: #1AAD19;
     </view>
     <view class="tab_con">
       <view class="con" style="height:{{showMap?71:93}}vh">
-        <map id="mapCon" class="" latitude="{{latitude}}" longitude="{{longitude}}" markers="{{markers}}" controls="{{controls}}" polyline="{{polyline}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location></map>
+        <map id="mapCon" class="" latitude="{{latitude}}" longitude="{{longitude}}" markers="{{markers}}" controls="{{controls}}" bindcontroltap="bindcontroltap" bindmarkertap="bindmarkertap" show-location></map>
         <zanPopup direction="bottom" :showPopup.sync="showMap">
           <view class="markermask">
             <view class="zan-font-16">
@@ -143,7 +143,6 @@ export default class Home extends wepy.page {
     currentMarkersLati: 0,
     currentMarkerName: '',
     currentMarkerAddr: '',
-    polyline: [],
     oldMarkerID: null,
     markersinfo: {},
     showMap: false,
@@ -162,7 +161,6 @@ export default class Home extends wepy.page {
   onReady() {
     this.iniMap()
     this.movetoPosition()
-    this.getMapLocation()
     this.getMarkers()
     this.mapControl()
   }
@@ -210,19 +208,6 @@ export default class Home extends wepy.page {
           this.currentMarkersLati = _markers[v].latitude
           this.currentMarkerName = _markers[v]['callout'].siteName
           this.currentMarkerAddr = _markers[v]['callout'].siteAddress
-          this.polyline = [{
-            points: [{ // 连线起点
-              longitude: this.longitude,
-              latitude: this.latitude
-            }, { // 连线终点(当前点击的标记)
-              longitude: _markers[v].longitude,
-              latitude: _markers[v].latitude
-            }],
-            color: '#1AAD19', // 连线颜色
-            width: 3, // 连线宽度
-            dottedLine: true, // 虚线
-            arrowLine: true
-          }]
         }
       }
       if (!this.showMap && this.oldMarkerID !== markerId) {
@@ -252,18 +237,6 @@ export default class Home extends wepy.page {
   // 定位到本地坐标
   movetoPosition() {
     this.mapCtx.moveToLocation()
-  }
-  // 获取当前地图中心经纬度
-  getMapLocation () {
-    this.mapCtx.getCenterLocation({
-      success: (res) => {
-        console.log('地图' + res.longitude)
-        console.log('地图' + res.latitude)
-        this.longitude = res.longitude
-        this.latitude = res.latitude
-        this.$apply()
-      }
-    })
   }
   // 获取地图标记
   getMarkers() {
@@ -350,11 +323,9 @@ export default class Home extends wepy.page {
       success: (res) => {
         let latitude = res.latitude
         let longitude = res.longitude
-        console.log(longitude)
-        console.log(latitude)
-        /* this.longitude = longitude
+        this.longitude = longitude
         this.latitude = latitude
-        this.$parent.globalData.longitude = longitude
+        /* this.$parent.globalData.longitude = longitude
         this.$parent.globalData.latitude = latitude
         this.$apply() */
       },

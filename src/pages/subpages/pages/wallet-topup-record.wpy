@@ -51,15 +51,10 @@ export default class WalletTopupRecord extends wepy.page {
     this.getData()
   }
   onShow() {
-    setTimeout(() => {
-      this.loadingShow = false
-      this.$apply()
-    }, 2000)
   }
   lower() {
     let _length = this.recordList.length
     if (_length === this.pagtotal) {
-      this.$apply()
       wepy.showToast({
         title: '全部加载完了',
         icon: 'success',

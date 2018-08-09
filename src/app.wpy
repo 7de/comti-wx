@@ -1,5 +1,5 @@
 <style lang="scss">
-@import "./assets/icon/icon_font.scss";
+@import "./assets/icon/font.scss";
 @import "./zanui/helper.scss";
 @import "./zanui/panel.scss";
 @import "./zanui/cell.scss";
@@ -68,14 +68,19 @@ page{
 .padding-bottom-30{
   padding-bottom: 30rpx;
 }
+.display-none {
+  display: none;
+}
+.display-show {
+  display: block;
+}
 
 </style>
 <script>
 import wepy from 'wepy'
 import 'wepy-async-function'
-import api from './common/api'
 import page from './common/page'
-const URL = 'platform/platform/customer/getCustomerByKey'
+
 export default class extends wepy.app {
   config = {
     pages: [
@@ -115,7 +120,7 @@ export default class extends wepy.app {
   globalData = {
     receiving: false,
     token: '',
-    userInfo: null,
+    userInfo: {},
     code: null,
     longitude: 0,
     latitude: 0
@@ -152,19 +157,7 @@ export default class extends wepy.app {
   onShow () {
     try {
       this.token = this.token ? this.token : wepy.getStorageSync('token_r')
-      if (this.token) {
-        console.log('token主页:' + this.token)
-        // 判断token是否有效
-        api.get(URL + '?rdSession=' + this.token).then(res => {
-          // console.log(res)
-          if (res.code === 0) {
-            if (!this.longitude) {
-              this.getLocation()
-            }
-          }
-        })
-      } else {
-        console.log('主页没token授权')
+      if (!this.token) {
         page.goauthorize()
       }
     } catch (e) {
@@ -179,58 +172,6 @@ export default class extends wepy.app {
         }
       })
     }
-  }
-  // 获取地理位置
-  getLocation() {
-    wepy.getLocation({
-      type: 'gcj02',
-      success: (res) => {
-        let latitude = res.latitude
-        let longitude = res.longitude
-        this.globalData.longitude = longitude
-        this.globalData.latitude = latitude
-      },
-      fail: (res) => {
-        this.getScopeLocation()
-      }
-    })
-  }
-  // 是否授权当前位置
-  getScopeLocation() {
-    wepy.getSetting({
-      success: (res) => {
-        if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
-          wepy.showModal({
-            title: '是否授权当前位置',
-            content: '需要获取您的地理位置，否则地图信息可能会有误！',
-            success: (res) => {
-              if (res.confirm) {
-                wepy.openSetting({
-                  success: (data) => {
-                    if (data.authSetting['scope.userLocation'] === true) {
-                      wepy.showToast({
-                        title: '授权成功',
-                        icon: 'success',
-                        duration: 1000
-                      })
-                      wepy.navigateBack({
-                        delta: 2
-                      })
-                    } else {
-                      wepy.showToast({
-                        title: '授权失败',
-                        icon: 'none',
-                        duration: 2000
-                      })
-                    }
-                  }
-                })
-              }
-            }
-          })
-        }
-      }
-    })
   }
   constructor () {
     super()

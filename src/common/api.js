@@ -54,18 +54,29 @@ export default {
         },
         fail: res => {
           wepy.hideLoading()
-          console.log(res.data.error)
-          wx.showModal({
-            title: '错误提示',
-            content: res.data.error + ' ' + res.status,
-            showCancel: false,
-            confirmText: '我知道了',
-            success: (res) => {
-              if (res.confirm) {
-                console.log('用户点击确定')
+          console.log(res)
+          if (res.errMsg) {
+            wx.showModal({
+              title: '错误提示',
+              content: res.errMsg,
+              showCancel: false,
+              confirmText: '我知道了',
+              success: (res) => {
               }
-            }
-          })
+            })
+          } else {
+            wx.showModal({
+              title: '错误提示',
+              content: res.data.msg + ' ' + res.status,
+              showCancel: false,
+              confirmText: '我知道了',
+              success: (res) => {
+                if (res.confirm) {
+                  console.log('用户点击')
+                }
+              }
+            })
+          }
         }
       })
     })

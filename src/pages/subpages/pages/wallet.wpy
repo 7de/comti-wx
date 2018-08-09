@@ -20,14 +20,14 @@
     <block wx:if="{{showLoading}}">
       <Loading />
     </block>
-    <view class="page_spacing" wx:else>
+    <view class="page_spacing display-none" style="{{showLoading?'':'display:block'}}" wx:else>
       <view class="zan-panel zan-panel--without-border zan-center">
         <view class="wallet-title">
             <view class="iconfont icon-user-menu-money"></view>
         </view>
         <view class="zan-c-gray-dark zan-font-14">我的余额</view>
         <view class="money" style="color:#f15b6c">￥<text class="">{{account}}</text></view>
-        <navigator class="zan-btn zan-btn--primary" style="margin-top:120rpx;" url="./wallet-topup?account={{account}}">马上充值</navigator>
+        <button class="zan-btn zan-btn--primary {{showTopup?'zan-btn--disabled':''}}" style="margin-top:120rpx;" disabled="{{showTopup}}" @tap="goTopup">马上充值</button>
       </view>
     </view>
   </view>
@@ -48,22 +48,29 @@ export default class Wallet extends wepy.page {
   }
   data = {
     account: '--',
-    showLoading: true
+    showLoading: true,
+    showTopup: true
   }
   events = {
   }
   onLoad() {
-    setTimeout(() => {
+    /* setTimeout(() => {
       this.showLoading = false
       this.$apply()
-    }, 1000)
+    }, 10000) */
   }
   onShow() {
     // 账户余额查询
     api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.showLoading = false
+      this.showTopup = false
       this.$apply()
+    })
+  }
+  goTopup() {
+    wepy.navigateTo({
+      url: '/pages/subpages/pages/wallet-topup?account=' + this.account
     })
   }
 }

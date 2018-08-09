@@ -15,6 +15,9 @@
                     height: 130rpx;
                     position: absolute;
                     margin-left: 10rpx;
+                    image{
+                      border-radius: 50%;
+                    }
                 }
                 .wechat_info {
                     padding-left: 180rpx;
@@ -46,15 +49,14 @@
     <block wx:if="{{showLoading}}">
       <Loading />
     </block>
-    <block wx:else>
+    <view class="display-none" style="{{showLoading?'':'display:block'}}" wx:else>
       <view class="info item">
-        <view class="me_icon round">
-          <view class="img-mask"></view>
-          <open-data type="userAvatarUrl"></open-data>
+        <view class="me_icon">
+          <image mode="scaleToFill" src="{{user.img}}" style="width:130rpx;height:130rpx;"/>
         </view>
         <view class="wechat_info">
-          <view class="wechat_name"><text class="zan-c-gray-darker">昵称：</text><open-data type="userNickName" lang="zh_CN"></open-data></view>
-          <view class="wechat_id"><text class="zan-c-gray-darker">城市：</text><open-data type="userCity" lang="zh_CN"></open-data></view>
+          <view class="wechat_name"><text class="zan-c-gray-darker">昵称：</text>{{user.name}}</view>
+          <view class="wechat_id"><text class="zan-c-gray-darker">城市：</text>{{user.city}}</view>
         </view>
       </view>
       <view class="page_spacing">
@@ -87,7 +89,7 @@
           </view>
         </view>
       </view>
-    </block>
+    </view>
   </view>
 </template>
 <script>
@@ -96,7 +98,8 @@ import wepy from 'wepy'
 import List from '../../../components/comlist'
 import Loading from '../../../components/loading'
 import page from '../../../common/page'
-
+import api from '../../../common/api'
+const URL = 'platform/platform/customer/getCustomerByKey'
 export default class Personal extends wepy.page {
   config = {
     'navigationBarTitleText': '个人中心'
@@ -137,15 +140,29 @@ export default class Personal extends wepy.page {
         path: './about'
       }
     ],
-    showLoading: true
+    showLoading: true,
+    user: {
+      name: '未知用户',
+      img: '../../../images/user_2.png',
+      city: '未知'
+    }
   }
   onLoad() {
-  }
-  onShow() {
-    setTimeout(() => {
+    /* setTimeout(() => {
       this.showLoading = false
       this.$apply()
-    }, 1000)
+    }, 10000) */
+  }
+  onShow() {
+    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
+      this.showLoading = false
+      this.user = {
+        name: res.data.nickName ? res.data.nickName : '未知用户',
+        img: res.data.avatarUrl ? res.data.avatarUrl : '../../../images/user_2.png',
+        city: res.data.city ? res.data.city : '未知'
+      }
+      this.$apply()
+    })
   }
   methods = {
     clearStorageSyn() {

@@ -1,6 +1,6 @@
 <style lang="scss">
 .scan-subtitle{
-    width: 140rpx;
+    width: 120rpx;
     height:42px;
     text-align: center;
   }
@@ -8,8 +8,10 @@
     line-height: 42px;
   }
   .oth-input{
+    width: 80%;
     height: 32px;
     line-height: 32px;
+    font-size: 16px;
     border:none;
   }
 </style>
@@ -57,7 +59,7 @@ import zanToptips from '../../../components/zan-toptips'
 import Loading from '../../../components/loading'
 import api from '../../../common/api'
 
-// const URL = 'wallet/customWallet/queryBalanceBySession'
+const URL = 'wallet/customWallet/queryBalanceBySession'
 
 export default class WalletTopup extends wepy.page {
   config = {
@@ -72,33 +74,41 @@ export default class WalletTopup extends wepy.page {
     showLoading: false,
     items: [
       {
-        value: '1000',
-        name: '充￥1000'
-      },
-      {
-        value: '500',
-        name: '充￥500'
+        value: '200',
+        name: '充￥200'
       },
       {
         value: '100',
         name: '充￥100'
       },
       {
+        value: '80',
+        name: '充￥80'
+      },
+      {
         value: '50',
-        name: '冲￥50'
+        name: '充￥50'
       },
       {
         value: '20',
         name: '充￥20'
       },
       {
+        value: '10',
+        name: '充￥10'
+      },
+      {
+        value: '5',
+        name: '充￥5'
+      },
+      {
+        value: '3',
+        name: '充￥3'
+      },
+      {
         value: 'oth',
         name: '其他'
-      }/* ,
-      {
-        value: '0.01',
-        name: '冲￥0.01'
-      } */
+      }
     ],
     checked_base: -1,
     time_value: 0,
@@ -116,12 +126,7 @@ export default class WalletTopup extends wepy.page {
       content: '余额查询中...'
     })
     // 账户余额查询
-    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
-      wepy.hideLoading()
-      this.account = parseFloat(api.fotmatMoney(res.data))
-      this.showLoading = false
-      this.$apply()
-    }) */
+     */
   }
   methods = {
     // 马上充值
@@ -187,7 +192,7 @@ export default class WalletTopup extends wepy.page {
               'package': _data.package,
               'signType': 'MD5',
               'paySign': _data.paySign,
-              'success': function(res) {
+              'success': res => {
                 wepy.navigateBack({
                   delta: 1
                 })
@@ -200,6 +205,13 @@ export default class WalletTopup extends wepy.page {
           })
         }
       }
+    })
+  }
+  // 账户余额查询
+  getMoney() {
+    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
+      this.account = parseFloat(api.fotmatMoney(res.data))
+      this.$apply()
     })
   }
 }
