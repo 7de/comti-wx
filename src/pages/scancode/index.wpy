@@ -174,10 +174,6 @@ export default class ScanIndex extends wepy.page {
     _token: null
   }
   onLoad(option) {
-    /* setTimeout(() => {
-      this.showLoading = false
-      this.$apply()
-    }, 1500) */
     // 页面传值
     if (option.num) {
       this.code = option.num
@@ -193,21 +189,22 @@ export default class ScanIndex extends wepy.page {
     this._token = this.$parent.token
     this.$apply()
     if (this._token) {
-      api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
-        this.showLoading = false
-        this.$apply()
-        if (res.code === 0) {
-          this.showTopup = false
-          this.account = parseFloat(api.fotmatMoney(res.data))
-          this.$apply()
-        }
-      })
       // 设备查询
       this.checkEqui()
+      this.getBalance()
     } else {
-      // 跳转授权页
-      wepy.navigateTo({
-        url: '/pages/authorize'
+      wepy.showModal({
+        title: '温馨提示',
+        content: '您暂未授权或授权已过期',
+        showCancel: false,
+        confirmText: '去授权',
+        success: function(res) {
+          if (res.confirm) {
+            wepy.navigateTo({
+              url: '/pages/authorize'
+            })
+          }
+        }
       })
     }
   }
@@ -299,7 +296,6 @@ export default class ScanIndex extends wepy.page {
       url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
       method: 'GET',
       success: res => {
-        console.log(res)
         wepy.hideLoading()
         if (res.data.code === 0) {
         } else if (res.data.code === -50) {
@@ -327,6 +323,23 @@ export default class ScanIndex extends wepy.page {
       }
     })
   }
+  // 账户余额
+  getBalance() {
+    wepy.showLoading({
+      title: '余额查询中...',
+      mask: true
+    })
+    api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
+      wepy.hideLoading()
+      this.showLoading = false
+      this.$apply()
+      if (res.code === 0) {
+        this.showTopup = false
+        this.account = parseFloat(api.fotmatMoney(res.data))
+        this.$apply()
+      }
+    })
+  }
 
   // 预估金额查询
   checkMoney() {
@@ -350,14 +363,14 @@ export default class ScanIndex extends wepy.page {
   }
   // 设备超时
   timeoutEqui(msg) {
+    const _this = this
     wepy.showModal({
       title: '温馨提示',
       content: msg,
-      showCancel: false,
       confirmText: '重试',
-      success: function(res) {
+      success: (res) => {
         if (res.confirm) {
-          this.checkEqui()
+          _this.checkEqui()
         }
       }
     })

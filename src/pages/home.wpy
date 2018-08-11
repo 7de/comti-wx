@@ -149,13 +149,6 @@ export default class Home extends wepy.page {
     showPopup: false
   }
   onLoad() {
-    /* if (this.$parent.globalData.longitude) {
-      this.latitude = this.$parent.globalData.latitude
-      this.longitude = this.$parent.globalData.longitude
-    } else {
-      this.getLocation()
-      console.log('没有位置')
-    } */
     this.getLocation()
   }
   onReady() {

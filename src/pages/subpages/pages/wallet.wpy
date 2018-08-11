@@ -23,7 +23,7 @@
     <view class="page_spacing display-none" style="{{showLoading?'':'display:block'}}" wx:else>
       <view class="zan-panel zan-panel--without-border zan-center">
         <view class="wallet-title">
-            <view class="iconfont icon-user-menu-money"></view>
+          <view class="iconfont icon-user-menu-money"></view>
         </view>
         <view class="zan-c-gray-dark zan-font-14">我的余额</view>
         <view class="money" style="color:#f15b6c">￥<text class="">{{account}}</text></view>
