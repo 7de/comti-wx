@@ -92,7 +92,6 @@ export default class Charging extends wepy.page {
     charg_timer: 0, // 定时上传订单状态
     timer: 0, // 计时器
     order_no: 0, // 充电订单号
-    equip_no: 0, // 设备编码
     charg_activetime: 0, // 所用时间
     time: 0, // 充电时长
     charg_endtime: 0, // 预计结束时间
@@ -104,13 +103,12 @@ export default class Charging extends wepy.page {
     Loading
   }
   onLoad(option) {
-    setTimeout(() => {
+    /* setTimeout(() => {
       this.showLoading = false
       this.$apply()
-    }, 2000)
+    }, 2000) */
     this.order_no = option.orderNo
     this.time = option.time
-    this.equip_no = option.equipNo
     this.timer = setInterval(() => {
       this.seconds++
       this.seconds = this.seconds < 10 ? '0' + this.seconds : this.seconds

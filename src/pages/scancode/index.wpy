@@ -248,7 +248,7 @@ export default class ScanIndex extends wepy.page {
                 wepy.hideLoading()
                 if (res.code === 0) {
                   wepy.navigateTo({
-                    url: '/pages/subpages/pages/charging?orderNo=' + res.data + '&time=' + _this.time_value + '&equipNo=' + _this.code
+                    url: '/pages/subpages/pages/charging?orderNo=' + res.data + '&time=' + _this.time_value
                   })
                 }
               })

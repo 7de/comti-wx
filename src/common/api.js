@@ -6,9 +6,9 @@ import wepy from 'wepy'
 export default {
   apiData : {
     // 正式
-    host: 'https://www.comtti.net/',
+    // host: 'https://www.comtti.net/',
     // 测试
-    // host: 'https://actor.comtti.net/pc/',
+    host: 'https://actor.comtti.net/pc/',
     receiving: false, // 是否正在获取token
     token: '',
     userInfo: null,

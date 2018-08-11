@@ -168,7 +168,8 @@ export default class Personal extends wepy.page {
     clearStorageSyn() {
       wepy.showModal({
         title: '温馨提示',
-        content: '请确定是否清除本地缓存？',
+        content: '清除本地缓存将重新授权，是否继续？',
+        confirmText: '继续',
         success: (res) => {
           if (res.confirm) {
             wepy.clearStorageSync()
