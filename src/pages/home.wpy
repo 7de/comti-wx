@@ -82,7 +82,7 @@ $activecolor: #1AAD19;
       <view class="tab_item tab_message{{currentTab == 0 ? ' active' : ''}}">
           <text class="title">电单车</text>
       </view>
-      <view class="tab_item tab_contact" @tap="showTopTips">
+      <view class="tab_item tab_contact" @tap="unableTopTips">
           <text class="title">电动汽车</text>
       </view>
     </view>
@@ -300,12 +300,16 @@ export default class Home extends wepy.page {
           title: '正在查询设备...',
           mask: true
         })
-        api.get(equiUrl + '?rdSession=' + _this.$parent.token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
-          wepy.hideLoading()
-          wepy.navigateTo({
-            url: '/pages/scancode/index?num=' + _numNum
+        if (_numNum) {
+          api.get(equiUrl + '?rdSession=' + _this.$parent.token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
+            wepy.hideLoading()
+            wepy.navigateTo({
+              url: '/pages/scancode/index?num=' + _numNum
+            })
           })
-        })
+        } else {
+          this.showTopTips('设备编号为空，请重新扫码')
+        }
       }
     })
   }
@@ -331,7 +335,6 @@ export default class Home extends wepy.page {
   getScopeLocation() {
     wepy.getSetting({
       success: (res) => {
-        const _this = this
         if (res.authSetting['scope.userLocation'] !== undefined && res.authSetting['scope.userLocation'] !== true) {
           wepy.showModal({
             title: '是否授权当前位置',
@@ -342,17 +345,16 @@ export default class Home extends wepy.page {
                   success: (data) => {
                     if (data.authSetting['scope.userLocation'] === true) {
                       wepy.showToast({
-                        title: '授权成功',
+                        title: '设置成功',
                         icon: 'success',
                         duration: 1000
                       })
                       wepy.navigateBack({
                         delta: 1
                       })
-                      _this.movetoPosition()
                     } else {
                       wepy.showToast({
-                        title: '授权失败',
+                        title: '设置失败',
                         icon: 'none',
                         duration: 2000
                       })
@@ -366,9 +368,12 @@ export default class Home extends wepy.page {
       }
     })
   }
+  unableTopTips() {
+    this.showTopTips('功能暂未开通，敬请期待...')
+  }
   // 顶部提示
-  showTopTips() {
-    this.$invoke('zanToptips', 'showZanTopTips', { content: '功能暂未开通，敬请期待...', options: 2000 })
+  showTopTips(content) {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
   }
 }
 </script>

@@ -88,6 +88,12 @@
             <view class="zan-cell__bd">清除本地缓存</view>
           </view>
         </view>
+        <view class="zan-panel">
+          <view class="zan-cell" @tap="delAuth">
+            <view class="zan-cell__icon iconfont icon-remind" style="color:#38f;"></view>
+            <view class="zan-cell__bd">删除授权</view>
+          </view>
+        </view>
       </view>
     </view>
   </view>
@@ -148,12 +154,9 @@ export default class Personal extends wepy.page {
     }
   }
   onLoad() {
-    /* setTimeout(() => {
-      this.showLoading = false
-      this.$apply()
-    }, 10000) */
   }
   onShow() {
+    page.goTop()
     api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
       this.showLoading = false
       this.user = {
@@ -173,7 +176,24 @@ export default class Personal extends wepy.page {
         success: (res) => {
           if (res.confirm) {
             wepy.clearStorageSync()
-            page.goauthorize()
+            page.goAuthorize()
+          }
+        }
+      })
+    },
+    delAuth() {
+      wepy.showModal({
+        title: '温馨提示',
+        content: '确认清除授权，是否继续？',
+        confirmText: '继续',
+        success: (res) => {
+          if (res.confirm) {
+            api.get('platform/platform/customer/deleteRdSession' + '?rdSession=' + this.$parent.token).then(res => {
+              console.log(res)
+              this.$parent.token = ''
+              wepy.clearStorageSync()
+              page.goAuthorize()
+            })
           }
         }
       })

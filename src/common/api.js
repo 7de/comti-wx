@@ -1,5 +1,6 @@
 
 import global from './global'
+import page from './page'
 
 import wepy from 'wepy'
 
@@ -39,6 +40,7 @@ export default {
             })
             // resolve(this._request(method, url, params))
           } else if (data.code === -1) {
+            console.log(res)
             wepy.showToast({
               title: data.msg ? data.msg : data.message,
               icon: 'none',
@@ -52,27 +54,29 @@ export default {
             resolve(data)
           }
         },
-        fail: res => {
+        fail: err => {
           wepy.hideLoading()
-          console.log(res)
-          if (res.errMsg) {
-            wx.showModal({
+          console.log(err)
+          if (err.errMsg === 'request:fail timeout') {
+            wepy.showModal({
               title: '错误提示',
-              content: res.errMsg,
-              showCancel: false,
-              confirmText: '我知道了',
-              success: (res) => {
-              }
-            })
-          } else {
-            wx.showModal({
-              title: '错误提示',
-              content: res.data.msg + ' ' + res.status,
-              showCancel: false,
+              content: '请求超时，请稍后重试',
               confirmText: '我知道了',
               success: (res) => {
                 if (res.confirm) {
-                  console.log('用户点击')
+                  page.goBack()
+                }
+              }
+            })
+          } else {
+            let _msg = err.data.msg ? err.data.msg : err.errMsg
+            wepy.showModal({
+              title: '错误提示',
+              content: _msg + ' 状态码：' + err.status,
+              showCancel: false,
+              confirmText: '我知道了',
+              success: (err) => {
+                if (res.confirm) {
                 }
               }
             })

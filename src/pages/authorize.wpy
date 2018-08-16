@@ -53,14 +53,19 @@
       zanToptips
     }
     data = {
-      code: null
+      code: null,
+      num: 0 // 授权次数
     }
     onLoad(option) {
     }
     methods = {
     }
     bindGetUserInfo(e) {
-      const _this = this
+      this.postLogin(this.num)
+    }
+    // 用户授权
+    postLogin(num) {
+      num++
       wepy.showLoading({
         title: '正在校验信息...',
         mask: true
@@ -69,38 +74,96 @@
         success: res => {
           wepy.hideLoading()
           if (res.code) {
+            // 获取登录code
             this.code = res.code
-            if (e.detail.errMsg === 'getUserInfo:ok') {
-              wepy.showLoading({
-                title: '授权中...',
-                mask: true
-              })
-              api.post(URL, {
-                code: this.code,
-                encryptedData: e.detail.encryptedData,
-                iv: e.detail.iv,
-                signature: e.detail.signature,
-                rawData: e.detail.rawData
-              }).then(res => {
-                wepy.hideLoading()
-                _this.$parent.token = res.data['rd_session']
-                _this.$apply()
-                wepy.setStorageSync('token_r', res.data['rd_session'])
-                console.log(this.getCurrentPages().length)
-                if (this.getCurrentPages().length > 1) {
-                  page.goBack()
+            wepy.getSetting({
+              success: (res) => {
+                if (res.authSetting['scope.userInfo']) {
+                  wepy.getUserInfo({
+                    lang: 'zh_CN',
+                    success: (res) => {
+                      let _params = Object.assign({
+                        code: this.code,
+                        encryptedData: res.encryptedData,
+                        iv: res.iv,
+                        signature: res.signature,
+                        rawData: res.rawData
+                      })
+                      this.postAuth(_params, num)
+                    }
+                  })
                 } else {
-                  page.goHome()
+                  this.showTopTips('我们需要获取您的信息，请重新授权')
                 }
-              })
-            } else {
-              this.$invoke('zanToptips', 'showZanTopTips', { content: '我们需要获取您的信息，请重新授权', options: 2000 })
-            }
+              }
+            })
           } else {
-            console.log('登录失败！' + res.errMsg)
+            this.showTopTips('登录失败，请稍后重试')
           }
         }
       })
+    }
+    // 授权
+    postAuth(params, num) {
+      const _this = this
+      wepy.showLoading({
+        title: '授权中...',
+        mask: true
+      })
+      wepy.request({
+        url: api.apiData.host + URL,
+        method: 'POST',
+        data: params,
+        success: (res) => {
+          wepy.hideLoading()
+          console.log(res)
+          console.log('授权次数：' + num)
+          if (res.data.code === 0) {
+            _this.$parent.token = res.data.data['rd_session']
+            _this.$apply()
+            wepy.setStorageSync('token_r', res.data.data['rd_session'])
+            console.log(_this.$parent.token)
+            console.log(_this.getCurrentPages().length)
+            if (_this.getCurrentPages().length > 1) {
+              page.goBack()
+            } else {
+              page.goHome()
+            }
+          } else if (res.data.code === -1) {
+            console.log('次数：' + num)
+            if (num < 3) {
+              this.postLogin(num)
+            } else {
+              wepy.showToast({
+                title: res.data.msg ? res.data.msg : res.data.message,
+                icon: 'none',
+                duration: 2000
+              })
+            }
+          } else {
+            wepy.showToast({
+              title: res.data.msg ? res.data.msg : res.data.message,
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        },
+        fail: (err) => {
+          wepy.hideLoading()
+          wepy.showModal({
+            title: '错误提示',
+            content: err.data.msg + ' ' + err.status,
+            showCancel: false,
+            confirmText: '我知道了',
+            success: (res) => {
+            }
+          })
+        }
+      })
+    }
+    // 顶部提示
+    showTopTips(content) {
+      this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
     }
   }
 </script>

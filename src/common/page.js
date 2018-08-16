@@ -12,10 +12,22 @@ export default {
       url: '/pages/authorize'
     })
   },
+  // 返回授权
+  goAuthorize() {
+    wepy.navigateTo({
+      url: '/pages/authorize'
+    })
+  },
   // 返回上一级
   goBack() {
     wepy.navigateBack({
       delta: 1
+    })
+  },
+  // 返回页头
+  goTop() {
+    wepy.pageScrollTo({
+      scrollTop: 0
     })
   }
 }

@@ -114,7 +114,7 @@ export default class extends wepy.app {
       }
     ],
     networkTimeout: {
-      request: 10000
+      request: 20000
     }
   }
   globalData = {
@@ -155,6 +155,7 @@ export default class extends wepy.app {
     })
   }
   onShow () {
+    this.token = this.token ? this.token : wepy.getStorageSync('token_r')
   }
   constructor () {
     super()

@@ -70,7 +70,7 @@
       </view>
       <view class="zan-panel-title">请选择充电时长：</view>
       <view class="zan-panel">
-        <zanSelect1 :items="items" :checkedValue.sync="checked_base" componentId="base" ></zanSelect1>
+        <zanSelect1 :items="items" :checkedValue.sync="checked_base" :disabled.sync="timeDisabled" componentId="base" ></zanSelect1>
       </view>
       <view class="zan-panel-title">预估金额：<text class="zan-font-12">(电费{{changeFee}}+服务费{{serviceFee}})</text></view>
       <view class="zan-panel">
@@ -171,27 +171,25 @@ export default class ScanIndex extends wepy.page {
     changeFee: '0.00', // 充电费
     serviceFee: '0.00', // 服务费
     totalFee: '0.00', // 总费用
-    _token: null
+    _token: null,
+    equiData: null,
+    timeDisabled: false
   }
   onLoad(option) {
     // 页面传值
     if (option.num) {
       this.code = option.num
-      this.$apply()
     } else if (option.q !== undefined) {
       let _url = decodeURIComponent(option.q) // 字符分割
       let _urlBox = _url.split('num=')
       this.code = _urlBox[1]
-      this.$apply()
     }
   }
   onShow() {
     this._token = this.$parent.token
-    this.$apply()
     if (this._token) {
-      // 设备查询
-      this.checkEqui()
       this.getBalance()
+      this.checkEqui()
     } else {
       wepy.showModal({
         title: '温馨提示',
@@ -200,9 +198,7 @@ export default class ScanIndex extends wepy.page {
         confirmText: '去授权',
         success: function(res) {
           if (res.confirm) {
-            wepy.navigateTo({
-              url: '/pages/authorize'
-            })
+            page.goAuthorize()
           }
         }
       })
@@ -221,9 +217,9 @@ export default class ScanIndex extends wepy.page {
     // 订单提交
     goCharging() {
       const _this = this
-      if (!this.code) {
+      if (!this.code || !this.equiData) {
         this.input_focus = true
-        this.showTopTips('请填写二维码编号')
+        this.showTopTips('请确认二维码编号是否填写或者正确')
       } else if (!this.time_value) {
         this.showTopTips('请选择充电时长')
       } else if (this.totalFee > parseFloat(this.account)) {
@@ -233,7 +229,7 @@ export default class ScanIndex extends wepy.page {
         wepy.showModal({
           title: '提示',
           content: '请确认是否开始充电？',
-          success: function(res) {
+          success: (res) => {
             if (res.confirm) {
               wepy.showLoading({
                 title: '开启充电...',
@@ -281,10 +277,6 @@ export default class ScanIndex extends wepy.page {
       }
     }
   }
-  // 顶部提示
-  showTopTips(content) {
-    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
-  }
 
   // 设备查询
   checkEqui() {
@@ -292,36 +284,62 @@ export default class ScanIndex extends wepy.page {
       title: '设备查询中...',
       mask: true
     })
-    wepy.request({
-      url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
-      method: 'GET',
-      success: res => {
-        wepy.hideLoading()
-        if (res.data.code === 0) {
-        } else if (res.data.code === -50) {
-          this.timeoutEqui(res.data.msg)
-          console.log('超时')
-        } else {
-          let _msg = res.data.msg
-          wepy.showModal({
-            title: '温馨提示',
-            content: _msg,
-            confirmText: '首页扫码',
-            success: function(res) {
-              if (res.confirm) {
-                page.goHome()
+    if (this.code) {
+      wepy.request({
+        url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
+        method: 'GET',
+        success: res => {
+          console.log(res)
+          wepy.hideLoading()
+          if (res.data.code === 0) {
+            this.equiData = res.data.data
+            this.timeDisabled = false
+            this.$apply()
+          } else if (res.data.code === -100) {
+            console.log('未登录')
+          } else if (res.data.code === -50) {
+            this.timeoutEqui(res.data.msg)
+            this.timeDisabled = true
+            this.$apply()
+          } else {
+            let _msg = res.data.msg ? res.data.msg : res.data.errMsg
+            wepy.showModal({
+              title: '温馨提示',
+              content: _msg,
+              confirmText: '首页扫码',
+              success: function(res) {
+                if (res.confirm) {
+                  page.goHome()
+                }
               }
-            }
-          })
+            })
+            this.timeDisabled = true
+            this.$apply()
+          }
+        },
+        fail: (err) => {
+          // 时长不可选
+          this.timeDisabled = true
+          this.$apply()
+          let _msg = err.data.msg ? err.data.msg : err.errMsg
+          if (err.data.code === -50) {
+            this.timeoutEqui(_msg)
+          } else {
+            wepy.showModal({
+              title: '错误提示',
+              content: _msg,
+              success: (res) => {
+                if (res.confirm) {
+                  page.goHome()
+                }
+              }
+            })
+          }
         }
-      },
-      fail: ({data}) => {
-        console.log(data)
-        if (data.code === -50) {
-          this.timeoutEqui(data.message)
-        }
-      }
-    })
+      })
+    } else {
+      this.showTopTips('未填二维码编号')
+    }
   }
   // 账户余额
   getBalance() {
@@ -330,6 +348,7 @@ export default class ScanIndex extends wepy.page {
       mask: true
     })
     api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
+      console.log(res)
       wepy.hideLoading()
       this.showLoading = false
       this.$apply()
@@ -357,7 +376,7 @@ export default class ScanIndex extends wepy.page {
       this.totalFee = api.fotmatMoney(Number(data.changeFee) + Number(data.serviceCharge))
       this.$apply()
       if (this.totalFee > parseFloat(this.account)) {
-        this.$invoke('zanToptips', 'showZanTopTips', { content: '您的余额不足以选择此服务，请及时充值', options: 2000 })
+        this.showTopTips('您的余额不足以选择此服务，请及时充值')
       }
     })
   }
@@ -380,6 +399,10 @@ export default class ScanIndex extends wepy.page {
     wepy.navigateTo({
       url: '/pages/subpages/pages/wallet-topup?account=' + this.account
     })
+  }
+  // 顶部提示
+  showTopTips(content) {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
   }
 }
 </script>

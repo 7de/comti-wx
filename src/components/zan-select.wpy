@@ -7,7 +7,7 @@
 .com-select{
   height: 45rpx;
   line-height: 45rpx;
-  border:1px solid #eee;
+  border:1px solid #e7e6e6;
   border-radius: 50rpx;
   text-align: center;
   padding:10rpx 8rpx;
@@ -19,6 +19,10 @@
   border-color:#4b0;
   background-color: #4b0;
   color:#fff;
+}
+.com-select.disabled{
+  border-color:#eee;
+  color: #d7d7d7
 }
 .zan-select__list{
   padding: 25rpx 30rpx;
@@ -37,8 +41,8 @@
   >
     <view class="zan-row">
       <label wx:for="{{ items }}" wx:key="value" class="zan-col zan-col-8">
-        <view class="com-select {{item.value === checkedValue?'com-select_active':''}}">
-          <radio class="zan-select__radio" value="{{ item.value }}" checked="{{ item.value === checkedValue }}" />
+        <view class="com-select {{item.value === checkedValue?'com-select_active':''}} {{disabled?'disabled':''}}">
+          <radio class="zan-select__radio" value="{{ item.value }}" checked="{{ item.value === checkedValue }}" disabled="{{disabled}}" />
           <view class="com-select__bd">
             {{ item.name }}
           </view>
@@ -67,6 +71,10 @@ export default class zanSelect extends wepy.component {
     name: {
       type: String,
       default: ''
+    },
+    disabled: {
+      type: Boolean,
+      default: false
     },
     activeColor: {
       type: String,
