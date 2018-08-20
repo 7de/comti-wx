@@ -88,12 +88,6 @@
             <view class="zan-cell__bd">清除本地缓存</view>
           </view>
         </view>
-        <view class="zan-panel">
-          <view class="zan-cell" @tap="delAuth">
-            <view class="zan-cell__icon iconfont icon-remind" style="color:#38f;"></view>
-            <view class="zan-cell__bd">删除授权</view>
-          </view>
-        </view>
       </view>
     </view>
   </view>

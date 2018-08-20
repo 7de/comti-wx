@@ -1,21 +1,31 @@
 <template>
     <view class="container">
       <block wx:if="{{recordList.length>0}}">
-        <scroll-view scroll-y='true' bindscrolltolower="lower" style="height:{{height}}px;overflow:hidden;">
-          <view class="zan-panel" wx:for="{{recordList}}" wx:key="index" wx:for-index="index" wx:for-item="item">
-            <view class="zan-cell">
-              <view class="zan-cell__bd">{{item.goodsName}}</view>
-              <view class="zan-cell__ft">￥{{item.totalFee/100}}</view>
+        <view>
+          <repeat for="{{recordList}}" key="index" index="index" item="item">
+            <view class="zan-panel">
+              <view class="zan-cell">
+                <view class="zan-cell__bd">{{item.goodsName}}</view>
+                <view class="zan-cell__ft">￥{{item.totalFee/100}}</view>
+              </view>
+              <view class="zan-cell">
+                <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">充值时间：{{item.payTime}}</view>
+              </view>
             </view>
-            <view class="zan-cell">
-              <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">充值时间：{{item.payTime}}</view>
+          </repeat>
+          <block wx:if="{{recordList.length > pageSize}}">
+            <block wx:if="{{updateLoadShow}}">
+              <updateLoad :loading="updateLoadShow"></updateLoad>
+            </block>
+            <view class="doc-description zan-center" style="font-size:12px;" wx:else>
+              <text>{{updateLoadTxt}}</text>
             </view>
-          </view>
-        </scroll-view>
+          </block>
+        </view>
       </block>
       <view wx:else class="zan-center" style="padding-top:20rpx">
         <block wx:if="{{loadingShow}}">
-          <zanLoadmore :loading="loadingShow"></zanLoadmore>
+          <pageLoad :loading="loadingShow"></pageLoad>
         </block>
         <text wx:else class="zan-c-gray-dark zan-font-12">暂无数据</text>
       </view>
@@ -28,10 +38,13 @@ import api from '../../../common/api'
 const recordURL = 'order/rechargeOrder/'
 export default class WalletTopupRecord extends wepy.page {
   config = {
-    'navigationBarTitleText': '充值记录'
+    navigationBarTitleText: '充值记录',
+    onReachBottomDistance: 0
   }
   data = {
     loadingShow: true,
+    updateLoadShow: true,
+    updateLoadTxt: '没有更多了',
     height: '',
     recordList: [],
     pageNum: 1, // 当前页
@@ -39,12 +52,14 @@ export default class WalletTopupRecord extends wepy.page {
     pagtotal: null // 数据总数
   }
   components = {
-    zanLoadmore
+    pageLoad: zanLoadmore,
+    updateLoad: zanLoadmore
   }
   onLoad() {
     wepy.getSystemInfo({
       success: (res) => {
         this.height = res.windowHeight
+        this.pageSize = Math.round(res.windowHeight / 103) + 1
         this.$apply()
       }
     })
@@ -52,30 +67,33 @@ export default class WalletTopupRecord extends wepy.page {
   }
   onShow() {
   }
-  lower() {
+  onReachBottom() {
+    this.updateLoadShow = true
     let _length = this.recordList.length
     if (_length === this.pagtotal) {
-      wepy.showToast({
-        title: '全部加载完了',
-        icon: 'success',
-        duration: 500
-      })
-      return false
+      setTimeout(() => {
+        this.updateLoadShow = false
+        this.$apply()
+      }, 1000)
     } else {
       this.pageNum++
       this.getData()
     }
   }
+  lower() {
+  }
   // 充值记录查询
   getData() {
-    api.get(recordURL + 'queryRechargeRecords?rdSession=' + this.$parent.token + '&start=' + this.pageNum + '&size=' + this.pageSize).then(({data}) => {
-      if (this.pagenum === 1) {
+    const pageNum = this.pageNum
+    api.get(recordURL + 'queryRechargeRecords?rdSession=' + this.$parent.token + '&start=' + pageNum + '&size=' + this.pageSize).then(({data}) => {
+      if (pageNum === 1) {
         this.recordList = data.list
         this.pagtotal = data.totalRow
       } else {
         this.recordList = this.recordList.concat(data.list)
       }
       this.loadingShow = false
+      this.updateLoadShow = false
       this.$apply()
     })
   }

@@ -5,68 +5,50 @@
 </style>
 <template>
   <view class="page_spacing">
-    <block wx:if="{{list}}">
-      <block wx:if="{{list.length>0}}">
-        <view class="zan-panel" wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item">
-          <view class="zan-cell zan-font-12">
-            <view class="zan-cell__bd zan-c-gray-dark">订单编号：{{item.orderNo}}</view>
+    <repeat for="{{list}}" key="index" index="index" item="item">
+      <view class="zan-panel">
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd zan-c-gray-dark">订单编号：{{item.orderNo}}</view>
+        </view>
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd zan-c-gray-dark">订单状态：{{item.orderStatus===1?'充电完成':item.orderStatus===2?'已关闭':item.orderStatus===3?'全部':'充电中'}}</view>
+          <view class="zan-cell__ft" wx:if="{{item.orderStatus===0}}">
+            <navigator class="zan-btn zan-btn--small zan-btn--primary" url="/pages/subpages/pages/charging?orderNo={{item.orderNo}}&time={{item.actPeriod/60}}">查看充电详情</navigator>
           </view>
-          <view class="zan-cell zan-font-12">
-            <view class="zan-cell__bd zan-c-gray-dark">订单状态：{{item.orderStatus===1?'充电完成':item.orderStatus===2?'已关闭':item.orderStatus===3?'全部':'充电中'}}</view>
-            <view class="zan-cell__ft" wx:if="{{item.orderStatus===0}}">
-              <navigator class="zan-btn zan-btn--small zan-btn--primary" url="/pages/subpages/pages/charging?orderNo={{item.orderNo}}&time={{item.actPeriod/60}}">查看充电详情</navigator>
-            </view>
-            <view wx:else>
-              <view class="zan-cell__ft">充电时长：<text class="zan-c-green zan-font-16">{{item.actChargerTime}}</text>分钟</view>
-            </view>
-          </view>
-          <view class="zan-cell zan-font-12">
-            <view class="zan-cell__bd">订单金额：￥<text class="zan-c-red zan-font-16">{{item.chargeMoney/100}}</text></view>
-          </view>
-          <view class="zan-cell zan-font-12">
-            <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">{{item.serviceMoney/100}}</text></view>
-            <view class="zan-cell__ft" wx:if="{{item.orderStatus!==0}}">结算金额：￥<text class="zan-c-red zan-font-16">{{item.totalFee/100}}</text></view>
-          </view>
-          <view class="zan-cell zan-font-12" wx:if="{{item.orderStatus===2}}">
-            <view class="zan-cell__bd">关闭原因：<text class="zan-c-red">{{item.orderRes}}</text></view>
-          </view>
-          <view class="zan-cell zan-font-12">
-            <view class="zan-cell__bd  zan-c-gray-dark">订单时间：{{item.extraMap.startTimeFad}}</view>
-          </view>
-          <view class="zan-cell zan-font-12" wx:if="{{item.orderStatus!==0}}">
-            <view class="zan-cell__bd  zan-c-gray-dark">结束时间：{{item.extraMap.endTimeFad}}</view>
+          <view wx:else>
+            <view class="zan-cell__ft">充电时长：<text class="zan-c-green zan-font-16">{{item.actChargerTime}}</text>分钟</view>
           </view>
         </view>
-      </block>
-      <view wx:else class="zan-center" style="padding-top:20rpx">
-        <text class="zan-c-gray-dark zan-font-12">暂无数据</text>
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd">订单金额：￥<text class="zan-c-red zan-font-16">{{item.chargeMoney/100}}</text></view>
+        </view>
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">{{item.serviceMoney/100}}</text></view>
+          <view class="zan-cell__ft" wx:if="{{item.orderStatus!==0}}">结算金额：￥<text class="zan-c-red zan-font-16">{{item.totalFee/100}}</text></view>
+        </view>
+        <view class="zan-cell zan-font-12" wx:if="{{item.orderStatus===2}}">
+          <view class="zan-cell__bd">关闭原因：<text class="zan-c-red">{{item.orderRes}}</text></view>
+        </view>
+        <view class="zan-cell zan-font-12">
+          <view class="zan-cell__bd  zan-c-gray-dark">订单时间：{{item.extraMap.startTimeFad}}</view>
+        </view>
+        <view class="zan-cell zan-font-12" wx:if="{{item.orderStatus!==0}}">
+          <view class="zan-cell__bd  zan-c-gray-dark">结束时间：{{item.extraMap.endTimeFad}}</view>
+        </view>
       </view>
-    </block>
-    <block wx:else>
-      <zanLoadmore :loading="loadingsubShow"></zanLoadmore>
-    </block>
+    </repeat>
   </view>
 </template>
 <script>
 import wepy from 'wepy'
-import zanLoadmore from '../components/zan-loadmore'
 import api from '../common/api'
 export default class Card extends wepy.component {
   props = {
     list: {}
   }
-  data = {
-    loadingsubShow: true
-  }
-  components = {
-    zanLoadmore
-  }
   onLoad () {
   }
   events = {
-    fotmatMoney(str) {
-      return api.fotmatMoney(str)
-    }
   }
 }
 </script>

@@ -1,5 +1,4 @@
 
-import global from './global'
 import page from './page'
 
 import wepy from 'wepy'

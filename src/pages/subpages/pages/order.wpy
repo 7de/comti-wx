@@ -7,15 +7,26 @@
     </block>
     <block wx:else>
       <zanTab :tab.sync="tab1" componentId="tab1" fixed></zanTab>
-      <view class="tab-con">
-        <scroll-view scroll-y='true' bindscrolltolower="allLower" style="height:{{height-50}}px">
-          <block wx:if="{{loadingsubShow}}">
-            <zanLoadmoreB :loading="loadingsubShow"></zanLoadmoreB>
-          </block>
-          <block wx:else>
+      <view class="tab-con" style="margin-top: 47px;">
+        <view>
+          <block wx:if="{{allData.length>0}}">
             <cardA :list.sync="allData"></cardA>
+            <block wx:if="{{allData.length>pageSize}}">
+              <block wx:if="{{updateLoadShow}}">
+                <updateLoad :loading="updateLoadShow"></updateLoad>
+              </block>
+              <view class="doc-description zan-center" style="font-size:12px;" wx:else>
+                <text>{{updateLoadTxt}}</text>
+              </view>
+            </block>
           </block>
-        </scroll-view>
+          <view wx:else class="zan-center" style="padding-top:20rpx">
+            <block wx:if="{{loadingsubShow}}">
+              <zanLoadmoreB :loading="loadingsubShow"></zanLoadmoreB>
+            </block>
+            <text wx:else class="zan-c-gray-dark zan-font-12" >暂无数据</text>
+          </view>
+        </view>
       </view>
     </block>
   </view>
@@ -32,18 +43,22 @@ const orderURL = 'server/' // 订单列表
 
 export default class Order extends wepy.page {
   config = {
-    'navigationBarTitleText': '我的订单'
+    navigationBarTitleText: '我的订单',
+    onReachBottomDistance: 60
   }
   components = {
     zanTab,
     cardA: Card,
     zanLoadmoreA: zanLoadmore,
-    zanLoadmoreB: zanLoadmore
+    zanLoadmoreB: zanLoadmore,
+    updateLoad: zanLoadmore
   }
   data = {
     height: '',
     loadingShow: true,
     loadingsubShow: true,
+    updateLoadShow: true,
+    updateLoadTxt: '没有更多了',
     timer: '',
     currentTab: 3,
     tab1: {
@@ -73,7 +88,7 @@ export default class Order extends wepy.page {
       scroll: false,
       url: false
     },
-    pageSize: 5, // 当前页数量
+    pageSize: 10, // 当前页数量
     allData: [],
     allPagtotal: null, // 全部总数
     allPagenum: 1
@@ -87,6 +102,7 @@ export default class Order extends wepy.page {
       this.allData = []
       this.allPagenum = 1
       this.loadingsubShow = true
+      this.updateLoadShow = true
       this.$apply()
       clearTimeout(this.timer)
       this.getData(this.allData, this.allPagenum, this.currentTab, this)
@@ -96,6 +112,7 @@ export default class Order extends wepy.page {
     wepy.getSystemInfo({
       success: (res) => {
         this.height = res.windowHeight
+        this.pageSize = Math.round(res.windowHeight / 318) + 1
         this.$apply()
       }
     })
@@ -107,19 +124,20 @@ export default class Order extends wepy.page {
   }
   onShow() {
   }
-  allLower() {
+  onReachBottom() {
+    this.updateLoadShow = true
     let _length = this.allData.length
     if (_length === this.allPagtotal) {
-      wepy.showToast({ // 如果全部加载完成了也弹一个框
-        title: '全部加载完了',
-        icon: 'success',
-        duration: 500
-      })
-      return false
+      setTimeout(() => {
+        this.updateLoadShow = false
+        this.$apply()
+      }, 1000)
     } else {
       this.allPagenum++
       this.getData(this.allData, this.allPagenum, this.currentTab, this)
     }
+  }
+  allLower() {
   }
   // 读取订单列表
   // data 数据列表， pageNum 每页显示数，state 状态
@@ -132,6 +150,7 @@ export default class Order extends wepy.page {
         that.allData = this.allData.concat(res.data)
       }
       that.loadingShow = false
+      that.updateLoadShow = false
       that.$apply()
       this.timer = setTimeout(() => {
         that.loadingsubShow = false
