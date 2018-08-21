@@ -41,7 +41,6 @@
 </template>
 <script>
 import wepy from 'wepy'
-import api from '../common/api'
 export default class Card extends wepy.component {
   props = {
     list: {}

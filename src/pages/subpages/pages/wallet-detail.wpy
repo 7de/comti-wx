@@ -1,27 +1,25 @@
 <template>
-    <view class="container" bindscrolltolower="lower">
+    <view class="container">
       <block wx:if="{{recordList.length>0}}">
-        <view>
-          <repeat for="{{recordList}}" key="index" index="index" item="item" >
-            <view class="zan-panel">
-              <view class="zan-cell">
-                <view class="zan-cell__bd">变更内容：{{item.typeText}}</view>
-                <view class="zan-cell__ft zan-c-{{item.refundType===1?'green':'red'}}">￥{{item.refundType===1?'-':'+'}}<text style="padding-left:4rpx">{{item.totalFee/100}}</text></view>
-              </view>
-              <view class="zan-cell">
-                <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">变更时间：{{item.updateTime}}</view>
-              </view>
+        <repeat for="{{recordList}}" key="index" index="index" item="item" >
+          <view class="zan-panel">
+            <view class="zan-cell">
+              <view class="zan-cell__bd">变更内容：{{item.typeText}}</view>
+              <view class="zan-cell__ft zan-c-{{item.refundType===1?'green':'red'}}">￥{{item.refundType===1?'-':'+'}}<text style="padding-left:4rpx">{{item.totalFee/100}}</text></view>
             </view>
-          </repeat>
-          <block wx:if="{{recordList.length > pageSize}}">
-            <block wx:if="{{updateLoadShow}}">
-              <updateLoad :loading="updateLoadShow"></updateLoad>
-            </block>
-            <view class="doc-description zan-center" style="font-size:12px;" wx:else>
-              <text>{{updateLoadTxt}}</text>
+            <view class="zan-cell">
+              <view class="zan-cell__bd zan-font-12 zan-c-gray-dark">变更时间：{{item.updateTime}}</view>
             </view>
+          </view>
+        </repeat>
+        <block wx:if="{{recordList.length > pageSize}}">
+          <block wx:if="{{updateLoadShow}}">
+            <updateLoad :loading="updateLoadShow"></updateLoad>
           </block>
-        </view>
+          <view class="doc-description zan-center" style="font-size:12px;" wx:else>
+            <text>{{updateLoadTxt}}</text>
+          </view>
+        </block>
       </block>
       <view wx:else class="zan-center" style="padding-top:20rpx">
         <block wx:if="{{loadingShow}}">

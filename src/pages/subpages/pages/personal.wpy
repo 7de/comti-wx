@@ -1,36 +1,4 @@
 <style lang="scss">
-    .personal {
-        .item {
-            background-color: #fff;
-            height: 100rpx;
-            position: relative;
-            box-sizing: border-box;
-            padding: 15rpx 25rpx;
-            border-bottom: 1px solid #eeeeee;
-            &.info {
-                height: 160rpx;
-                position: relative;
-                .me_icon {
-                    width: 130rpx;
-                    height: 130rpx;
-                    position: absolute;
-                    margin-left: 10rpx;
-                    image{
-                      border-radius: 50%;
-                    }
-                }
-                .wechat_info {
-                    padding-left: 180rpx;
-                    padding-top: 25rpx;
-                    font-size: 30rpx;
-                    .wechat_id {
-                        margin-top: 20rpx;
-                        color: #333;
-                    }
-                }
-            }
-        }
-    }
     
     .zan-col{
       text-align: center;
@@ -49,16 +17,8 @@
     <block wx:if="{{showLoading}}">
       <Loading />
     </block>
-    <view class="display-none" style="{{showLoading?'':'display:block'}}" wx:else>
-      <view class="info item">
-        <view class="me_icon">
-          <image mode="scaleToFill" src="{{user.img}}" style="width:130rpx;height:130rpx;"/>
-        </view>
-        <view class="wechat_info">
-          <view class="wechat_name"><text class="zan-c-gray-darker">昵称：</text>{{user.name}}</view>
-          <view class="wechat_id"><text class="zan-c-gray-darker">城市：</text>{{user.city}}</view>
-        </view>
-      </view>
+    <view wx:else>
+      <Info :info.sync="user" />
       <view class="page_spacing">
         <view class="zan-panel">
           <navigator class="zan-cell zan-cell--access" url="./order?selectedId=3">
@@ -80,8 +40,8 @@
             </navigator>
           </view>
         </view>
-        <order :list="walletData"/>
-        <wallet :list="settingData" />
+        <wallet :list="walletData"/>
+        <setting :list="settingData" />
         <view class="zan-panel">
           <view class="zan-cell" @tap="clearStorageSyn">
             <view class="zan-cell__icon iconfont icon-remind" style="color:#38f;"></view>
@@ -96,6 +56,7 @@
 import wepy from 'wepy'
 
 import List from '../../../components/comlist'
+import Info from '../../../components/com-userinfo'
 import Loading from '../../../components/loading'
 import page from '../../../common/page'
 import api from '../../../common/api'
@@ -108,7 +69,8 @@ export default class Personal extends wepy.page {
     order: List,
     wallet: List,
     setting: List,
-    Loading
+    Loading,
+    Info
   }
   data = {
     walletData: [
@@ -148,37 +110,16 @@ export default class Personal extends wepy.page {
     }
   }
   onLoad() {
+    this.getUserinfo()
   }
   onShow() {
     page.goTop()
-    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
-      this.showLoading = false
-      this.user = {
-        name: res.data.nickName ? res.data.nickName : '未知用户',
-        img: res.data.avatarUrl ? res.data.avatarUrl : '../../../images/user_2.png',
-        city: res.data.city ? res.data.city : '未知'
-      }
-      this.$apply()
-    })
   }
   methods = {
     clearStorageSyn() {
       wepy.showModal({
         title: '温馨提示',
         content: '清除本地缓存将重新授权，是否继续？',
-        confirmText: '继续',
-        success: (res) => {
-          if (res.confirm) {
-            wepy.clearStorageSync()
-            page.goAuthorize()
-          }
-        }
-      })
-    },
-    delAuth() {
-      wepy.showModal({
-        title: '温馨提示',
-        content: '确认清除授权，是否继续？',
         confirmText: '继续',
         success: (res) => {
           if (res.confirm) {
@@ -192,6 +133,18 @@ export default class Personal extends wepy.page {
         }
       })
     }
+  }
+  // 获取用户信息
+  getUserinfo() {
+    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
+      this.showLoading = false
+      this.user = {
+        name: res.data.nickName ? res.data.nickName : '未知用户',
+        img: res.data.avatarUrl ? res.data.avatarUrl : '../../../images/user_2.png',
+        city: res.data.city ? res.data.city : '未知'
+      }
+      this.$apply()
+    })
   }
 }
 </script>

@@ -7,46 +7,34 @@
 
 <template>
     <view class="zan-panel">
-        <block wx:for="{{list}}" wx:key="index" wx:for-index="index" wx:for-item="item">
-            <view class="zan-cell zan-cell--access" @tap="click({{index}}, {{item}})" hidden="{{item.path}}">
-                <image class="icon" src="{{item.icon}}" wx:if="{{item.icon}}"></image>
-                <view class="zan-cell__icon iconfont icon-{{item.iconfont}}" style="color:#38f;" wx:if="{{item.iconfont}}"></view>
-                <text class="zan-cell__bd">{{item.title}}</text>
-                <view class="zan-cell__ft"><text wx:if="{{item.rightcon}}">{{item.rightcon}}</text></view>
-            </view>
-            <navigator class="zan-cell zan-cell--access" url="{{ item.path }}" hidden="{{!item.path}}">
-              <view class="zan-cell__icon iconfont icon-{{item.iconfont}}" style="color:#38f;" wx:if="{{item.iconfont}}"></view>
-              <view class="zan-cell__bd">{{ item.title }}</view>
-              <view class="zan-cell__ft"><text class="zan-font-12 zan-c-gray-dark" wx:if="{{item.rightcon}}">{{item.rightcon}}</text></view>
-            </navigator>
-        </block>
+      <repeat for="{{list}}" key="index" index="index" item="item">
+        <navigator class="zan-cell zan-cell--access" url="{{ item.path }}" hidden="{{!item.path}}">
+          <view class="zan-cell__icon iconfont icon-{{item.iconfont}}" style="color:#38f;" wx:if="{{item.iconfont}}"></view>
+          <view class="zan-cell__bd">{{ item.title }}</view>
+          <view class="zan-cell__ft"><text class="zan-font-12 zan-c-gray-dark" wx:if="{{item.rightcon}}">{{item.rightcon}}</text></view>
+        </navigator>
+    </repeat>
     </view>
 </template>
 <script>
-    import wepy from 'wepy'
+import wepy from 'wepy'
 
-    export default class Comlist extends wepy.component {
-      props = {
-        list: {}
-      }
-      data = {
-      }
-      methods = {
-        click (index, item, evt) {
-          console.log('index: ' + index + 'clicked: ' + item.title)
-          if (this.list[index].action) {
-            this.list[index].action.call(this.$parent)
-          } else {
-          }
-        }
-      }
-
-      onLoad () {
-      }
-
-      load(list) {
-        this.list = list
-        this.$apply()
+export default class Comlist extends wepy.component {
+  props = {
+    list: {}
+  }
+  data = {
+  }
+  methods = {
+    click (index, item, evt) {
+      console.log('index: ' + index + 'clicked: ' + item.title)
+      if (this.list[index].action) {
+        this.list[index].action.call(this.$parent)
+      } else {
       }
     }
+  }
+  onLoad () {
+  }
+}
 </script>

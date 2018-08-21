@@ -1,0 +1,50 @@
+<style lang="scss">
+.item {
+      background-color: #fff;
+      padding: 15rpx 25rpx;
+      border-bottom: 1px solid #eeeeee;
+      &.info {
+          height: 140rpx;
+          position: relative;
+          .me_icon {
+              width: 130rpx;
+              height: 130rpx;
+              position: absolute;
+              margin-left: 10rpx;
+              image{
+                border-radius: 50%;
+              }
+          }
+          .wechat_info {
+              padding-left: 180rpx;
+              padding-top: 25rpx;
+              font-size: 30rpx;
+              .wechat_id {
+                  margin-top: 20rpx;
+                  color: #333;
+              }
+          }
+      }
+  }
+</style>
+<template>
+  <view class="info item">
+    <view class="me_icon">
+      <image mode="scaleToFill" src="{{info.img}}" style="width:130rpx;height:130rpx;"/>
+    </view>
+    <view class="wechat_info">
+      <view class="wechat_name"><text class="zan-c-gray-darker">昵称：</text>{{info.name}}</view>
+      <view class="wechat_id"><text class="zan-c-gray-darker">城市：</text>{{info.city}}</view>
+    </view>
+  </view>
+</template>
+<script>
+  import wepy from 'wepy'
+  export default class ComUserinfo extends wepy.component {
+    props = {
+      info: {}
+    }
+    onLoad() {
+    }
+  }
+</script>

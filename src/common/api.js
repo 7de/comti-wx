@@ -1,4 +1,3 @@
-
 import page from './page'
 
 import wepy from 'wepy'
@@ -6,13 +5,9 @@ import wepy from 'wepy'
 export default {
   apiData : {
     // 正式
-    // host: 'https://www.comtti.net/',
+    host: 'https://www.comtti.net/',
     // 测试
-    host: 'https://actor.comtti.net/pc/',
-    receiving: false, // 是否正在获取token
-    token: '',
-    userInfo: null,
-    code: null
+    // host: 'https://actor.comtti.net/pc/'
   },
   _request(method, url, params, header = {}) {
     const {

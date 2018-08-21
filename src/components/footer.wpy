@@ -8,11 +8,15 @@
 </style>
 <template>
   <view class="com-ft zan-center">
-      <text class="zan-font-12 zan-c-gray">CopyRight® 康体佳充电 2015-2018</text>
+      <text class="zan-font-12 zan-c-gray">CopyRight® {{name}}所有</text>
     </view>
 </template>
 <script>
 import wepy from 'wepy'
+import Info from '../common/setinfo'
 export default class Footer extends wepy.component {
+  data = {
+    name: Info.info.name
+  }
 }
 </script>
