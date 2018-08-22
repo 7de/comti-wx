@@ -6,7 +6,8 @@
       <zanLoadmoreA :loading="loadingShow"></zanLoadmoreA>
     </block>
     <block wx:else>
-      <zanTab :tab.sync="tab1" componentId="tab1" fixed></zanTab>
+      <!-- <zanTab :tab.sync="tab1" componentId="tab1"></zanTab> -->
+      <zanTab :tab.sync="tab1" componentId="tab1"></zanTab>
       <view class="tab-con" style="margin-top: 47px;">
         <view>
           <block wx:if="{{allData.length>0}}">
@@ -60,28 +61,23 @@ export default class Order extends wepy.page {
     updateLoadShow: true,
     updateLoadTxt: '没有更多了',
     timer: '',
-    currentTab: 3,
     tab1: {
       list: [
         {
           id: 3,
-          title: '全部',
-          url: '/pages/order'
+          title: '全部'
         },
         {
           id: 0,
-          title: '充电中',
-          url: '/pages/order-charg'
+          title: '充电中'
         },
         {
           id: 1,
-          title: '充电完成',
-          url: '/pages/order-compl'
+          title: '充电完成'
         },
         {
           id: 2,
-          title: '已关闭',
-          url: '/pages/order-close'
+          title: '已关闭'
         }
       ],
       selectedId: 3,
@@ -98,14 +94,13 @@ export default class Order extends wepy.page {
     zanTabChange(selectedId, event) {
       let { componentId } = event.source
       this[componentId].selectedId = selectedId
-      this.currentTab = Number(selectedId)
       this.allData = []
       this.allPagenum = 1
       this.loadingsubShow = true
       this.updateLoadShow = true
       this.$apply()
       clearTimeout(this.timer)
-      this.getData(this.allData, this.allPagenum, this.currentTab, this)
+      this.getData(this.allData, this.allPagenum, selectedId, this)
     }
   }
   onLoad(option) {
@@ -118,14 +113,12 @@ export default class Order extends wepy.page {
     })
     if (option.selectedId) {
       this.tab1.selectedId = option.selectedId
-      this.currentTab = parseInt(option.selectedId)
     }
-    this.getData(this.allData, this.allPagenum, this.currentTab, this)
+    this.getData(this.allData, this.allPagenum, this.tab1.selectedId, this)
   }
   onShow() {
   }
   onReachBottom() {
-    this.updateLoadShow = true
     let _length = this.allData.length
     if (_length === this.allPagtotal) {
       setTimeout(() => {
@@ -134,10 +127,8 @@ export default class Order extends wepy.page {
       }, 1000)
     } else {
       this.allPagenum++
-      this.getData(this.allData, this.allPagenum, this.currentTab, this)
+      this.getData(this.allData, this.allPagenum, this.tab1.selectedId, this)
     }
-  }
-  allLower() {
   }
   // 读取订单列表
   // data 数据列表， pageNum 每页显示数，state 状态
@@ -150,7 +141,6 @@ export default class Order extends wepy.page {
         that.allData = this.allData.concat(res.data)
       }
       that.loadingShow = false
-      that.updateLoadShow = false
       that.$apply()
       this.timer = setTimeout(() => {
         that.loadingsubShow = false

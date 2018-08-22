@@ -93,7 +93,6 @@ export default class WalletTopupRecord extends wepy.page {
         this.recordList = this.recordList.concat(data.list)
       }
       this.loadingShow = false
-      this.updateLoadShow = false
       this.$apply()
     })
   }

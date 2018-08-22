@@ -49,8 +49,8 @@ export default {
           }
         },
         fail: err => {
-          wepy.hideLoading()
           console.log(err)
+          wepy.hideLoading()
           if (err.errMsg === 'request:fail timeout') {
             wepy.showModal({
               title: '错误提示',
@@ -63,7 +63,8 @@ export default {
               }
             })
           } else {
-            let _msg = err.data.msg ? err.data.msg : err.errMsg
+            // let _msg = err.data.msg ? err.data.msg : err.errMsg
+            let _msg = err.errMsg
             wepy.showModal({
               title: '错误提示',
               content: _msg + ' 状态码：' + err.status,

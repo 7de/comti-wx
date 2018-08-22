@@ -43,6 +43,7 @@
   import zanToptips from '../components/zan-toptips'
   import api from '../common/api'
   import page from '../common/page'
+  import Info from '../common/setinfo'
   const URL = 'platform/weChat/wechatLogin'
   export default class Authorize extends wepy.page {
     config = {
@@ -53,6 +54,7 @@
       zanToptips
     }
     data = {
+      infoLogo: Info.info.logo,
       code: null,
       num: 0 // 授权次数
     }
