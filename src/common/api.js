@@ -5,9 +5,9 @@ import wepy from 'wepy'
 export default {
   apiData : {
     // 正式
-    host: 'https://www.comtti.net/',
+    // host: 'https://www.comtti.net/',
     // 测试
-    // host: 'https://actor.comtti.net/pc/'
+    host: 'https://actor.comtti.net/pc/'
   },
   _request(method, url, params, header = {}) {
     const {
@@ -58,21 +58,16 @@ export default {
               confirmText: '我知道了',
               success: (res) => {
                 if (res.confirm) {
-                  page.goBack()
                 }
               }
             })
           } else {
             // let _msg = err.data.msg ? err.data.msg : err.errMsg
-            let _msg = err.errMsg
             wepy.showModal({
               title: '错误提示',
-              content: _msg + ' 状态码：' + err.status,
-              showCancel: false,
+              content: '网络异常，请稍后重试',
               confirmText: '我知道了',
-              success: (err) => {
-                if (res.confirm) {
-                }
+              success: (res) => {
               }
             })
           }

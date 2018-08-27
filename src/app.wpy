@@ -114,7 +114,7 @@ export default class extends wepy.app {
       }
     ],
     networkTimeout: {
-      request: 20000
+      request: 35000
     }
   }
   globalData = {

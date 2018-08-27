@@ -160,19 +160,7 @@ export default class Home extends wepy.page {
   onShow() {
     this.$parent.token = this.$parent.token ? this.$parent.token : wepy.getStorageSync('token_r')
     if (this.$parent.token) {
-      wepy.showLoading({
-        title: '加载中...',
-        mask: true
-      })
-      // 判断是否有进行中的订单
-      api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
-        wepy.hideLoading()
-        let _len = data.length
-        console.log('订单' + _len)
-        if (_len > 0) {
-          this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/subpages/pages/order?selectedId=0' })
-        }
-      })
+      this.chargingOrder()
     } else {
       page.goauthorize()
     }
@@ -213,7 +201,6 @@ export default class Home extends wepy.page {
   }
   toggleTopPopup() {
     this.showMap = false
-    this.polyline = []
   }
   goSite() {
     wepy.openLocation({
@@ -276,10 +263,10 @@ export default class Home extends wepy.page {
           id: 4,
           iconPath: '/images/pos.png',
           position: {
-            left: res.windowWidth / 2 - 14,
-            top: res.windowHeight / 2 - 32,
-            width: 28,
-            height: 28
+            left: res.windowWidth / 2 - 15,
+            top: res.windowHeight / 2 - 48,
+            width: 30,
+            height: 30
           },
           clickable: false
         }]
@@ -296,19 +283,10 @@ export default class Home extends wepy.page {
         let _urlBox = _url.split('num=')
         const _numNum = _urlBox[1]
         console.log(_numNum)
-        wepy.showLoading({
-          title: '正在查询设备...',
-          mask: true
-        })
         if (_numNum) {
-          api.get(equiUrl + '?rdSession=' + _this.$parent.token + '&serialNo=' + _numNum + '&tagsFlag=true').then(res => {
-            wepy.hideLoading()
-            wepy.navigateTo({
-              url: '/pages/scancode/index?num=' + _numNum
-            })
-          })
+          this.checkEqui(_this.$parent.token, _numNum)
         } else {
-          this.showTopTips('设备编号为空，请重新扫码')
+          this.showTopTips('设备编号有误，请重新扫码')
         }
       }
     })
@@ -322,9 +300,6 @@ export default class Home extends wepy.page {
         let longitude = res.longitude
         this.longitude = longitude
         this.latitude = latitude
-        /* this.$parent.globalData.longitude = longitude
-        this.$parent.globalData.latitude = latitude
-        this.$apply() */
       },
       fail: (res) => {
         this.getScopeLocation()
@@ -368,12 +343,71 @@ export default class Home extends wepy.page {
       }
     })
   }
+  // 查询充电中订单
+  chargingOrder() {
+    wepy.showLoading({
+      title: '加载中...',
+      mask: true
+    })
+    // 判断是否有进行中的订单
+    api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
+      wepy.hideLoading()
+      let _len = data.length
+      console.log('订单' + _len)
+      if (_len > 0) {
+        this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/subpages/pages/order?selectedId=0' })
+      }
+    })
+  }
   unableTopTips() {
     this.showTopTips('功能暂未开通，敬请期待...')
   }
   // 顶部提示
   showTopTips(content) {
     this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
+  }
+  // 设备查询
+  checkEqui(token, code) {
+    wepy.showLoading({
+      title: '设备查询中...',
+      mask: true
+    })
+    wepy.request({
+      url: api.apiData.host + equiUrl + '?rdSession=' + token + '&serialNo=' + code + '&tagsFlag=true',
+      method: 'GET',
+      success: res => {
+        if (res.data.code === 0) {
+          wepy.hideLoading()
+          wepy.navigateTo({
+            url: '/pages/scancode/index?num=' + code
+          })
+        } else {
+          wepy.hideLoading()
+          if (res.data.code === -100) {
+            wepy.navigateTo({
+              url: '/pages/authorize'
+            })
+          } else {
+            let _msg = res.data.msg ? res.data.msg : res.data.errMsg
+            wepy.showToast({
+              title: _msg,
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        }
+      },
+      fail: (err) => {
+        console.log(err)
+        wepy.showModal({
+          title: '错误提示',
+          content: '网络异常，请稍后重试',
+          confirmText: '我知道了',
+          success: (res) => {
+          }
+        })
+      }
+    })
   }
 }
 </script>

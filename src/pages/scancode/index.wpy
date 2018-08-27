@@ -70,7 +70,7 @@
       </view>
       <view class="zan-panel-title">请选择充电时长：</view>
       <view class="zan-panel">
-        <zanSelect1 :items="items" :checkedValue.sync="checked_base" :disabled.sync="timeDisabled" componentId="base" ></zanSelect1>
+        <zanSelect1 :items="items" :checkedValue.sync="checked_base" :disabled.sync="equiDisabled" componentId="base" ></zanSelect1>
       </view>
       <view class="zan-panel-title">预估金额：<text class="zan-font-12">(电费{{changeFee}}+服务费{{serviceFee}})</text></view>
       <view class="zan-panel">
@@ -162,18 +162,17 @@ export default class ScanIndex extends wepy.page {
         name: '12小时'
       }
     ],
-    checked_base: -1,
+    checked_base: 120,
     code: null, // 插座ID
     input_focus: false,
-    time_value: 0,
+    time_value: 12, // 充电时长
+    charger_mode: 3, // 充电模式
     account: '加载中...',
-    charger_mode: null, // 充电模式
     changeFee: '0.00', // 充电费
     serviceFee: '0.00', // 服务费
     totalFee: '0.00', // 总费用
     _token: null,
-    equiData: null,
-    timeDisabled: false
+    equiDisabled: false
   }
   onLoad(option) {
     // 页面传值
@@ -204,6 +203,14 @@ export default class ScanIndex extends wepy.page {
       })
     }
   }
+  onReady() {
+    // 设备可用，默认获取‘充满自停’预估金额
+    if (!this.equiDisabled) {
+      this.checkMoney()
+    } else {
+      this.equiDisabledFun()
+    }
+  }
   methods = {
     blurInput(e) {
       let _code = e.detail.value
@@ -217,9 +224,12 @@ export default class ScanIndex extends wepy.page {
     // 订单提交
     goCharging() {
       const _this = this
-      if (!this.code || !this.equiData) {
+      if (!this.code) {
         this.input_focus = true
-        this.showTopTips('请确认二维码编号是否填写或者正确')
+        this.showTopTips('请确认二维码编号是否填写')
+      } else if (this.equiDisabled) {
+        this.input_focus = true
+        this.showTopTips('二维码编号失效，请重新填写')
       } else if (!this.time_value) {
         this.showTopTips('请选择充电时长')
       } else if (this.totalFee > parseFloat(this.account)) {
@@ -241,6 +251,7 @@ export default class ScanIndex extends wepy.page {
                 streamNo: _this.code,
                 totalFee: _this.totalFee * 100
               }).then(res => {
+                console.log(res)
                 wepy.hideLoading()
                 if (res.code === 0) {
                   wepy.navigateTo({
@@ -289,37 +300,43 @@ export default class ScanIndex extends wepy.page {
         url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
         method: 'GET',
         success: res => {
-          console.log(res)
           wepy.hideLoading()
           if (res.data.code === 0) {
-            this.equiData = res.data.data
-            this.timeDisabled = false
+            this.equiDisabled = false
             this.$apply()
-          } else if (res.data.code === -100) {
-            console.log('未登录')
-          } else if (res.data.code === -50) {
-            this.timeoutEqui(res.data.msg)
-            this.timeDisabled = true
+            /* this.equiDisabled = false
+            this.checked_base = 120
+            this.time_value = 12
+            this.charger_mode = 3
             this.$apply()
+            this.checkMoney() */
           } else {
-            let _msg = res.data.msg ? res.data.msg : res.data.errMsg
-            wepy.showModal({
-              title: '温馨提示',
-              content: _msg,
-              confirmText: '首页扫码',
-              success: function(res) {
-                if (res.confirm) {
-                  page.goHome()
-                }
-              }
-            })
-            this.timeDisabled = true
+            // 设备无效不可选择时长
+            this.equiDisabled = true
             this.$apply()
+            this.equiDisabledFun()
+            if (res.data.code === -100) {
+              console.log('未登录')
+            } else if (res.data.code === -50) {
+              this.timeoutEqui(res.data.msg)
+            } else {
+              let _msg = res.data.msg ? res.data.msg : res.data.errMsg
+              wepy.showModal({
+                title: '温馨提示',
+                content: _msg,
+                confirmText: '首页扫码',
+                success: function(res) {
+                  if (res.confirm) {
+                    page.goHome()
+                  }
+                }
+              })
+            }
           }
         },
         fail: (err) => {
           // 时长不可选
-          this.timeDisabled = true
+          this.equiDisabled = true
           this.$apply()
           let _msg = err.data.msg ? err.data.msg : err.errMsg
           if (err.data.code === -50) {
@@ -327,11 +344,9 @@ export default class ScanIndex extends wepy.page {
           } else {
             wepy.showModal({
               title: '错误提示',
-              content: _msg,
+              content: '网络异常，请稍后重试',
+              confirmText: '我知道了',
               success: (res) => {
-                if (res.confirm) {
-                  page.goHome()
-                }
               }
             })
           }
@@ -348,7 +363,6 @@ export default class ScanIndex extends wepy.page {
       mask: true
     })
     api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
-      console.log(res)
       wepy.hideLoading()
       this.showLoading = false
       this.$apply()
@@ -403,6 +417,15 @@ export default class ScanIndex extends wepy.page {
   // 顶部提示
   showTopTips(content) {
     this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
+  }
+  // 设备不可用,时长默认不选择,预估金额为零
+  equiDisabledFun() {
+    this.checked_base = -1
+    this.time_value = 0
+    this.changeFee = api.fotmatMoney(0)
+    this.serviceFee = api.fotmatMoney(0)
+    this.totalFee = api.fotmatMoney(0)
+    this.$apply()
   }
 }
 </script>

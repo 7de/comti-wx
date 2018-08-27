@@ -104,6 +104,10 @@ export default class Order extends wepy.page {
     }
   }
   onLoad(option) {
+    setTimeout(() => {
+      this.loadingShow = false
+      this.$apply()
+    }, 1000)
     wepy.getSystemInfo({
       success: (res) => {
         this.height = res.windowHeight
@@ -140,12 +144,12 @@ export default class Order extends wepy.page {
       } else {
         that.allData = this.allData.concat(res.data)
       }
-      that.loadingShow = false
-      that.$apply()
+      /* that.loadingShow = false
+      that.$apply() */
       this.timer = setTimeout(() => {
         that.loadingsubShow = false
         that.$apply()
-      }, 500)
+      }, 1000)
     })
   }
 }

@@ -41,8 +41,8 @@
   >
     <view class="zan-row">
       <label wx:for="{{ items }}" wx:key="value" class="zan-col zan-col-8">
-        <view class="com-select {{item.value === checkedValue?'com-select_active':''}} {{disabled?'disabled':''}}">
-          <radio class="zan-select__radio" value="{{ item.value }}" checked="{{ item.value === checkedValue }}" disabled="{{disabled}}" />
+        <view class="com-select {{item.value == checkedValue?'com-select_active':''}} {{disabled?'disabled':''}}">
+          <radio class="zan-select__radio" value="{{ item.value }}" checked="{{ item.value == checkedValue }}" disabled="{{disabled}}" />
           <view class="com-select__bd">
             {{ item.name }}
           </view>
