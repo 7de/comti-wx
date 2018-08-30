@@ -276,7 +276,7 @@ export default class Home extends wepy.page {
   }
   // 扫一扫
   openCode() {
-    const _this = this
+    // const _this = this
     wepy.scanCode({
       success: (res) => {
         let _url = decodeURIComponent(res.result) // 字符分割
@@ -284,7 +284,10 @@ export default class Home extends wepy.page {
         const _numNum = _urlBox[1]
         console.log(_numNum)
         if (_numNum) {
-          this.checkEqui(_this.$parent.token, _numNum)
+          // this.checkEqui(_this.$parent.token, _numNum)
+          wepy.navigateTo({
+            url: '/pages/scancode/index?num=' + _numNum
+          })
         } else {
           this.showTopTips('设备编号有误，请重新扫码')
         }
@@ -356,6 +359,8 @@ export default class Home extends wepy.page {
       console.log('订单' + _len)
       if (_len > 0) {
         this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/subpages/pages/order?selectedId=0' })
+      } else {
+        this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 0, urlShow: true, url: '/pages/subpages/pages/order?selectedId=0' })
       }
     })
   }
@@ -376,11 +381,19 @@ export default class Home extends wepy.page {
       url: api.apiData.host + equiUrl + '?rdSession=' + token + '&serialNo=' + code + '&tagsFlag=true',
       method: 'GET',
       success: res => {
+        wepy.showLoading({
+          title: '正在校验中...',
+          mask: true
+        })
         if (res.data.code === 0) {
-          wepy.hideLoading()
-          wepy.navigateTo({
-            url: '/pages/scancode/index?num=' + code
-          })
+          if (res.data.success) {
+            wepy.hideLoading()
+            wepy.navigateTo({
+              url: '/pages/scancode/index?num=' + code
+            })
+          } else {
+            wepy.hideLoading()
+          }
         } else {
           wepy.hideLoading()
           if (res.data.code === -100) {

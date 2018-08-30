@@ -19,7 +19,7 @@
     line-height: 28px;
   }
   .scan-input{
-    width: 80%;
+    width: 70%;
     height:28px;
     font-size:16px;
     font-weight:bold
@@ -51,6 +51,14 @@
     width: 90%;
   }
 }
+.agin-btn{
+  position: relative;
+  .icon-zhongshi{
+    position:absolute;
+    top:-7px;
+    left:0;
+  }
+}
 </style>
 <template>
   <view class="container scan-box">
@@ -65,6 +73,7 @@
               <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
             </view>
             <input type="number" class="zan-pull-left zan-field__input scan-input" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/>
+            <!-- <view wx:if="{{equiDisabled}}" class="zan-pull-left zan-tag zan-tag--primary" @tap="againEqui">重试</view> -->
           </view>
         </view>
       </view>
@@ -97,8 +106,8 @@
           </view>
         </view>
       </view>
-      <view class="zan-panel" style="margin:30rpx 40rpx">
-        <button class="zan-btn zan-btn--primary" @tap="goCharging">确认并提交</button>
+      <view class="zan-panel" style="margin:30rpx 40rpx;">
+        <button class="zan-btn zan-btn--primary {{submitDisabled?'zan-btn--disabled':''}}" disabled="{{submitDisabled}}" @tap="goCharging">确认并提交</button>
       </view>
     </block>
     <zanToptips/>
@@ -172,7 +181,9 @@ export default class ScanIndex extends wepy.page {
     serviceFee: '0.00', // 服务费
     totalFee: '0.00', // 总费用
     _token: null,
-    equiDisabled: false
+    equiDisabled: false,
+    equiDisabledMsg: '',
+    submitDisabled: false
   }
   onLoad(option) {
     // 页面传值
@@ -214,12 +225,14 @@ export default class ScanIndex extends wepy.page {
   methods = {
     blurInput(e) {
       let _code = e.detail.value
-      if (this.code !== _code) {
+      /* if (this.code !== _code) {
         this.code = _code
         this.$apply()
         // 设备查询
         this.checkEqui()
-      }
+      } */
+      this.code = _code
+      this.checkEqui()
     },
     // 订单提交
     goCharging() {
@@ -228,8 +241,9 @@ export default class ScanIndex extends wepy.page {
         this.input_focus = true
         this.showTopTips('请确认二维码编号是否填写')
       } else if (this.equiDisabled) {
-        this.input_focus = true
-        this.showTopTips('二维码编号失效，请重新填写')
+        /* this.input_focus = true
+        this.showTopTips(this.equiDisabledMsg) */
+        this.checkEqui()
       } else if (!this.time_value) {
         this.showTopTips('请选择充电时长')
       } else if (this.totalFee > parseFloat(this.account)) {
@@ -245,25 +259,43 @@ export default class ScanIndex extends wepy.page {
                 title: '开启充电...',
                 mask: true
               })
+              this.submitDisabled = true
+              this.$apply()
               api.post(chargrURL + 'chargeStart?rdSession=' + _this._token, {
                 chargerMode: _this.charger_mode,
                 chargerValue: _this.time_value,
                 streamNo: _this.code,
                 totalFee: _this.totalFee * 100
               }).then(res => {
-                console.log(res)
+                console.log()
+                this.submitDisabled = false
+                this.$apply()
                 wepy.hideLoading()
                 if (res.code === 0) {
-                  wepy.navigateTo({
+                  wepy.reLaunch({
                     url: '/pages/subpages/pages/charging?orderNo=' + res.data + '&time=' + _this.time_value
                   })
                 }
+              }).catch(error => {
+                wepy.showModal({
+                  title: '错误提示',
+                  content: '充电响应超时，请重试',
+                  confirmText: '我知道了',
+                  success: (res) => {
+                  }
+                })
+                this.submitDisabled = false
+                this.$apply()
+                console.log(error)
               })
             }
           }
         })
         // 确认提示 --end
       }
+    },
+    againEqui() {
+      this.checkEqui()
     }
   }
   events = {
@@ -301,15 +333,11 @@ export default class ScanIndex extends wepy.page {
         method: 'GET',
         success: res => {
           wepy.hideLoading()
+          console.log(res)
           if (res.data.code === 0) {
+            console.log(res.data)
             this.equiDisabled = false
             this.$apply()
-            /* this.equiDisabled = false
-            this.checked_base = 120
-            this.time_value = 12
-            this.charger_mode = 3
-            this.$apply()
-            this.checkMoney() */
           } else {
             // 设备无效不可选择时长
             this.equiDisabled = true
@@ -318,9 +346,13 @@ export default class ScanIndex extends wepy.page {
             if (res.data.code === -100) {
               console.log('未登录')
             } else if (res.data.code === -50) {
+              this.equiDisabledMsg = res.data.msg
+              this.$apply()
               this.timeoutEqui(res.data.msg)
             } else {
               let _msg = res.data.msg ? res.data.msg : res.data.errMsg
+              this.equiDisabledMsg = _msg
+              this.$apply()
               wepy.showModal({
                 title: '温馨提示',
                 content: _msg,

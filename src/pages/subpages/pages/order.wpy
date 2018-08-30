@@ -107,7 +107,7 @@ export default class Order extends wepy.page {
     setTimeout(() => {
       this.loadingShow = false
       this.$apply()
-    }, 1000)
+    }, 1500)
     wepy.getSystemInfo({
       success: (res) => {
         this.height = res.windowHeight

@@ -25,13 +25,13 @@ export default {
           const {
             data
           } = res
-          wepy.hideLoading()
           if (data.code === 500 || data.status === 500) {
             wepy.showToast({
               title: '服务器错误，请联系管理员',
               icon: 'none',
               duration: 2000
             })
+            resolve(data)
             // resolve(this._request(method, url, params))
           } else if (data.code === -1) {
             console.log(res)
@@ -40,6 +40,7 @@ export default {
               icon: 'none',
               duration: 2000
             })
+            resolve(data)
           } else if (data.code === -100) {
             wepy.navigateTo({
               url: '/pages/authorize'
@@ -49,7 +50,7 @@ export default {
           }
         },
         fail: err => {
-          console.log(err)
+          reject(err)
           wepy.hideLoading()
           if (err.errMsg === 'request:fail timeout') {
             wepy.showModal({
@@ -63,13 +64,14 @@ export default {
             })
           } else {
             // let _msg = err.data.msg ? err.data.msg : err.errMsg
-            wepy.showModal({
+            /* wepy.showModal({
               title: '错误提示',
               content: '网络异常，请稍后重试',
               confirmText: '我知道了',
               success: (res) => {
               }
-            })
+            }) */
+            console.log('请求失败')
           }
         }
       })
