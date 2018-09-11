@@ -1,0 +1,304 @@
+<style lang="scss">
+.card-box{
+  padding: 30rpx;
+}
+.oth-input{
+  width: 80%;
+  height: 36px;
+  line-height: 36px;
+  font-size: 14px;
+  border:none;
+}
+.card-wrong{
+  .icon-wrong{
+    color:red;
+    padding-right:10px;
+  }
+}
+
+</style>
+<template>
+<view class="container">
+  <view class="page_spacing">
+    <view class="zan-panel zan-panel--radius card-wrong" wx:if="{{invalidCard || status==2}}">
+      <view class="zan-cell">
+        <view class="iconfont icon-wrong zan-font-22"></view>
+        <view class="zan-cell__bd">这是一张无效的卡</view>
+      </view>
+    </view>
+    <block wx:else>
+      <view class="zan-panel zan-panel--radius">
+        <view class="card-box">
+          <view class="zan-font-14 zan-c-gray-dark">智能卡号：</view>
+          <view class="zan-font-26 margin-top-10">{{newCode}}</view>
+          <view class="zan-font-12 zan-c-gray-dark margin-top-10">所属商户：{{cardData.orgName ? cardData.orgName:''}}</view>
+        </view>
+      </view>
+      <view class="zan-panel zan-panel--radius">
+        <view class="zan-cell">
+          <view class="zan-cell__bd zan-c-gray-dark">用户昵称：{{cardData.nickName ? cardData.nickName : name}}</view>
+          <view class="zan-cell__ft">
+            <button class="zan-btn zan-btn--warn zan-btn--mini" style="background:#FF7300;padding:0 8px;" wx:if="{{status===0}}" @tap="bindingBtn">点击绑定</button>
+          </view>
+        </view>
+      </view>
+      <view class="zan-panel zan-panel--radius card-input">
+        <view class="zan-cell zan-cell--noborder" style="padding-bottom:0;padding-top:70rpx">
+          <view class="zan-cell__bd" style="overflow:hidden;">
+            <view class="scan-subtitle zan-pull-left">
+              <view class="iconfont zan-font-26">￥</view>
+            </view>
+            <input class="zan-pull-left oth-input" type="digit" value="{{money_input}}" name="moneyinp" placeholder="请输入充值金额" bindblur="bindblur"/>
+          </view>
+        </view>
+        <view class="zan-hairline--top" style="margin:0 30rpx"></view>
+        <view class="zan-cell">
+          <view class="zan-cell__bd zan-font-14 zan-c-gray-dark">余额：<text class="zan-c-{{cardData.state==1?'gray-dark':'red'}}">{{cardData.state==1?'***' : account}}元</text></view>
+        </view>
+      </view>
+      <view>
+        <button class="zan-btn zan-btn--primary {{(status!==1 || showBtn)?'zan-btn--disabled':''}}" style="margin-top:130rpx;" @tap="topup" disabled="{{status!==1 || showBt}}">在线充值</button>
+      </view>
+    </block>
+  </view>
+  <zanToptips />
+</view>
+</template>
+<script>
+import wepy from 'wepy'
+import zanToptips from '../components/zan-toptips'
+import api from '../common/api'
+import page from '../common/page'
+// const userUrl = 'platform/platform/customer/getCustomerByKey' // 用户信息
+const userUrl = 'platform/platform/customer/getCustomerByToken' // 用户信息
+const cardUrl = 'platform/platform/smartCard/findSmartCardByCode' // 卡信息
+const balanceUrl = 'wallet/customWallet/queryBalanceBySession' // 用户余额
+const bindUrl = 'platform/platform/smartCard/updateCtkSmartCard' // 绑定卡
+const payUrl = 'wxpay/wxpay/jsapi/pay' // 支付
+export default class Cardadd extends wepy.page {
+  config = {
+    'navigationBarTitleText': '智能充电卡'
+  }
+  components = {
+    zanToptips
+  }
+  data = {
+    code: '',
+    newCode: '', // 卡号转译后显示
+    userNickname: '',
+    name: '请先绑定用户',
+    account: '0.00',
+    money_input: null,
+    status: null, // 卡状态 0 未绑定 1 已绑定 2 已注销
+    state: null, // 归属 null未绑定 0 本人 1 他人
+    cardData: {},
+    userId: null, // 绑定卡用户ID
+    showBtn: true, // 显示绑定按钮
+    disBtn: false, // 按钮不可用
+    invalidCard: false // 无效卡
+  }
+  onLoad(option) {
+    wepy.showLoading({
+      title: '加载中'
+    })
+    if (option.num) {
+      this.code = option.num
+      console.log(option.num)
+    } else if (option.q !== undefined) {
+      let _url = decodeURIComponent(option.q) // 字符分割
+      let _urlBox = _url.split('card=')
+      this.code = _urlBox[1]
+    }
+    if (this.code) {
+      this.newCode = this.fotmatCard(this.code)
+    }
+  }
+  onShow() {
+    setTimeout(function() {
+      wepy.hideLoading()
+    }, 1000)
+    if (this.$parent.token) {
+      this.getCard()
+      // this.getBalance()
+      this.getUser()
+    } else {
+      wepy.showModal({
+        title: '温馨提示',
+        content: '您暂未授权或授权已过期',
+        showCancel: false,
+        confirmText: '去授权',
+        success: function(res) {
+          if (res.confirm) {
+            page.goAuthorize()
+          }
+        }
+      })
+    }
+  }
+  onReady() {
+  }
+  // input失去焦距
+  bindblur(e) {
+    let _value = parseFloat(e.detail.value)
+    this.money_input = _value
+    this.$apply()
+  }
+  getBalance() {
+    // 账户余额查询
+    api.get(balanceUrl + '?rdSession=' + this.$parent.token).then(res => {
+      console.log(res.code)
+      this.account = parseFloat(api.fotmatMoney(res.data))
+      this.$apply()
+    })
+  }
+  // 获取卡号信息
+  getCard() {
+    const _this = this
+    api.get(cardUrl + '?code=' + this.code, {}, {
+      'token': this.$parent.token
+    }).then(res => {
+      wepy.hideLoading()
+      // status 0 未绑定 1 已绑定 2 已注销
+      // state null 未绑定 0 自己卡 1 别人卡
+      let _data = res.data
+      console.log(_data)
+      if (_data) {
+        _this.showBtn = false
+        _this.invalidCard = false
+        _this.status = _data.status
+        _this.state = _data.state
+        _this.userId = _data.userId
+        _this.cardData = _data
+        _this.$apply()
+        _this.checkStatus(_data.status)
+      } else {
+        wepy.showModal({
+          title: '温馨提示',
+          content: '该卡已注销或不存在，请重新扫码',
+          showCancel: false,
+          confirmText: '我知道了',
+          success: (res) => {
+            if (res.confirm) {
+              _this.invalidCard = true
+              _this.$apply()
+              /* wepy.reLaunch({
+                url: '/pages/subpages/pages/card'
+              }) */
+            }
+          }
+        })
+      }
+    }).catch(err => {
+      wepy.hideLoading()
+      console.log(err)
+    })
+  }
+  // 充值
+  topup() {
+    let _money = this.money_input
+    let _goodTitle = this.state === 1 ? '给他人' : ''
+    if (!_money) {
+      this.showTopTips('请输入充值金额')
+    } else if (_money < 0.01) {
+      this.showTopTips('请输入大于或等于0.01的金额')
+      this.money_input = ''
+    } else {
+      wepy.showModal({
+        title: '温馨提示',
+        content: `请确认是否${_goodTitle}充值${_money}元？`,
+        confirmText: '马上充值',
+        success: res => {
+          const _this = this
+          if (res.confirm) {
+            api.post(payUrl + '?rdSession=' + _this.$parent.token + '&id=' + this.userId, {
+              goodsId: 1, // 商品ID
+              goodsName: '充值' + _money + '元', // 商品名称
+              totalfee: _money * 100  // 充值金额 转为以分为单位
+            }).then(res => {
+              console.log(res)
+              let _data = res.data
+              // 调用支付接口
+              wepy.requestPayment({
+                'timeStamp': _data.timeStamp,
+                'nonceStr': _data.nonceStr,
+                'package': _data.package,
+                'signType': 'MD5',
+                'paySign': _data.paySign,
+                'success': res => {
+                  _this.getBalance()
+                  _this.money_input = ''
+                  this.$apply()
+                  wepy.showToast({
+                    title: '充值成功',
+                    icon: 'success',
+                    duration: 2000
+                  })
+                },
+                'fail': err => {
+                  _this.showTopTips('充值失败，请稍后再试')
+                  console.log(err.errMsg)
+                }
+              })
+            })
+          }
+        }
+      })
+    }
+  }
+  // 绑定
+  bindingBtn() {
+    const _this = this
+    wepy.showModal({
+      title: '温馨提示',
+      content: `是否绑定该${_this.code}智能卡？`,
+      success: res => {
+        console.log(_this.$parent.token)
+        if (res.confirm) {
+          api.post(bindUrl, {
+            code: _this.code,
+            nickName: _this.userNickname,
+            source: 1, // 1,微信客户 2,支付宝客户
+            token: _this.$parent.token
+          }).then(res => {
+            this.getCard()
+          })
+        }
+      }
+    })
+  }
+  // 获取用户昵称
+  getUser() {
+    api.get(userUrl).then(res => {
+      this.userNickname = res.data.nickName
+      this.$apply()
+    })
+  }
+  // 状态处理
+  checkStatus(status) {
+    const that = this
+    if (status === 0) {
+      wepy.showModal({
+        title: '温馨提示',
+        content: '该卡暂未绑定用户，是否绑定？',
+        confirmText: '马上绑定',
+        success: function(res) {
+          if (res.confirm) {
+            that.bindingBtn()
+          }
+        }
+      })
+    } else if (status === 1) {
+      this.getBalance()
+    }
+  }
+  // 顶部提示
+  showTopTips(content) {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
+  }
+  // 转换卡号
+  fotmatCard(str) {
+    let _str = api.fotmatCard(str)
+    return _str
+  }
+}
+</script>

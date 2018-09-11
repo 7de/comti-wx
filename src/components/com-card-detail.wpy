@@ -1,0 +1,70 @@
+<style lang="scss">
+.card-title{
+  height: 90rpx;
+  line-height: 90rpx;
+  padding: 0 30rpx;
+  background-color: #e5e5e5;
+}
+.card-content{
+  padding-bottom: 60rpx;
+  font-size:12px;
+  background-color: #fff;
+}
+.card-conten__title{
+  color: #FF7300
+}
+</style>
+<template>
+<repeat for="{{list}}" key="index" index="index" item="item">
+    <view class="zan-panel zan-panel--radius">
+      <view class="card-title zan-clearfix">
+        <image style="width: 60rpx;height:60rpx;margin-top:15rpx;padding-right:20rpx;" mode="scaleToFill" src="../images/card_logo.png" class="zan-pull-left"/>
+        <text class="zan-font-14">充电智能卡详情</text>
+      </view>
+      <view class="card-content margin-top-30">
+        <view class="zan-cell zan-cell--switch zan-cell--noborder">
+          <view class="zan-cell__bd zan-font-20 zan-center card-conten__title">ID:{{item.code}}</view>
+        </view>
+        <view class="zan-cell zan-cell--card zan-cell--noborder margin-top-30">
+          <view class="zan-cell__bd zan-c-gray-dark">用户昵称</view>
+          <view class="zan-cell__ft">{{item.nickName?item.nickName:''}}</view>
+        </view>
+        <view class="zan-cell zan-cell--card zan-cell--noborder">
+          <view class="zan-cell__bd zan-c-gray-dark">当前状态</view>
+          <view class="zan-cell__ft">{{item.status===0 ? '待激活' : item.status===1 ? '正常' : item.status===2 ? '已注销' : ''}}</view>
+        </view>
+        <view class="zan-cell zan-cell--card zan-cell--noborder">
+          <view class="zan-cell__bd zan-c-gray-dark">配卡时间</view>
+          <view class="zan-cell__ft">{{creatTime}}</view>
+        </view>
+        <view class="zan-cell zan-cell--card zan-cell--noborder">
+          <view class="zan-cell__bd zan-c-gray-dark">激活时间</view>
+          <view class="zan-cell__ft">{{bindTime}}</view>
+        </view>
+        <view class="zan-cell zan-cell--card zan-cell--noborder">
+          <view class="zan-cell__bd zan-c-gray-dark">绑定终端</view>
+          <view class="zan-cell__ft">{{item.source==1?'微信小程序': item.source==2 ? '支付宝小程序' : ''}}</view>
+        </view>
+        <view class="zan-hairline--top" style="margin:30rpx"></view>
+        <view class="zan-cell zan-cell--card zan-cell--noborder">
+          <view class="zan-cell__bd zan-c-gray-dark">订单数量</view>
+          <view class="zan-cell__ft">{{item.orderNum}}</view>
+        </view>
+        <view class="zan-cell zan-cell--card">
+          <view class="zan-cell__bd zan-c-gray-dark">有效日期</view>
+          <view class="zan-cell__ft">永久有效</view>
+        </view>
+      </view>
+    </view>
+</repeat>
+</template>
+<script>
+import wepy from 'wepy'
+export default class Comcarddetail extends wepy.component {
+  props = {
+    list: Object,
+    creatTime: String,
+    bindTime: String
+  }
+}
+</script>

@@ -12,7 +12,7 @@ export default {
       url: '/pages/authorize'
     })
   },
-  // 返回授权
+  // 返回授权 能返回之前页
   goAuthorize() {
     wepy.navigateTo({
       url: '/pages/authorize'

@@ -1,0 +1,19 @@
+<template>
+    <web-view src="https://www.comtika.cn/#/register"></web-view>
+</template>
+<script>
+import wepy from 'wepy'
+export default class settingUser extends wepy.page {
+  data = {}
+  onLoad () {
+    wepy.showLoading({
+      title: '加载中'
+    })
+  }
+  onShow() {
+    setTimeout(function() {
+      wepy.hideLoading()
+    }, 2000)
+  }
+}
+</script>

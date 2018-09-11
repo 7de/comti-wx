@@ -1,0 +1,72 @@
+<style lang="scss">
+.card-container {
+  height:100vh;
+  background: #f5f5f5;
+  position: relative;
+}
+
+</style>
+
+<template>
+<view class="card-container">
+  <view class="page_spacing">
+    <carddetail :list.sync="cardData" :creatTime.sync="creatTime" :bindTime.sync="bindTime" />
+  </view>
+</view>
+</template>
+<script>
+import wepy from 'wepy'
+import carddetail from '../../../components/com-card-detail'
+import api from '../../../common/api'
+const cardUrl = 'platform/platform/smartCard/findCtkSmartCardList'
+export default class Carddetail extends wepy.page {
+  config = {
+    'navigationBarTitleText': '我的卡包'
+  }
+  components = {
+    carddetail
+  }
+  data = {
+    code: null,
+    cardData: {},
+    creatTime: '',
+    bindTime: ''
+  }
+  onLoad(option) {
+    wepy.showLoading({
+      title: '加载中'
+    })
+    if (option.code) {
+      this.code = option.code
+    }
+    this.getCard()
+  }
+  onShow() {
+    setTimeout(function() {
+      wepy.hideLoading()
+    }, 10000)
+  }
+  // 获取卡号信息
+  getCard() {
+    // const _this = this
+    api.get(cardUrl, {
+      code: this.code
+    }).then(res => {
+      wepy.hideLoading()
+      let _data = res.data.list[0]
+      this.cardData = res.data.list
+      this.creatTime = this.formatDate(_data.batchTime)
+      this.bindTime = this.formatDate(_data.bindingTime)
+      this.$apply()
+    }).catch(err => {
+      wepy.hideLoading()
+      console.log(err)
+    })
+  }
+  // 时间戳转换
+  formatDate(time) {
+    const date = new Date(time)
+    return api.formatDate(date, 'yyyy-MM-dd hh:mm')
+  }
+}
+</script>

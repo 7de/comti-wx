@@ -1,0 +1,138 @@
+<style lang="scss">
+.card-box{
+  color:#fff;
+  border-radius: 4px;
+  margin-top: 30rpx;
+  padding-top:30rpx;
+  padding-left: 30rpx;
+  position: relative;
+  .logo{
+    margin-right: 25rpx;
+  }
+  .text{
+    padding-bottom: 30rpx;
+    .title{
+      margin-bottom: 15rpx;
+    }
+  }
+  .bg{
+    position: absolute;
+    bottom:0;
+    right:0
+  }
+}
+.card-box--green{
+  background-color: #df7879;
+}
+.card-box--blue{
+  background-color: #17b1cd;
+}
+.card-box--orange{
+  background-color: #ffb935;
+}
+.card-box--freshgreen{
+  background-color: #3ccf9e;
+}
+.card-box--purple{
+  background-color: #ad83c6;
+}
+</style>
+<template>
+    <repeat for="{{list}}" key="index" index="index" item="item">
+      <!-- <view class="card-box flex-wrp card-box--{{(index%5===0) ? 'purple' : (index%4===0) ? 'freshgreen' : index%3==0 ? 'orange' : index%2 ? 'blue' : 'green'}}" @tap="gotoDetail({{item.code}})" bindtouchstart="touchS" bindtouchmove="touchM" bindtouchend="touchE"> -->
+      <view class="card-box flex-wrp card-box--{{(index%5===0) ? 'purple' : (index%4===0) ? 'freshgreen' : index%3==0 ? 'orange' : index%2 ? 'blue' : 'green'}}" @tap="gotoDetail({{item.code}})">
+        <view class="card-item flex-item logo">
+          <image style="width: 60rpx;height:60rpx" mode="scaleToFill" src="../images/card_logo.png" />
+        </view>
+        <view class="card-item text">
+          <view class="zan-font-12 title">{{item.orgName ? item.orgName : ' '}}</view>
+          <text class="zan-font-22">{{item.code ? item.code : ' '}}</text>
+        </view>
+        <view class="card-item bg">
+          <image style="width: 160rpx; height:90rpx;display:block" src="../images/code_bg.png" />
+        </view>
+      </view>
+      <!-- <view class="dele-box">
+        <view class="del" @tap="delEvent({{item.code}})">删除</view>
+      </view> -->
+    </repeat>
+</template>
+<script>
+import wepy from 'wepy'
+import api from '../common/api'
+export default class Comcard extends wepy.component {
+  props = {
+    list: []
+  }
+  data = {
+    startX: null,
+    delBtnWidth: 150
+  }
+  methods = {
+    gotoDetail(code) {
+      this.$emit('goDetailEvent', code)
+      /* wepy.navigateTo({
+        url: '/pages/subpages/pages/card-detail?code=' + code
+      }) */
+    },
+    delEvent(e) {
+      console.log('删除')
+      this.$emit('delEvent', e)
+    }
+    /* touchS(e) {
+      console.log('touchs:' + e)
+      console.log(e)
+      if (e.touches.length === 1) {
+        console.log(e.touches[0].clientX)
+        this.startX = e.touches[0].clientX
+      }
+    },
+    touchM(e) {
+      console.log('touchM:' + e)
+      var that = this
+      if (e.touches.length === 1) {
+        var moveX = e.touches[0].clientX
+        var disX = that.startX - moveX
+        var delBtnWidth = that.delBtnWidth
+        console.log('移动' + moveX)
+        console.log('移动开始' + that.startX)
+        console.log('移动差' + disX)
+        console.log('移动宽度' + delBtnWidth)
+        let txtStyle = ''
+        if (disX === 0 || disX < 0) {
+          txtStyle = 'left:0'
+        } else if (disX > 0) {
+          txtStyle = 'left:-' + disX + 'px'
+          if (disX >= delBtnWidth) {
+            txtStyle = 'left:-' + delBtnWidth + 'px'
+          }
+        }
+        let index = e.currentTarget.dataset.index
+        // let list = that.addressList
+        // list[index].txtStyle = txtStyle
+      }
+      console.log(e)
+    },
+    touchE(e) {
+      console.log('touchE' + e)
+      var that = this
+      if (e.changedTouches.length === 1) {
+        var endX = e.changedTouches[0].clientX
+        var disX = that.startX - endX
+        var delBtnWidth = that.delBtnWidth
+        console.log('结束' + endX)
+        console.log('结束差' + disX)
+        console.log('结束宽' + delBtnWidth)
+        let txtStyle = disX > delBtnWidth / 2 ? 'left:-' + delBtnWidth + 'px' : 'left:0px'
+        let index = e.currentTarget.dataset.index
+        // let list = that.addressList
+        // list[index].txtStyle = txtStyle
+      }
+      console.log(e)
+    } */
+  }
+  fotmatCard(str) {
+    return api.fotmatCard(str)
+  }
+}
+</script>

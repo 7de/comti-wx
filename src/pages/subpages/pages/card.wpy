@@ -1,0 +1,137 @@
+<style lang="scss">
+.card-container {
+  height:100vh;
+  background: #f5f5f5;
+  position: relative;
+}
+.card-add{
+  position:fixed;
+  bottom:0;
+  left:0;
+  height:90rpx;
+  line-height: 90rpx;
+  width: 100%;
+  color: #fff;
+  background-color: #ff7300;
+  text-align: center;
+  font-size: 16px;
+}
+.card__cont{
+  background-color: #f5f5f5;
+  padding-bottom: 95rpx;
+}
+</style>
+
+<template>
+<view class="card-container">
+  <view class="page_spacing card__cont">
+    <card :list.sync="list"/>
+  </view>
+  <view class="card-add" @tap="addCard">添加卡号</view>
+  <zanToptips />
+</view>
+</template>
+<script>
+import wepy from 'wepy'
+import card from '../../../components/com-card'
+import zanToptips from '../../../components/zan-toptips'
+import api from '../../../common/api'
+const cardUrl = 'platform/platform/smartCard/findCtkSmartCardList'
+export default class Card extends wepy.page {
+  config = {
+    'navigationBarTitleText': '我的卡包'
+  }
+  components = {
+    card: card,
+    zanToptips
+  }
+  data = {
+    list: [],
+    height: '',
+    pageNum: 1, // 当前页
+    pageSize: 7, // 当前页数量
+    pagtotal: null // 数据总数
+  }
+  onLoad() {
+    wepy.showLoading({
+      title: '加载中'
+    })
+    wepy.getSystemInfo({
+      success: (res) => {
+        this.height = res.windowHeight
+        this.pageSize = Math.round(res.windowHeight / 95) + 1
+        this.$apply()
+      }
+    })
+  }
+  onShow() {
+    setTimeout(function() {
+      wepy.hideLoading()
+    }, 10000)
+    this.getCard(this.pageNum)
+  }
+  events = {
+    goDetailEvent(code) {
+      wepy.navigateTo({
+        url: '/pages/subpages/pages/card-detail?code=' + code
+      })
+    }
+  }
+  onReachBottom() {
+    let _length = this.list.length
+    if (_length === this.pagtotal) {
+    } else {
+      this.pageNum++
+      this.getCard(this.pageNum)
+    }
+  }
+  addCard() {
+    wepy.scanCode({
+      success: (res) => {
+        let _url = decodeURIComponent(res.result) // 字符分割
+        let _urlBox = _url.split('card=')
+        const _numNum = _urlBox[1]
+        if (_numNum) {
+          wepy.navigateTo({
+            url: '/pages/card-add?num=' + _numNum
+          })
+        } else {
+          this.showTopTips('智能卡号有误，请重新扫码')
+        }
+      },
+      fail: () => {
+        console.log('扫码失败')
+        // this.showTopTips('扫码失败，请重新扫码')
+      }
+    })
+  }
+  // 获取卡列表
+  getCard(pageNum) {
+    api.get(cardUrl, {
+      start: pageNum,
+      size: this.pageSize
+    }, {
+      'token': this.$parent.token
+    }).then(res => {
+      wepy.hideLoading()
+      let _data = res.data.list
+      if (pageNum === 1) {
+        this.list = _data
+        this.pagtotal = res.data.totalRow
+        this.$apply()
+      } else {
+        this.list = this.list.concat(_data)
+        this.$apply()
+      }
+    }).catch(err => {
+      console.log(err)
+      wepy.hideLoading()
+      console.log('请求错误')
+    })
+  }
+  // 顶部提示
+  showTopTips(content) {
+    this.$invoke('zanToptips', 'showZanTopTips', { content: content, options: 2000 })
+  }
+}
+</script>

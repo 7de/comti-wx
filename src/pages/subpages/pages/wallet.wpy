@@ -59,11 +59,29 @@ export default class Wallet extends wepy.page {
     }, 1500)
   }
   onShow() {
+    this.getBalance()
+  }
+  getBalance() {
     // 账户余额查询
-    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
+    api.get(URL).then(res => {
+      console.log(res.code)
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.showTopup = false
       this.$apply()
+    }).catch((err) => {
+      wepy.showModal({
+        title: '温馨提示',
+        content: '获取数据异常，请重试',
+        confirmText: '重试',
+        success: (res) => {
+          if (res.confirm) {
+            wepy.navigateBack({
+              delta: 1
+            })
+          }
+        }
+      })
+      console.log(err)
     })
   }
   goTopup() {

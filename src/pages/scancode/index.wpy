@@ -73,7 +73,6 @@
               <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
             </view>
             <input type="number" class="zan-pull-left zan-field__input scan-input" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/>
-            <!-- <view wx:if="{{equiDisabled}}" class="zan-pull-left zan-tag zan-tag--primary" @tap="againEqui">重试</view> -->
           </view>
         </view>
       </view>
@@ -107,7 +106,9 @@
         </view>
       </view>
       <view class="zan-panel" style="margin:30rpx 40rpx;">
-        <button class="zan-btn zan-btn--primary {{submitDisabled?'zan-btn--disabled':''}}" disabled="{{submitDisabled}}" @tap="goCharging">确认并提交</button>
+        <form report-submit="true" bindsubmit="formSubmit">
+          <button formType="submit" class="zan-btn zan-btn--primary {{submitDisabled?'zan-btn--disabled':''}}" disabled="{{submitDisabled}}">确认并提交</button>
+        </form>
       </view>
     </block>
     <zanToptips/>
@@ -121,9 +122,10 @@ import Loading from '../../components/loading'
 import api from '../../common/api'
 import page from '../../common/page'
 
-const balaneURL = 'wallet/customWallet/' // 钱包
+const balaneURL = 'wallet/customWallet/queryBalanceBySession' // 钱包
 const chargrURL = 'server/' // 开始充电
 const equiUrl = 'equip/equipSocket/querySocketStatus' // 查询设备
+// const formUrl = 'platform/service-push'
 
 export default class ScanIndex extends wepy.page {
   config = {
@@ -183,7 +185,7 @@ export default class ScanIndex extends wepy.page {
     _token: null,
     equiDisabled: false,
     equiDisabledMsg: '',
-    submitDisabled: false
+    submitDisabled: true
   }
   onLoad(option) {
     // 页面传值
@@ -199,7 +201,12 @@ export default class ScanIndex extends wepy.page {
     this._token = this.$parent.token
     if (this._token) {
       this.getBalance()
-      this.checkEqui()
+      if (this.code) {
+        console.log(this.code)
+        this.checkEqui()
+      } else {
+        this.showTopTips('二维码编号为空，请手动输入')
+      }
     } else {
       wepy.showModal({
         title: '温馨提示',
@@ -225,24 +232,26 @@ export default class ScanIndex extends wepy.page {
   methods = {
     blurInput(e) {
       let _code = e.detail.value
-      /* if (this.code !== _code) {
+      if (this.code !== _code) {
         this.code = _code
         this.$apply()
         // 设备查询
         this.checkEqui()
-      } */
-      this.code = _code
-      this.checkEqui()
+      }
     },
     // 订单提交
-    goCharging() {
+    formSubmit(e) {
+      console.log(e)
+      let _formId = e.detail.formId
+      console.log(_formId)
+      /* api.get(formUrl, {formId: _formId}).then(res => {
+        console.log(res)
+      }) */
       const _this = this
       if (!this.code) {
         this.input_focus = true
         this.showTopTips('请确认二维码编号是否填写')
       } else if (this.equiDisabled) {
-        /* this.input_focus = true
-        this.showTopTips(this.equiDisabledMsg) */
         this.checkEqui()
       } else if (!this.time_value) {
         this.showTopTips('请选择充电时长')
@@ -261,16 +270,15 @@ export default class ScanIndex extends wepy.page {
               })
               this.submitDisabled = true
               this.$apply()
-              api.post(chargrURL + 'chargeStart?rdSession=' + _this._token, {
+              api.post(chargrURL + 'chargeStart', {
                 chargerMode: _this.charger_mode,
                 chargerValue: _this.time_value,
                 streamNo: _this.code,
                 totalFee: _this.totalFee * 100
               }).then(res => {
-                console.log()
+                wepy.hideLoading()
                 this.submitDisabled = false
                 this.$apply()
-                wepy.hideLoading()
                 if (res.code === 0) {
                   wepy.reLaunch({
                     url: '/pages/subpages/pages/charging?orderNo=' + res.data + '&time=' + _this.time_value
@@ -293,9 +301,6 @@ export default class ScanIndex extends wepy.page {
         })
         // 确认提示 --end
       }
-    },
-    againEqui() {
-      this.checkEqui()
     }
   }
   events = {
@@ -329,30 +334,28 @@ export default class ScanIndex extends wepy.page {
     })
     if (this.code) {
       wepy.request({
-        url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
+        url: api.apiData.host + equiUrl + '?serialNo=' + this.code + '&tagsFlag=true',
         method: 'GET',
         success: res => {
           wepy.hideLoading()
-          console.log(res)
           if (res.data.code === 0) {
             console.log(res.data)
             this.equiDisabled = false
             this.$apply()
           } else {
             // 设备无效不可选择时长
+            this.equiDisabledFun()
             this.equiDisabled = true
             this.$apply()
-            this.equiDisabledFun()
             if (res.data.code === -100) {
+              wepy.navigateTo({
+                url: '/pages/authorize'
+              })
               console.log('未登录')
             } else if (res.data.code === -50) {
-              this.equiDisabledMsg = res.data.msg
-              this.$apply()
               this.timeoutEqui(res.data.msg)
             } else {
               let _msg = res.data.msg ? res.data.msg : res.data.errMsg
-              this.equiDisabledMsg = _msg
-              this.$apply()
               wepy.showModal({
                 title: '温馨提示',
                 content: _msg,
@@ -394,12 +397,13 @@ export default class ScanIndex extends wepy.page {
       title: '余额查询中...',
       mask: true
     })
-    api.get(balaneURL + 'queryBalanceBySession?rdSession=' + this._token).then(res => {
+    api.get(balaneURL).then(res => {
       wepy.hideLoading()
       this.showLoading = false
       this.$apply()
       if (res.code === 0) {
         this.showTopup = false
+        this.submitDisabled = false
         this.account = parseFloat(api.fotmatMoney(res.data))
         this.$apply()
       }
@@ -414,6 +418,7 @@ export default class ScanIndex extends wepy.page {
       mask: true
     })
     api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value).then(({data}) => {
+      console.log(data)
       wepy.hideLoading()
       let _changeFee = data.changeFee ? data.changeFee : 0
       let _serviceFee = data.serviceCharge ? data.serviceCharge : 0

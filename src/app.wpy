@@ -9,6 +9,7 @@
 @import "./zanui/btn.scss";
 @import "./zanui/tag.scss";
 @import "./zanui/load.scss";
+@import "./zanui/flex.scss";
 page{
   color: #444;
 }
@@ -86,7 +87,8 @@ export default class extends wepy.app {
     pages: [
       'pages/home',
       'pages/scancode/index',
-      'pages/authorize'
+      'pages/authorize',
+      'pages/card-add'
     ],
     window: {
       backgroundTextStyle: 'light',
@@ -109,7 +111,10 @@ export default class extends wepy.app {
           'pages/help',
           'pages/about',
           'pages/charging',
-          'pages/setting-user'
+          'pages/setting-user',
+          'pages/cooperation',
+          'pages/card',
+          'pages/card-detail'
         ]
       }
     ],
@@ -119,7 +124,7 @@ export default class extends wepy.app {
   }
   globalData = {
     receiving: false,
-    token: '',
+    token: '1231',
     userInfo: {},
     code: null,
     longitude: 0,

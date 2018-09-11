@@ -2,24 +2,30 @@ import page from './page'
 
 import wepy from 'wepy'
 
+// const appInstance = getApp()
+
 export default {
   apiData : {
     // 正式
     // host: 'https://www.comtti.net/',
     // 测试
-    host: 'https://actor.comtti.net/pc/'
+    host: 'https://actor.comtti.net/pc/',
+    token: wx.getStorageSync('token_r')
   },
   _request(method, url, params, header = {}) {
     const {
-      host
+      host,
+      token
     } = this.apiData
+    const _this = this
     return new Promise((resolve, reject) => {
       wepy.request({
         url: `${host}${url}`,
         method: method,
         data: params,
         header: Object.assign({
-          'content-type': 'application/json'
+          'content-type': 'application/json',
+          'Authorization': 'Bearer ' + token
         }, header),
         success: res => {
           const {
@@ -31,16 +37,15 @@ export default {
               icon: 'none',
               duration: 2000
             })
-            resolve(data)
             // resolve(this._request(method, url, params))
           } else if (data.code === -1) {
-            console.log(res)
+            console.log(token)
             wepy.showToast({
               title: data.msg ? data.msg : data.message,
               icon: 'none',
               duration: 2000
             })
-            resolve(data)
+            // resolve(data)
           } else if (data.code === -100) {
             wepy.navigateTo({
               url: '/pages/authorize'
@@ -155,6 +160,10 @@ export default {
   fotmatMoney(str) {
     let _money = (str/100).toFixed(2);
     return _money
+  },
+  // 智能卡显示规则 第4位自动空一格
+  fotmatCard(str) {
+    var _str = str.replace(/\s/g,'').replace(/(.{4})/g,"$1 ")
+    return _str
   }
-
 }

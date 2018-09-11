@@ -75,3 +75,11 @@
   padding-top: 6px;
   padding-bottom: 6px;
 }
+.zan-cell--card {
+  font-size:12px;
+  padding-top: 8px;
+  padding-bottom: 0;
+}
+.zan-cell--noborder::after{
+  border-bottom-width: 0;
+}

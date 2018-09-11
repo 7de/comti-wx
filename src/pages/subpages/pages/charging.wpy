@@ -4,14 +4,6 @@
   width: 220rpx;
   font-size: 12px;
 }
-.cir{
- display: inline-block;
- margin-top:20rpx;
-}
-.cc{
-  margin-top:-77px;
-}
-
 .time-padding{
   padding:0 8rpx;
   display: inline-block;
@@ -50,6 +42,9 @@
           <progress percent="{{charg_longtime}}" active-mode="forwards" show-info active></progress>
         </view>
         <view class="zan-panel">
+          <view class="zan-cell">
+            <view class="zan-cell__bd"><view class="charging_title">站点名称</view><text class="">{{chargData.siteName}}</text></view>
+          </view>
           <view class="zan-cell">
             <view class="zan-cell__bd"><view class="charging_title">设备编码</view><text class="">{{chargData.socketSeq}}</text></view>
           </view>

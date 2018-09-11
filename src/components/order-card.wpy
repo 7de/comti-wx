@@ -26,7 +26,7 @@
           <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">{{item.serviceMoney/100}}</text></view>
           <view class="zan-cell__ft" wx:if="{{item.orderStatus!==0}}">结算金额：￥<text class="zan-c-red zan-font-16">{{item.totalFee/100}}</text></view>
         </view>
-        <view class="zan-cell zan-font-12" wx:if="{{item.orderStatus===2}}">
+        <view class="zan-cell zan-font-12" wx:if="{{item.orderStatus===2 || item.orderStatus===1}}">
           <view class="zan-cell__bd">关闭原因：<text class="zan-c-red">{{item.orderRes}}</text></view>
         </view>
         <view class="zan-cell zan-font-12">

@@ -281,16 +281,27 @@ export default class Home extends wepy.page {
       success: (res) => {
         let _url = decodeURIComponent(res.result) // 字符分割
         let _urlBox = _url.split('num=')
-        const _numNum = _urlBox[1]
-        console.log(_numNum)
-        if (_numNum) {
-          // this.checkEqui(_this.$parent.token, _numNum)
-          wepy.navigateTo({
-            url: '/pages/scancode/index?num=' + _numNum
-          })
+        let _cardBox = _url.split('card=')
+        if (_urlBox) {
+          const _numNum = _urlBox[1]
+          if (_numNum) {
+            wepy.navigateTo({
+              url: '/pages/scancode/index?num=' + _numNum
+            })
+          }
+        } else if (_cardBox) {
+          let _cardNum = _cardBox[1]
+          if (_cardNum) {
+            wepy.navigateTo({
+              url: '/pages/subpages/pages/card-add?num=' + _cardNum
+            })
+          }
         } else {
-          this.showTopTips('设备编号有误，请重新扫码')
+          this.showTopTips('扫码失败，请重新扫码')
         }
+      },
+      fail: () => {
+        // this.showTopTips('扫码失败，请重新扫码')
       }
     })
   }
@@ -353,7 +364,7 @@ export default class Home extends wepy.page {
       mask: true
     })
     // 判断是否有进行中的订单
-    api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&rdSession=' + this.$parent.token + '&pageNum=1&pageSize=10').then(({data}) => {
+    api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&pageNum=1&pageSize=10').then(({data}) => {
       wepy.hideLoading()
       let _len = data.length
       console.log('订单' + _len)
