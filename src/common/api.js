@@ -24,8 +24,8 @@ export default {
         method: method,
         data: params,
         header: Object.assign({
-          'content-type': 'application/json',
-          'Authorization': 'Bearer ' + token
+          // 'Authorization': 'Bearer ' + token,
+          'content-type': 'application/json'
         }, header),
         success: res => {
           const {

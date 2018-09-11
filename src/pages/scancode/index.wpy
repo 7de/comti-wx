@@ -270,7 +270,7 @@ export default class ScanIndex extends wepy.page {
               })
               this.submitDisabled = true
               this.$apply()
-              api.post(chargrURL + 'chargeStart', {
+              api.post(chargrURL + 'chargeStart?rdSession=' + _this._token, {
                 chargerMode: _this.charger_mode,
                 chargerValue: _this.time_value,
                 streamNo: _this.code,
@@ -334,7 +334,7 @@ export default class ScanIndex extends wepy.page {
     })
     if (this.code) {
       wepy.request({
-        url: api.apiData.host + equiUrl + '?serialNo=' + this.code + '&tagsFlag=true',
+        url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
         method: 'GET',
         success: res => {
           wepy.hideLoading()
@@ -397,7 +397,7 @@ export default class ScanIndex extends wepy.page {
       title: '余额查询中...',
       mask: true
     })
-    api.get(balaneURL).then(res => {
+    api.get(balaneURL + '?rdSession=' + this._token).then(res => {
       wepy.hideLoading()
       this.showLoading = false
       this.$apply()

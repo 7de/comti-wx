@@ -63,7 +63,7 @@ export default class Wallet extends wepy.page {
   }
   getBalance() {
     // 账户余额查询
-    api.get(URL).then(res => {
+    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
       console.log(res.code)
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.showTopup = false

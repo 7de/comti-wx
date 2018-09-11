@@ -44,8 +44,8 @@
   import api from '../common/api'
   import page from '../common/page'
   import Info from '../common/setinfo'
-  // const URL = 'platform/weChat/wechatLogin'
-  const URL = 'wxpay/wechatLogin'
+  const URL = 'platform/weChat/wechatLogin'
+  // const URL = 'wxpay/wechatLogin'
   export default class Authorize extends wepy.page {
     config = {
       navigationBarTitleText: '用户授权'

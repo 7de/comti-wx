@@ -60,8 +60,8 @@ import Info from '../../../components/com-userinfo'
 import Loading from '../../../components/loading'
 import page from '../../../common/page'
 import api from '../../../common/api'
-// const URL = 'platform/platform/customer/getCustomerByKey'
-const URL = 'platform/platform/customer/getCustomerByToken' // 用户信息
+const URL = 'platform/platform/customer/getCustomerByKey'
+// const URL = 'platform/platform/customer/getCustomerByToken' // 用户信息
 export default class Personal extends wepy.page {
   config = {
     'navigationBarTitleText': '个人中心'
@@ -165,7 +165,7 @@ export default class Personal extends wepy.page {
   }
   // 获取用户信息
   getUserinfo() {
-    api.get(URL).then(res => {
+    api.get(URL + '?rdSession=' + this.$parent.token).then(res => {
       console.log(res)
       this.showLoading = false
       this.user = {
