@@ -160,7 +160,7 @@ export default class Home extends wepy.page {
   onShow() {
     this.$parent.token = this.$parent.token ? this.$parent.token : wepy.getStorageSync('token_r')
     if (this.$parent.token) {
-      // this.chargingOrder()
+      this.chargingOrder()
     } else {
       page.goauthorize()
     }
