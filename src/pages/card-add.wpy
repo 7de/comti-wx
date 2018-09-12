@@ -69,8 +69,8 @@ import wepy from 'wepy'
 import zanToptips from '../components/zan-toptips'
 import api from '../common/api'
 import page from '../common/page'
-// const userUrl = 'platform/platform/customer/getCustomerByKey' // 用户信息
-const userUrl = 'platform/platform/customer/getCustomerByToken' // 用户信息
+const userUrl = 'platform/platform/customer/getCustomerByKey' // 用户信息
+// const userUrl = 'platform/platform/customer/getCustomerByToken' // 用户信息
 const cardUrl = 'platform/platform/smartCard/findSmartCardByCode' // 卡信息
 const balanceUrl = 'wallet/customWallet/queryBalanceBySession' // 用户余额
 const bindUrl = 'platform/platform/smartCard/updateCtkSmartCard' // 绑定卡
@@ -205,7 +205,7 @@ export default class Cardadd extends wepy.page {
     } else {
       wepy.showModal({
         title: '温馨提示',
-        content: `请确认是否${_goodTitle}充值${_money}元？`,
+        content: `是否${_goodTitle}充值${_money}元？`,
         confirmText: '马上充值',
         success: res => {
           const _this = this
@@ -235,7 +235,7 @@ export default class Cardadd extends wepy.page {
                   })
                 },
                 'fail': err => {
-                  _this.showTopTips('充值失败，请稍后再试')
+                  _this.showTopTips('充值失败!')
                   console.log(err.errMsg)
                 }
               })
@@ -250,7 +250,7 @@ export default class Cardadd extends wepy.page {
     const _this = this
     wepy.showModal({
       title: '温馨提示',
-      content: `是否绑定该${_this.code}智能卡？`,
+      content: `确定绑定该${_this.code}智能卡？`,
       success: res => {
         console.log(_this.$parent.token)
         if (res.confirm) {
@@ -268,7 +268,10 @@ export default class Cardadd extends wepy.page {
   }
   // 获取用户昵称
   getUser() {
-    api.get(userUrl).then(res => {
+    // api.get(userUrl).then(res => {
+    api.get(userUrl, {
+      rdSession: this.$parent.token
+    }).then(res => {
       this.userNickname = res.data.nickName
       this.$apply()
     })
