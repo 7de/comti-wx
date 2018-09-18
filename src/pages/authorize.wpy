@@ -44,8 +44,8 @@
   import api from '../common/api'
   import page from '../common/page'
   import Info from '../common/setinfo'
-  const URL = 'platform/weChat/wechatLogin'
-  // const URL = 'wxpay/wechatLogin'
+  // const URL = 'platform/weChat/wechatLogin'
+  const URL = 'wxpay/weChat/wechatLogin'
   export default class Authorize extends wepy.page {
     config = {
       navigationBarTitleText: '用户授权'
@@ -85,8 +85,6 @@
                   wepy.getUserInfo({
                     lang: 'zh_CN',
                     success: (res) => {
-                      /* console.log(this.code)
-                      console.log(res) */
                       let _params = Object.assign({
                         code: this.code,
                         encryptedData: res.encryptedData,
@@ -124,12 +122,9 @@
           console.log(res)
           console.log('授权次数：' + num)
           if (res.data.code === 0) {
-            // _this.$parent.token = res.data.data['access_token']
-            _this.$parent.token = res.data.data['rd_session']
+            _this.$parent.token = res.data.data['access_token']
             _this.$apply()
-            wepy.setStorageSync('token_r', res.data.data['rd_session'])
-            // wepy.setStorageSync('token_r', res.data.data['access_token'])
-            console.log(_this.$parent.token)
+            wepy.setStorageSync('token_n', res.data.data['access_token'])
             console.log(_this.getCurrentPages().length)
             if (_this.getCurrentPages().length > 1) {
               page.goBack()

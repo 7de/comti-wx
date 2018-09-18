@@ -178,7 +178,7 @@ export default class WalletTopup extends wepy.page {
       confirmText: '马上充值',
       success: res => {
         if (res.confirm) {
-          api.post(payUrl + '?rdSession=' + this.$parent.token, {
+          api.post(payUrl, {
             goodsId: parseInt(this.time_value), // 商品ID
             goodsName: '充值' + _money + '元', // 商品名称
             totalfee: _money * 100  // 充值金额 转为以分为单位

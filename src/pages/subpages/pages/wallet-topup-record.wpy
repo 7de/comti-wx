@@ -85,7 +85,7 @@ export default class WalletTopupRecord extends wepy.page {
   // 充值记录查询
   getData() {
     const pageNum = this.pageNum
-    api.get(recordURL + 'queryRechargeRecords?rdSession=' + this.$parent.token + '&start=' + pageNum + '&size=' + this.pageSize).then(({data}) => {
+    api.get(recordURL + 'queryRechargeRecords?start=' + pageNum + '&size=' + this.pageSize).then(({data}) => {
       if (pageNum === 1) {
         this.recordList = data.list
         this.pagtotal = data.totalRow

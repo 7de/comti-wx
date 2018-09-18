@@ -10,7 +10,7 @@
     font-size: 40rpx;
   }
   .scan-subtitle{
-    width: 120rpx;
+    width: 90rpx;
     height:28px;
     line-height: 28px;
     text-align: center;
@@ -19,7 +19,7 @@
     line-height: 28px;
   }
   .scan-input{
-    width: 70%;
+    width: 75%;
     height:28px;
     font-size:16px;
     font-weight:bold
@@ -32,23 +32,23 @@
     button{
       height: 38px;
       line-height: 38px;
-      font-size: 12px;
+      font-size: 14px;
       color: #fff;
-      background-color: #f47a55;
+      background-color: #FF7300;
       border:1px solid #fff;
       >text{
-        margin-left: 5px;
         position: relative;
       }
     }
   }
 .scan-btn button.zan-btn--disabled{
-  background-color: #f8f8f8;
-  border-color:#e5e5e5;
-  color:#999;
+  background-color: #DCDCDC;
+  border:1px solid #DCDCDC;
+  // border-color:#e5e5e5;
+  color:#fff;
 }
   .account-width{
-    width: 90%;
+    width: 75%;
   }
 }
 .agin-btn{
@@ -58,6 +58,12 @@
     top:-7px;
     left:0;
   }
+}
+.othSubmit{
+  width: 100%;
+  position:absolute;
+  top:0;
+  left:0;
 }
 </style>
 <template>
@@ -70,15 +76,18 @@
         <view class="zan-cell scan-cell">
           <view class="zan-cell__bd zan-clearfix">
             <view class="scan-subtitle zan-pull-left">
-              <view class="iconfont icon-qrcode zan-font-22" style="color:#7fb80e;"></view>
+              <view class="iconfont icon-qr zan-font-30" style="color:#7fb80e;"></view>
             </view>
-            <input type="number" class="zan-pull-left zan-field__input scan-input" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/>
+            <view class="zan-pull-left" style="overflow:hidden; line-height:28px;width:80%">
+              <text class="zan-pull-left">设备ID:</text>
+              <input type="number" class="zan-pull-lef zan-field__input scan-input" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/>
+            </view>
           </view>
         </view>
       </view>
-      <view class="zan-panel-title">请选择充电时长：</view>
       <view class="zan-panel">
-        <zanSelect1 :items="items" :checkedValue.sync="checked_base" :disabled.sync="equiDisabled" componentId="base" ></zanSelect1>
+        <comTab :tab.sync="tab" componentId="tab" />
+          <zanSelect1 :items.sync="items" :checkedValue.sync="checked_base" :disabled.sync="equiDisabled" componentId="base" ></zanSelect1>
       </view>
       <view class="zan-panel-title">预估金额：<text class="zan-font-12">(电费{{changeFee}}+服务费{{serviceFee}})</text></view>
       <view class="zan-panel">
@@ -87,27 +96,33 @@
             <view class="scan-subtitle zan-pull-left">
               <view class="iconfont icon-uutmoney zan-font-24" style="color:#7fb80e;"></view>
             </view>
-            <text class="zan-pull-left zan-font-22 zan-c-red scan-subtitle-txt">￥{{totalFee}}</text>
+            <text class="zan-pull-left zan-font-18 zan-c-blue-dark scan-subtitle-txt">￥{{totalFee}}</text>
           </view>
         </view>
       </view>
       <view class="zan-panel-title">账户金额：</view>
       <view class="zan-panel">
-        <view class="zan-cell">
+        <view class="zan-cell scan-cell">
           <view class="zan-cell__bd" style="overflow:hidden">
-            <text class="zan-pull-left zan-c-red scan-subtitle-txt zan-ellipsis zan-font-26 account-width">￥{{account}}</text>  
+            <view class="scan-subtitle zan-pull-left">
+              <view class="iconfont icon-wallet-c zan-font-30" style="color:#7fb80e;"></view>
+            </view>
+            <text class="zan-pull-left zan-c-blue-dark scan-subtitle-txt zan-ellipsis zan-font-18 account-width">￥{{account}}</text>  
           </view>
           <view class="zan-cell__ft scan-btn">
-            <button type="button" style="overflow:hidden;font-size:12px;" class="{{showTopup?'zan-btn--disabled':''}}" disabled="{{showTopup}}" @tap="goTopup">
-              <view class="iconfont icon-signboard zan-font-18 zan-pull-left"></view>
+            <button type="button" style="overflow:hidden;" class="{{showTopup?'zan-btn--disabled':''}}" disabled="{{showTopup}}" @tap="goTopup">
               <text class="zan-pull-left">余额充值</text>
             </button>
           </view>
         </view>
       </view>
       <view class="zan-panel" style="margin:30rpx 40rpx;">
-        <form report-submit="true" bindsubmit="formSubmit">
-          <button formType="submit" class="zan-btn zan-btn--primary {{submitDisabled?'zan-btn--disabled':''}}" disabled="{{submitDisabled}}">确认并提交</button>
+        <form class="othSubmit-box" report-submit="true" bindsubmit="submitEvent">
+          <button formType="submit" class="zan-btn zan-btn--primary {{submitDisabled?'zan-btn--disabled':''}}" disabled="{{submitDisabled}}" style="margin-bottom:0">确认并提交
+            <form report-submit="true" bindsubmit="submitFrom" class="othSubmit">
+              <button formType="submit" class="zan-btn zan-btn--primary {{submitDisabled?'zan-btn--disabled':''}}" disabled="{{submitDisabled}}">确认并提交</button>
+            </form>
+          </button>
         </form>
       </view>
     </block>
@@ -119,6 +134,7 @@ import wepy from 'wepy'
 import zanSelect from '../../components/zan-select'
 import zanToptips from '../../components/zan-toptips'
 import Loading from '../../components/loading'
+import comTab from '../../components/com-tab'
 import api from '../../common/api'
 import page from '../../common/page'
 
@@ -134,11 +150,27 @@ export default class ScanIndex extends wepy.page {
   components = {
     zanSelect1: zanSelect,
     zanToptips,
-    Loading
+    Loading,
+    comTab
   }
   data = {
     showLoading: false,
     showTopup: true,
+    tab: {
+      list: [
+        {
+          id: 0,
+          title: '充电时长'
+        },
+        {
+          id: 1,
+          title: '充电电量'
+        }
+      ],
+      selectedId: 0,
+      scroll: false,
+      url: false
+    },
     items: [
       {
         value: '120',
@@ -173,6 +205,75 @@ export default class ScanIndex extends wepy.page {
         name: '12小时'
       }
     ],
+    itemsTime: [
+      {
+        value: '120',
+        name: '智能充满自停'
+      },
+      {
+        value: '1',
+        name: '1小时'
+      },
+      {
+        value: '2',
+        name: '2小时'
+      },
+      {
+        value: '3',
+        name: '3小时'
+      },
+      {
+        value: '5',
+        name: '5小时'
+      },
+      {
+        value: '6',
+        name: '6小时'
+      },
+      {
+        value: '8',
+        name: '8小时'
+      },
+      {
+        value: '12',
+        name: '12小时'
+      }
+    ],
+    itemsEle: [
+      {
+        value: '120',
+        name: '智能充满自停'
+      },
+      {
+        value: '1',
+        name: '1度'
+      },
+      {
+        value: '2',
+        name: '2度'
+      },
+      {
+        value: '3',
+        name: '3度'
+      },
+      {
+        value: '5',
+        name: '5度'
+      },
+      {
+        value: '6',
+        name: '6度'
+      },
+      {
+        value: '8',
+        name: '8度'
+      },
+      {
+        value: '9',
+        name: '9度'
+      }
+    ],
+    mode: 0, // 充电形式 0 按时长 1 按电量
     checked_base: 120,
     code: null, // 插座ID
     input_focus: false,
@@ -185,7 +286,8 @@ export default class ScanIndex extends wepy.page {
     _token: null,
     equiDisabled: false,
     equiDisabledMsg: '',
-    submitDisabled: true
+    submitDisabled: true,
+    formId: '' // 用于消息推送
   }
   onLoad(option) {
     // 页面传值
@@ -199,35 +301,24 @@ export default class ScanIndex extends wepy.page {
   }
   onShow() {
     this._token = this.$parent.token
-    if (this._token) {
-      this.getBalance()
+    this.getBalance()
+    /* if (!this.showTopup) {
+      // 检测设备状态
       if (this.code) {
         console.log(this.code)
         this.checkEqui()
       } else {
         this.showTopTips('二维码编号为空，请手动输入')
       }
-    } else {
-      wepy.showModal({
-        title: '温馨提示',
-        content: '您暂未授权或授权已过期',
-        showCancel: false,
-        confirmText: '去授权',
-        success: function(res) {
-          if (res.confirm) {
-            page.goAuthorize()
-          }
-        }
-      })
-    }
+      // 是否进入页面显示预估金额
+      if (!this.equiDisabled) {
+        this.checkMoney()
+      } else {
+        this.equiDisabledFun()
+      }
+    } */
   }
   onReady() {
-    // 设备可用，默认获取‘充满自停’预估金额
-    if (!this.equiDisabled) {
-      this.checkMoney()
-    } else {
-      this.equiDisabledFun()
-    }
   }
   methods = {
     blurInput(e) {
@@ -239,22 +330,28 @@ export default class ScanIndex extends wepy.page {
         this.checkEqui()
       }
     },
-    // 订单提交
-    formSubmit(e) {
-      console.log(e)
+    submitFrom(e) {
       let _formId = e.detail.formId
-      console.log(_formId)
-      /* api.get(formUrl, {formId: _formId}).then(res => {
-        console.log(res)
-      }) */
+      this.formId = _formId
+    },
+    submitEvent(e) {
+      let _formId = e.detail.formId
+      console.log('第YI个' + this.formId)
+      console.log('第ER个' + _formId)
       const _this = this
       if (!this.code) {
         this.input_focus = true
-        this.showTopTips('请确认二维码编号是否填写')
+        this.showTopTips('请确认设备ID是否填写')
       } else if (this.equiDisabled) {
         this.checkEqui()
       } else if (!this.time_value) {
-        this.showTopTips('请选择充电时长')
+        let _msg = ''
+        if (this.mode === 1) {
+          _msg = '电量'
+        } else {
+          _msg = '时长'
+        }
+        this.showTopTips('请选择充电' + _msg)
       } else if (this.totalFee > parseFloat(this.account)) {
         this.showTopTips('您的余额不足以选择此服务，请及时充值')
       } else {
@@ -270,15 +367,18 @@ export default class ScanIndex extends wepy.page {
               })
               this.submitDisabled = true
               this.$apply()
-              api.post(chargrURL + 'chargeStart?rdSession=' + _this._token, {
+              console.log(_formId)
+              api.post(chargrURL + 'chargeStart', {
+                formId: _formId + ',' + this.formId,
                 chargerMode: _this.charger_mode,
                 chargerValue: _this.time_value,
                 streamNo: _this.code,
                 totalFee: _this.totalFee * 100
               }).then(res => {
-                wepy.hideLoading()
+                console.log('加载完成')
                 this.submitDisabled = false
                 this.$apply()
+                wepy.hideLoading()
                 if (res.code === 0) {
                   wepy.reLaunch({
                     url: '/pages/subpages/pages/charging?orderNo=' + res.data + '&time=' + _this.time_value
@@ -304,15 +404,36 @@ export default class ScanIndex extends wepy.page {
     }
   }
   events = {
+    // tab事件切换
+    zanTabChange(selectedId, event) {
+      let { componentId } = event.source
+      if (this[componentId].selectedId !== selectedId) {
+        this[componentId].selectedId = selectedId
+        if (selectedId === 1) {
+          this.mode = 1
+          this.items = this.itemsEle
+          this.checkIni(9 * 100)
+        } else {
+          this.mode = 0
+          this.items = this.itemsTime
+          this.checkIni(12)
+        }
+      }
+    },
     // 单选项
     zanSelectChange(value, event) {
       let { componentId } = event.source
       this[`checked_${componentId}`] = value
-      this.$apply()
-      if (value === '120') {
+      if (value === '120' && this.mode === 0) {
         this.time_value = 12
         this.charger_mode = 3
         this.$apply()
+      } else if (value === '120' && this.mode === 1) {
+        this.time_value = 9 * 100
+        this.charger_mode = 2
+      } else if (this.mode === 1) {
+        this.charger_mode = 2
+        this.time_value = value * 100
       } else {
         this.charger_mode = 0
         this.time_value = value
@@ -334,14 +455,18 @@ export default class ScanIndex extends wepy.page {
     })
     if (this.code) {
       wepy.request({
-        url: api.apiData.host + equiUrl + '?rdSession=' + this._token + '&serialNo=' + this.code + '&tagsFlag=true',
+        url: api.apiData.host + equiUrl + '?serialNo=' + this.code + '&tagsFlag=true',
         method: 'GET',
+        header: {
+          'Authorization': 'Bearer ' + this._token
+        },
         success: res => {
           wepy.hideLoading()
           if (res.data.code === 0) {
             console.log(res.data)
             this.equiDisabled = false
             this.$apply()
+            this.checkMoney()
           } else {
             // 设备无效不可选择时长
             this.equiDisabledFun()
@@ -388,7 +513,7 @@ export default class ScanIndex extends wepy.page {
         }
       })
     } else {
-      this.showTopTips('未填二维码编号')
+      this.showTopTips('未填设备ID')
     }
   }
   // 账户余额
@@ -397,7 +522,7 @@ export default class ScanIndex extends wepy.page {
       title: '余额查询中...',
       mask: true
     })
-    api.get(balaneURL + '?rdSession=' + this._token).then(res => {
+    api.get(balaneURL, {}, {}, this._token).then(res => {
       wepy.hideLoading()
       this.showLoading = false
       this.$apply()
@@ -406,18 +531,24 @@ export default class ScanIndex extends wepy.page {
         this.submitDisabled = false
         this.account = parseFloat(api.fotmatMoney(res.data))
         this.$apply()
+        this.checkEqui()
       }
     })
   }
 
   // 预估金额查询
   checkMoney() {
-    // const _this = this
+    let _mode = ''
+    if (this.mode === 1) {
+      _mode = 2
+    }
+    console.log('模式' + this.mode)
+    console.log(_mode)
     wepy.showLoading({
       title: '费用查询中...',
       mask: true
     })
-    api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value).then(({data}) => {
+    api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value + '&chagerMode=' + _mode).then(({data}) => {
       console.log(data)
       wepy.hideLoading()
       let _changeFee = data.changeFee ? data.changeFee : 0
@@ -463,6 +594,13 @@ export default class ScanIndex extends wepy.page {
     this.serviceFee = api.fotmatMoney(0)
     this.totalFee = api.fotmatMoney(0)
     this.$apply()
+  }
+  // 电量初始化
+  checkIni(value) {
+    this.checked_base = 120
+    this.time_value = value
+    this.$apply()
+    this.checkMoney()
   }
 }
 </script>

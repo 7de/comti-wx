@@ -46,6 +46,8 @@ export default class Carddetail extends wepy.page {
       wepy.hideLoading()
     }, 10000)
   }
+  events = {
+  }
   // 获取卡号信息
   getCard() {
     // const _this = this

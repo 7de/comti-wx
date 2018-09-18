@@ -10,83 +10,100 @@ export default {
     // host: 'https://www.comtti.net/',
     // 测试
     host: 'https://actor.comtti.net/pc/',
-    token: wx.getStorageSync('token_r')
+    token: wepy.getStorageSync('token_n')
   },
-  _request(method, url, params, header = {}) {
+  _request(method, url, params, header = {}, _token) {
     const {
       host,
       token
     } = this.apiData
     const _this = this
     return new Promise((resolve, reject) => {
-      wepy.request({
-        url: `${host}${url}`,
-        method: method,
-        data: params,
-        header: Object.assign({
-          // 'Authorization': 'Bearer ' + token,
-          'content-type': 'application/json'
-        }, header),
-        success: res => {
-          const {
-            data
-          } = res
-          if (data.code === 500 || data.status === 500) {
-            wepy.showToast({
-              title: '服务器错误，请联系管理员',
-              icon: 'none',
-              duration: 2000
-            })
-            // resolve(this._request(method, url, params))
-          } else if (data.code === -1) {
-            console.log(token)
-            wepy.showToast({
-              title: data.msg ? data.msg : data.message,
-              icon: 'none',
-              duration: 2000
-            })
-            // resolve(data)
-          } else if (data.code === -100) {
-            wepy.navigateTo({
-              url: '/pages/authorize'
-            })
-          } else {
-            resolve(data)
+      let userToken = token ? token : _token
+      if(!userToken){
+        wepy.hideLoading()
+        wepy.showModal({
+          title: '温馨提示',
+          content: '您暂未授权或授权已过期',
+          showCancel: false,
+          confirmText: '去授权',
+          success: (res) => {
+            if (res.confirm) {
+              wepy.navigateTo({
+                url: '/pages/authorize'
+              })
+            }
           }
-        },
-        fail: err => {
-          reject(err)
-          wepy.hideLoading()
-          if (err.errMsg === 'request:fail timeout') {
-            wepy.showModal({
-              title: '错误提示',
-              content: '请求超时，请稍后重试',
-              confirmText: '我知道了',
-              success: (res) => {
-                if (res.confirm) {
+        })
+      } else {
+        wepy.request({
+          url: `${host}${url}`,
+          method: method,
+          data: params,
+          header: Object.assign({
+            'Authorization': 'Bearer ' + userToken,
+            'content-type': 'application/json'
+          }, header),
+          success: res => {
+            const {
+              data
+            } = res
+            if (data.code === 500 || data.status === 500) {
+              wepy.showToast({
+                title: '服务器错误，请联系管理员',
+                icon: 'none',
+                duration: 2000
+              })
+              // resolve(this._request(method, url, params))
+            } else if (data.code === -1) {
+              wepy.showToast({
+                title: data.msg ? data.msg : data.message,
+                icon: 'none',
+                duration: 2000
+              })
+              // reject(data)
+            } else if (data.code === -100) {
+              wepy.navigateTo({
+                url: '/pages/authorize'
+              })
+            } else {
+              resolve(data)
+            }
+          },
+          fail: err => {
+            reject(err)
+            wepy.hideLoading()
+            if (err.errMsg === 'request:fail timeout') {
+              wepy.showModal({
+                title: '错误提示',
+                content: '请求超时，请稍后重试',
+                confirmText: '我知道了',
+                success: (res) => {
+                  if (res.confirm) {
+                  }
                 }
-              }
-            })
-          } else {
-            // let _msg = err.data.msg ? err.data.msg : err.errMsg
-            /* wepy.showModal({
-              title: '错误提示',
-              content: '网络异常，请稍后重试',
-              confirmText: '我知道了',
-              success: (res) => {
-              }
-            }) */
-            console.log('请求失败')
+              })
+            } else {
+              // let _msg = err.data.msg ? err.data.msg : err.errMsg
+              /* wepy.showModal({
+                title: '错误提示',
+                content: '网络异常，请稍后重试',
+                confirmText: '我知道了',
+                success: (res) => {
+                }
+              }) */
+              console.log('请求失败')
+            }
           }
-        }
-      })
+        })
+      }
     })
   },
-  get(url, params = {}, header = {}) {
-    return this._request('GET', url, params, header)
+  get(url, params = {}, header = {}, token) {
+    return this._request('GET', url, params, header, token)
   },
-  post(url, params = {}, header = {}) {
-    return this._request('POST', url, params, header)
+  post(url, params = {}, header = {}, token) {
+    return this._request('POST', url, params, header, token)
   },
   put(url, params = {}, header = {}) {
     return this._request('PUT', url, params, header)

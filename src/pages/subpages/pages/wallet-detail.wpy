@@ -81,7 +81,7 @@ export default class WalletDetail extends wepy.page {
   // 获取数据
   getData() {
     const pageNum = this.pageNum
-    api.get(recordURL + 'queryBalanceSub?rdSession=' + this.$parent.token + '&start=' + pageNum + '&size=' + this.pageSize + '&sortStr=update_time&sortType=desc').then(({data}) => {
+    api.get(recordURL + 'queryBalanceSub?start=' + pageNum + '&size=' + this.pageSize + '&sortStr=update_time&sortType=desc').then(({data}) => {
       if (pageNum === 1) {
         this.recordList = data.list
         this.pagtotal = data.totalRow
