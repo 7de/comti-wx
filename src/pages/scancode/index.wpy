@@ -302,21 +302,6 @@ export default class ScanIndex extends wepy.page {
   onShow() {
     this._token = this.$parent.token
     this.getBalance()
-    /* if (!this.showTopup) {
-      // 检测设备状态
-      if (this.code) {
-        console.log(this.code)
-        this.checkEqui()
-      } else {
-        this.showTopTips('二维码编号为空，请手动输入')
-      }
-      // 是否进入页面显示预估金额
-      if (!this.equiDisabled) {
-        this.checkMoney()
-      } else {
-        this.equiDisabledFun()
-      }
-    } */
   }
   onReady() {
   }
@@ -336,8 +321,6 @@ export default class ScanIndex extends wepy.page {
     },
     submitEvent(e) {
       let _formId = e.detail.formId
-      console.log('第YI个' + this.formId)
-      console.log('第ER个' + _formId)
       const _this = this
       if (!this.code) {
         this.input_focus = true
@@ -367,7 +350,6 @@ export default class ScanIndex extends wepy.page {
               })
               this.submitDisabled = true
               this.$apply()
-              console.log(_formId)
               api.post(chargrURL + 'chargeStart', {
                 formId: _formId + ',' + this.formId,
                 chargerMode: _this.charger_mode,
@@ -385,16 +367,24 @@ export default class ScanIndex extends wepy.page {
                   })
                 }
               }).catch(error => {
-                wepy.showModal({
-                  title: '错误提示',
-                  content: '充电响应超时，请重试',
-                  confirmText: '我知道了',
-                  success: (res) => {
-                  }
-                })
+                console.log(error)
                 this.submitDisabled = false
                 this.$apply()
-                console.log(error)
+                if (error.code === -1) {
+                  wepy.showToast({
+                    title: error.msg ? error.msg : error.message,
+                    icon: 'none',
+                    duration: 2000
+                  })
+                } else {
+                  wepy.showModal({
+                    title: '错误提示',
+                    content: '充电响应超时，请重试',
+                    confirmText: '我知道了',
+                    success: (res) => {
+                    }
+                  })
+                }
               })
             }
           }
@@ -466,7 +456,12 @@ export default class ScanIndex extends wepy.page {
             console.log(res.data)
             this.equiDisabled = false
             this.$apply()
-            this.checkMoney()
+            // 默认选中充满自停
+            if (this.mode === 1) {
+              this.checkIni(9 * 100)
+            } else {
+              this.checkIni(12)
+            }
           } else {
             // 设备无效不可选择时长
             this.equiDisabledFun()
@@ -525,13 +520,20 @@ export default class ScanIndex extends wepy.page {
     api.get(balaneURL, {}, {}, this._token).then(res => {
       wepy.hideLoading()
       this.showLoading = false
+      this.showTopup = false
+      this.submitDisabled = false
+      this.account = parseFloat(api.fotmatMoney(res.data))
       this.$apply()
-      if (res.code === 0) {
-        this.showTopup = false
-        this.submitDisabled = false
-        this.account = parseFloat(api.fotmatMoney(res.data))
-        this.$apply()
-        this.checkEqui()
+      this.checkEqui()
+    }).catch(err => {
+      console.log(err)
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
       }
     })
   }
@@ -559,6 +561,14 @@ export default class ScanIndex extends wepy.page {
       this.$apply()
       if (this.totalFee > parseFloat(this.account)) {
         this.showTopTips('您的余额不足以选择此服务，请及时充值')
+      }
+    }).catch(err => {
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
       }
     })
   }

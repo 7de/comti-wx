@@ -91,19 +91,29 @@ export default class WalletDetail extends wepy.page {
       this.loadingShow = false
       this.$apply()
     }).catch((err) => {
-      wepy.showModal({
-        title: '温馨提示',
-        content: '获取数据异常，请重试',
-        confirmText: '重试',
-        success: (res) => {
-          if (res.confirm) {
-            wepy.navigateBack({
-              delta: 1
-            })
-          }
-        }
-      })
       console.log(err)
+      this.loadingShow = false
+      this.$apply()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      } else {
+        wepy.showModal({
+          title: '温馨提示',
+          content: '获取数据异常，请重试',
+          confirmText: '重试',
+          success: (res) => {
+            if (res.confirm) {
+              wepy.navigateBack({
+                delta: 1
+              })
+            }
+          }
+        })
+      }
     })
   }
 }

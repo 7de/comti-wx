@@ -154,6 +154,14 @@ export default class Cardadd extends wepy.page {
       console.log(res.code)
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.$apply()
+    }).catch(err => {
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 获取卡号信息
@@ -192,8 +200,15 @@ export default class Cardadd extends wepy.page {
         })
       }
     }).catch(err => {
-      wepy.hideLoading()
       console.log(err)
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 充值
@@ -243,6 +258,14 @@ export default class Cardadd extends wepy.page {
                   console.log(err.errMsg)
                 }
               })
+            }).catch(err => {
+              if (err.code === -1) {
+                wepy.showToast({
+                  title: err.msg ? err.msg : err.message,
+                  icon: 'none',
+                  duration: 2000
+                })
+              }
             })
           }
         }
@@ -265,6 +288,14 @@ export default class Cardadd extends wepy.page {
             token: _this.$parent.token
           }).then(res => {
             this.getCard()
+          }).catch(err => {
+            if (err.code === -1) {
+              wepy.showToast({
+                title: err.msg ? err.msg : err.message,
+                icon: 'none',
+                duration: 2000
+              })
+            }
           })
         }
       }
@@ -277,6 +308,14 @@ export default class Cardadd extends wepy.page {
       console.log(res)
       this.userNickname = res.data.nickName
       this.$apply()
+    }).catch(err => {
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 状态处理

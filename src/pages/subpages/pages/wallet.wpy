@@ -68,20 +68,29 @@ export default class Wallet extends wepy.page {
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.showTopup = false
       this.$apply()
-    }).catch((err) => {
-      wepy.showModal({
-        title: '温馨提示',
-        content: '获取数据异常，请重试',
-        confirmText: '重试',
-        success: (res) => {
-          if (res.confirm) {
-            wepy.navigateBack({
-              delta: 1
-            })
-          }
-        }
-      })
+    }).catch(err => {
       console.log(err)
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      } else {
+        wepy.showModal({
+          title: '温馨提示',
+          content: '获取数据异常，请重试',
+          confirmText: '重试',
+          success: (res) => {
+            if (res.confirm) {
+              wepy.navigateBack({
+                delta: 1
+              })
+            }
+          }
+        })
+      }
     })
   }
   goTopup() {

@@ -201,6 +201,16 @@ export default class WalletTopup extends wepy.page {
                 this.showTopTips('充值失败，请稍后再试')
                 console.log(err.errMsg)
               }
+            }).catch(err => {
+              console.log(err)
+              wepy.hideLoading()
+              if (err.code === -1) {
+                wepy.showToast({
+                  title: err.msg ? err.msg : err.message,
+                  icon: 'none',
+                  duration: 2000
+                })
+              }
             })
           })
         }
@@ -212,6 +222,16 @@ export default class WalletTopup extends wepy.page {
     api.get(URL).then(res => {
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.$apply()
+    }).catch(err => {
+      console.log(err)
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
 }

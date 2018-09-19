@@ -52,7 +52,8 @@ export default class Card extends wepy.page {
     pageNum: 1, // 当前页
     pageSize: 7, // 当前页数量
     pagtotal: null, // 数据总数
-    currentIndex: null // 当前索引
+    currentIndex: null, // 当前索引
+    startX: null  // 手指开始位置
   }
   onLoad() {
     wepy.showLoading({
@@ -93,6 +94,15 @@ export default class Card extends wepy.page {
               this.currentIndex = null
               this.$apply()
               this.getCard(this.pageNum)
+            }).catch(err => {
+              console.log(err)
+              if (err.code === -1) {
+                wepy.showToast({
+                  title: err.msg ? err.msg : err.message,
+                  icon: 'none',
+                  duration: 2000
+                })
+              }
             })
           } else {
             this.currentIndex = null
@@ -103,10 +113,21 @@ export default class Card extends wepy.page {
     },
     touchS(i, e) {
       console.log(i)
+      if (e.touches.length === 1) {
+        this.startX = e.touches[0].clientX
+      }
     },
     touchM(i, e) {
-      this.currentIndex = i
-      console.log(i)
+      if (e.touches.length === 1) {
+        var moveX = e.touches[0].clientX
+        var disX = this.data.startX - moveX
+        console.log(disX)
+        if (disX === 0 || disX < 0) {
+          this.currentIndex = null
+        } else if (disX > 0) {
+          this.currentIndex = i
+        }
+      }
     },
     touchE(e) {
       console.log('移动结束')
@@ -159,7 +180,13 @@ export default class Card extends wepy.page {
     }).catch(err => {
       console.log(err)
       wepy.hideLoading()
-      console.log('请求错误')
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 顶部提示

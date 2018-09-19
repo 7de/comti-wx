@@ -151,6 +151,15 @@ export default class Order extends wepy.page {
         that.loadingsubShow = false
         that.$apply()
       }, 1000)
+    }).catch(err => {
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
 }

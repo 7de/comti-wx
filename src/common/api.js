@@ -56,12 +56,12 @@ export default {
               })
               // resolve(this._request(method, url, params))
             } else if (data.code === -1) {
-              wepy.showToast({
+              /* wepy.showToast({
                 title: data.msg ? data.msg : data.message,
                 icon: 'none',
                 duration: 2000
-              })
-              // reject(data)
+              }) */
+              reject(data)
             } else if (data.code === -100) {
               wepy.navigateTo({
                 url: '/pages/authorize'
@@ -71,7 +71,6 @@ export default {
             }
           },
           fail: err => {
-            reject(err)
             wepy.hideLoading()
             if (err.errMsg === 'request:fail timeout') {
               wepy.showModal({
@@ -84,6 +83,7 @@ export default {
                 }
               })
             } else {
+              reject(err)
               // let _msg = err.data.msg ? err.data.msg : err.errMsg
               /* wepy.showModal({
                 title: '错误提示',

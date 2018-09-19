@@ -261,6 +261,14 @@ export default class Home extends wepy.page {
     api.get(markerURL + 'queryMapSiteList').then(res => {
       this.markers = res.data
       this.$apply()
+    }).catch(err => {
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 地图控件
@@ -402,7 +410,6 @@ export default class Home extends wepy.page {
       mask: true
     })
     // 判断是否有进行中的订单
-    // api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&pageNum=1&pageSize=10&rdSession=' + this._token).then(({data}) => {
     api.get(orderURL + 'queryOrderNoListMobile?orderStatus=0&pageNum=1&pageSize=10').then(({data}) => {
       wepy.hideLoading()
       let _len = data.length
@@ -411,6 +418,14 @@ export default class Home extends wepy.page {
         this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 200000, urlShow: true, url: '/pages/subpages/pages/order?selectedId=0' })
       } else {
         this.$invoke('zanToptips', 'showZanTopTips', { content: '您有进行中的订单，点击进入详情', options: 0, urlShow: true, url: '/pages/subpages/pages/order?selectedId=0' })
+      }
+    }).catch(err => {
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
       }
     })
   }
