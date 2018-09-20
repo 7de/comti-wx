@@ -187,7 +187,7 @@ export default class Charging extends wepy.page {
           console.log(_data)
           this.chargData = res.data.data
           this.money = api.fotmatMoney(this.chargData.predictFee)
-          this.charg_endtime = this.chargData.entTime ? this.formatDate(this.chargData.entTime) : ' - -'
+          this.charg_endtime = _data.entTime ? this.formatDate(_data.entTime) : ' - -'
           let _oldtime = this.chargData.actieTime
           let _time = api.formatDuring(_oldtime) // 转成时分秒
           let timeCount = _time.split(':')

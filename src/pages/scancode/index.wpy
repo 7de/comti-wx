@@ -80,7 +80,7 @@
             </view>
             <view class="zan-pull-left" style="overflow:hidden; line-height:28px;width:80%">
               <text class="zan-pull-left">设备ID:</text>
-              <input type="number" class="zan-pull-lef zan-field__input scan-input" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/>
+              <input type="number" class="zan-pull-left zan-field__input scan-input" bindblur='blurInput' value="{{code}}" focus="{{input_focus}}"  placeholder="请输入二维码编号"/>
             </view>
           </view>
         </view>
@@ -544,8 +544,6 @@ export default class ScanIndex extends wepy.page {
     if (this.mode === 1) {
       _mode = 2
     }
-    console.log('模式' + this.mode)
-    console.log(_mode)
     wepy.showLoading({
       title: '费用查询中...',
       mask: true
