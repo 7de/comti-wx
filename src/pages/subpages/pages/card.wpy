@@ -25,7 +25,7 @@
 <template>
 <view class="card-container">
   <view class="page_spacing card__cont">
-    <card :list.sync="list"/>
+    <card :list.sync="list" :currentIndex.sync="currentIndex" />
   </view>
   <view class="card-add" @tap="addCard">添加卡号</view>
   <zanToptips />
@@ -37,6 +37,7 @@ import card from '../../../components/com-card'
 import zanToptips from '../../../components/zan-toptips'
 import api from '../../../common/api'
 const cardUrl = 'platform/platform/smartCard/findCtkSmartCardList'
+const delUrl = 'platform/platform/smartCard/updateUntieCard'
 export default class Card extends wepy.page {
   config = {
     'navigationBarTitleText': '我的卡包'
@@ -50,7 +51,9 @@ export default class Card extends wepy.page {
     height: '',
     pageNum: 1, // 当前页
     pageSize: 7, // 当前页数量
-    pagtotal: null // 数据总数
+    pagtotal: null, // 数据总数
+    currentIndex: null, // 当前索引
+    startX: null  // 手指开始位置
   }
   onLoad() {
     wepy.showLoading({
@@ -71,10 +74,63 @@ export default class Card extends wepy.page {
     this.getCard(this.pageNum)
   }
   events = {
+    // 点击跳转至详情
     goDetailEvent(code) {
+      this.currentIndex = null
       wepy.navigateTo({
         url: '/pages/subpages/pages/card-detail?code=' + code
       })
+    },
+    // 解绑卡
+    delEvent(code) {
+      let _code = code
+      wepy.showModal({
+        title: '温馨提示',
+        content: '是否删除此卡？',
+        success: (res) => {
+          if (res.confirm) {
+            api.post(delUrl + '?code=' + _code).then(res => {
+              console.log(res)
+              this.currentIndex = null
+              this.$apply()
+              this.getCard(this.pageNum)
+            }).catch(err => {
+              console.log(err)
+              if (err.code === -1) {
+                wepy.showToast({
+                  title: err.msg ? err.msg : err.message,
+                  icon: 'none',
+                  duration: 2000
+                })
+              }
+            })
+          } else {
+            this.currentIndex = null
+            this.$apply()
+          }
+        }
+      })
+    },
+    touchS(i, e) {
+      console.log(i)
+      if (e.touches.length === 1) {
+        this.startX = e.touches[0].clientX
+      }
+    },
+    touchM(i, e) {
+      if (e.touches.length === 1) {
+        var moveX = e.touches[0].clientX
+        var disX = this.data.startX - moveX
+        console.log(disX)
+        if (disX === 0 || disX < 0) {
+          this.currentIndex = null
+        } else if (disX > 0) {
+          this.currentIndex = i
+        }
+      }
+    },
+    touchE(e) {
+      console.log('移动结束')
     }
   }
   onReachBottom() {
@@ -110,8 +166,6 @@ export default class Card extends wepy.page {
     api.get(cardUrl, {
       start: pageNum,
       size: this.pageSize
-    }, {
-      'token': this.$parent.token
     }).then(res => {
       wepy.hideLoading()
       let _data = res.data.list
@@ -126,7 +180,13 @@ export default class Card extends wepy.page {
     }).catch(err => {
       console.log(err)
       wepy.hideLoading()
-      console.log('请求错误')
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 顶部提示

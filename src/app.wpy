@@ -160,7 +160,7 @@ export default class extends wepy.app {
     })
   }
   onShow () {
-    this.token = this.token ? this.token : wepy.getStorageSync('token_r')
+    this.token = this.token ? this.token : wepy.getStorageSync('token_n')
   }
   constructor () {
     super()

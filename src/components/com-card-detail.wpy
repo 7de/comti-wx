@@ -6,7 +6,7 @@
   background-color: #e5e5e5;
 }
 .card-content{
-  padding-bottom: 60rpx;
+  padding-bottom: 50rpx;
   font-size:12px;
   background-color: #fff;
 }
@@ -65,6 +65,8 @@ export default class Comcarddetail extends wepy.component {
     list: Object,
     creatTime: String,
     bindTime: String
+  }
+  methods = {
   }
 }
 </script>

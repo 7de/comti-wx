@@ -81,7 +81,7 @@ export default class Personal extends wepy.page {
         path: './wallet-detail'
       },
       {
-        iconfont: 'trade',
+        iconfont: 'wallet-c',
         title: '账户余额',
         path: './wallet'
       },
@@ -91,7 +91,7 @@ export default class Personal extends wepy.page {
         path: './card'
       },
       {
-        iconfont: 'manageorder',
+        iconfont: 'uutmoney',
         title: '充值记录',
         path: './wallet-topup-record'
       }
@@ -114,6 +114,7 @@ export default class Personal extends wepy.page {
       }
     ],
     showLoading: true,
+    token: null,
     user: {
       name: '未知用户',
       img: '../../../images/user_2.png',
@@ -123,8 +124,14 @@ export default class Personal extends wepy.page {
   onLoad() {
   }
   onShow() {
+    this.token = this.$parent.token
+    setTimeout(() => {
+      this.showLoading = false
+      this.$apply()
+    }, 15000)
     page.goTop()
-    if (this.$parent.token) {
+    this.getUserinfo()
+    /* if (this.$parent.token) {
       console.log('个人中心' + this.$parent.token)
       this.getUserinfo()
     } else {
@@ -139,7 +146,7 @@ export default class Personal extends wepy.page {
           }
         }
       })
-    }
+    } */
   }
   methods = {
     clearStorageSyn() {
@@ -152,12 +159,6 @@ export default class Personal extends wepy.page {
             this.$parent.token = ''
             wepy.clearStorageSync()
             page.goAuthorize()
-            /* api.get('platform/platform/customer/deleteRdSession').then(res => {
-              console.log(res)
-              this.$parent.token = ''
-              wepy.clearStorageSync()
-              page.goAuthorize()
-            }) */
           }
         }
       })
@@ -165,7 +166,7 @@ export default class Personal extends wepy.page {
   }
   // 获取用户信息
   getUserinfo() {
-    api.get(URL).then(res => {
+    api.get(URL, {}, {}, this.token).then(res => {
       console.log(res)
       this.showLoading = false
       this.user = {
@@ -174,20 +175,30 @@ export default class Personal extends wepy.page {
         city: res.data.city ? res.data.city : '未知'
       }
       this.$apply()
-    }).catch((err) => {
-      wepy.showModal({
-        title: '温馨提示',
-        content: '获取数据异常，请重试',
-        confirmText: '重试',
-        success: (res) => {
-          if (res.confirm) {
-            wepy.navigateBack({
-              delta: 1
-            })
-          }
-        }
-      })
+    }).catch(err => {
       console.log(err)
+      this.showLoading = false
+      this.$apply()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      } else {
+        wepy.showModal({
+          title: '温馨提示',
+          content: '获取数据异常，请重试',
+          confirmText: '重试',
+          success: (res) => {
+            if (res.confirm) {
+              wepy.navigateBack({
+                delta: 1
+              })
+            }
+          }
+        })
+      }
     })
   }
 }

@@ -10,6 +10,6 @@ export default {
         // 客服电话
         telephone: '400-8636-400',
         // 小程序版本
-        version: 'V1.1.2'
+        version: 'V1.1.4'
     }
 }

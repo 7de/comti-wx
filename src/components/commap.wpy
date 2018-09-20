@@ -136,7 +136,7 @@ export default class Commap extends wepy.component {
     this.movetoPosition()
     this.getMarkers()
     this.mapControl()
-    this._token = wepy.getStorageSync('token_r')
+    this._token = wepy.getStorageSync('token_n')
   }
 
   methods = {

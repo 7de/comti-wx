@@ -68,7 +68,7 @@
 import wepy from 'wepy'
 import zanToptips from '../components/zan-toptips'
 import api from '../common/api'
-import page from '../common/page'
+// import page from '../common/page'
 // const userUrl = 'platform/platform/customer/getCustomerByKey' // 用户信息
 const userUrl = 'platform/platform/customer/getCustomerByToken' // 用户信息
 const cardUrl = 'platform/platform/smartCard/findSmartCardByCode' // 卡信息
@@ -116,8 +116,13 @@ export default class Cardadd extends wepy.page {
   onShow() {
     setTimeout(function() {
       wepy.hideLoading()
-    }, 1000)
-    if (this.$parent.token) {
+    }, 10000)
+    if (this.code) {
+      this.getCard()
+    } else {
+      this.showTopTips('智能卡编号有误，请重新扫码')
+    }
+    /* if (this.$parent.token) {
       this.getCard()
       // this.getBalance()
       this.getUser()
@@ -133,7 +138,7 @@ export default class Cardadd extends wepy.page {
           }
         }
       })
-    }
+    } */
   }
   onReady() {
   }
@@ -145,18 +150,24 @@ export default class Cardadd extends wepy.page {
   }
   getBalance() {
     // 账户余额查询
-    api.get(balanceUrl + '?rdSession=' + this.$parent.token).then(res => {
+    api.get(balanceUrl).then(res => {
       console.log(res.code)
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.$apply()
+    }).catch(err => {
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 获取卡号信息
   getCard() {
     const _this = this
-    api.get(cardUrl + '?code=' + this.code, {}, {
-      'token': this.$parent.token
-    }).then(res => {
+    api.get(cardUrl + '?code=' + this.code).then(res => {
       wepy.hideLoading()
       // status 0 未绑定 1 已绑定 2 已注销
       // state null 未绑定 0 自己卡 1 别人卡
@@ -189,14 +200,22 @@ export default class Cardadd extends wepy.page {
         })
       }
     }).catch(err => {
-      wepy.hideLoading()
       console.log(err)
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 充值
   topup() {
     let _money = this.money_input
-    let _goodTitle = this.state === 1 ? '给他人' : ''
+    let _goodTitle = this.data.state === 1 ? '给他人' : ''
+    let _goodName = this.data.state === 1 ? '他人' : ''
     if (!_money) {
       this.showTopTips('请输入充值金额')
     } else if (_money < 0.01) {
@@ -210,9 +229,9 @@ export default class Cardadd extends wepy.page {
         success: res => {
           const _this = this
           if (res.confirm) {
-            api.post(payUrl + '?rdSession=' + _this.$parent.token + '&id=' + this.userId, {
+            api.post(payUrl + '?id=' + this.userId, {
               goodsId: 1, // 商品ID
-              goodsName: '充值' + _money + '元', // 商品名称
+              goodsName: _goodName + '充值' + _money + '元', // 商品名称
               totalfee: _money * 100  // 充值金额 转为以分为单位
             }).then(res => {
               console.log(res)
@@ -235,10 +254,22 @@ export default class Cardadd extends wepy.page {
                   })
                 },
                 'fail': err => {
+<<<<<<< HEAD
                   _this.showTopTips('充值失败！')
+=======
+                  _this.showTopTips('充值失败!')
+>>>>>>> dev
                   console.log(err.errMsg)
                 }
               })
+            }).catch(err => {
+              if (err.code === -1) {
+                wepy.showToast({
+                  title: err.msg ? err.msg : err.message,
+                  icon: 'none',
+                  duration: 2000
+                })
+              }
             })
           }
         }
@@ -250,7 +281,7 @@ export default class Cardadd extends wepy.page {
     const _this = this
     wepy.showModal({
       title: '温馨提示',
-      content: `是否绑定该${_this.code}智能卡？`,
+      content: `绑定${_this.code}智能卡？`,
       success: res => {
         console.log(_this.$parent.token)
         if (res.confirm) {
@@ -261,6 +292,14 @@ export default class Cardadd extends wepy.page {
             token: _this.$parent.token
           }).then(res => {
             this.getCard()
+          }).catch(err => {
+            if (err.code === -1) {
+              wepy.showToast({
+                title: err.msg ? err.msg : err.message,
+                icon: 'none',
+                duration: 2000
+              })
+            }
           })
         }
       }
@@ -268,15 +307,26 @@ export default class Cardadd extends wepy.page {
   }
   // 获取用户昵称
   getUser() {
+    // api.get(userUrl).then(res => {
     api.get(userUrl).then(res => {
+      console.log(res)
       this.userNickname = res.data.nickName
       this.$apply()
+    }).catch(err => {
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 状态处理
   checkStatus(status) {
     const that = this
     if (status === 0) {
+      this.getUser()
       wepy.showModal({
         title: '温馨提示',
         content: '该卡暂未绑定用户，是否绑定？',

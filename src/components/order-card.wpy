@@ -16,11 +16,15 @@
             <navigator class="zan-btn zan-btn--small zan-btn--primary" url="/pages/subpages/pages/charging?orderNo={{item.orderNo}}&time={{item.actPeriod/60}}">查看充电详情</navigator>
           </view>
           <view wx:else>
-            <view class="zan-cell__ft">充电时长：<text class="zan-c-green zan-font-16">{{item.actChargerTime}}</text>分钟</view>
+            <block wx:if="{{item.strategy===2}}">
+              <view class="zan-cell__ft">充电电量：<text class="zan-c-green zan-font-16">{{item.totalCharge/100}}</text>度</view>
+            </block>
+            <view class="zan-cell__ft" wx:else>充电时长：<text class="zan-c-green zan-font-16">{{item.actChargerTime}}</text>分钟</view>
           </view>
         </view>
         <view class="zan-cell zan-font-12">
           <view class="zan-cell__bd">订单金额：￥<text class="zan-c-red zan-font-16">{{item.chargeMoney/100}}</text></view>
+          <view class="zan-cell__ft" wx:if="{{item.orderStatus===0 && item.strategy===2}}">预估电量：<text class="zan-c-green zan-font-16">{{item.budgetChargeNum/100}}</text>度</view>
         </view>
         <view class="zan-cell zan-font-12">
           <view class="zan-cell__bd">服务费：￥<text class="zan-c-red zan-font-16">{{item.serviceMoney/100}}</text></view>

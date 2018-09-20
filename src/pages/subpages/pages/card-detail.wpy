@@ -46,6 +46,8 @@ export default class Carddetail extends wepy.page {
       wepy.hideLoading()
     }, 10000)
   }
+  events = {
+  }
   // 获取卡号信息
   getCard() {
     // const _this = this
@@ -59,8 +61,15 @@ export default class Carddetail extends wepy.page {
       this.bindTime = this.formatDate(_data.bindingTime)
       this.$apply()
     }).catch(err => {
-      wepy.hideLoading()
       console.log(err)
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
   // 时间戳转换

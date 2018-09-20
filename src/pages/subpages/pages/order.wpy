@@ -137,6 +137,7 @@ export default class Order extends wepy.page {
   // 读取订单列表
   // data 数据列表， pageNum 每页显示数，state 状态
   getData(data, pagenum, state, that) {
+    // api.get(orderURL + 'queryOrderNoListMobile?rdSession=' + this.$parent.token + '&orderStatus=' + state + '&pageNum=' + pagenum + '&pageSize=' + that.pageSize).then(res => {
     api.get(orderURL + 'queryOrderNoListMobile?orderStatus=' + state + '&pageNum=' + pagenum + '&pageSize=' + that.pageSize).then(res => {
       if (pagenum === 1) {
         that.allData = res.data
@@ -150,6 +151,15 @@ export default class Order extends wepy.page {
         that.loadingsubShow = false
         that.$apply()
       }, 1000)
+    }).catch(err => {
+      wepy.hideLoading()
+      if (err.code === -1) {
+        wepy.showToast({
+          title: err.msg ? err.msg : err.message,
+          icon: 'none',
+          duration: 2000
+        })
+      }
     })
   }
 }
