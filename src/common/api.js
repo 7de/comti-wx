@@ -13,13 +13,12 @@ export default {
     token: wepy.getStorageSync('token_n')
   },
   _request(method, url, params, header = {}, _token) {
-    const {
-      host,
-      token
-    } = this.apiData
+    // console.log(_token)
+    const { host, token } = this.apiData
+    const subToken = token ? token : wepy.getStorageSync('token_n')
     const _this = this
     return new Promise((resolve, reject) => {
-      let userToken = token ? token : _token
+      let userToken = subToken
       if(!userToken){
         wepy.hideLoading()
         wepy.showModal({

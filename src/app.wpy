@@ -63,6 +63,9 @@ page{
   padding-left: 30rpx;
   padding-right: 30rpx;
 }
+.padding-right-20{
+  padding-right: 20rpx;
+}
 .padding-right-30{
   padding-right: 30rpx;
 }

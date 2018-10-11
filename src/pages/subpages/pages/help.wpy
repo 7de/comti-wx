@@ -1,13 +1,5 @@
-<style lang="scss">
-.com-textarea{
-  height:180rpx;
-  width:93%;
-  padding:5%;
-}
-
-</style>
 <template>
-  <view class="container">
+  <!-- <view class="container">
     <view class="page_spacing">
         <picker bindchange="bindPickerChange" value="{{index}}" range="{{array}}">
           <view class="zan-panel">
@@ -27,33 +19,24 @@
           <button class="zan-btn zan-btn--primary" formType="submit">提交</button>
         </view>
     </view>
-  </view>
+  </view> -->
+  <web-view src="https://www.comtika.cn/help/"></web-view>
 </template>
 <script>
 import wepy from 'wepy'
-import zanField from '../../../components/zan-field'
 export default class Message extends wepy.page {
   config = {
-    'navigationBarTitleText': '帮助反馈'
+    'navigationBarTitleText': '帮助与反馈'
   }
-  components = {
-    zanField1: zanField
+  onLoad () {
+    wepy.showLoading({
+      title: '加载中'
+    })
   }
-  data = {
-    array: ['投诉', '建议'],
-    index: 0,
-    pickerBtn: false,
-    notitle: {
-      placeholder: '手机/邮箱/QQ（选填）',
-      componentId: 'textarea:test'
-    }
-  }
-  methods = {
-    bindPickerChange(e) {
-      console.log('picker发送选择改变，携带值为', e.detail.value)
-      this.index = e.detail.value
-      this.pickerBtn = true
-    }
+  onShow() {
+    setTimeout(function() {
+      wepy.hideLoading()
+    }, 2000)
   }
 }
 </script>

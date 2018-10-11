@@ -137,10 +137,8 @@ import Loading from '../../components/loading'
 import comTab from '../../components/com-tab'
 import api from '../../common/api'
 import page from '../../common/page'
+import httpApi from '../../common/interface.js'
 
-const balaneURL = 'wallet/customWallet/queryBalanceBySession' // 钱包
-const chargrURL = 'server/' // 开始充电
-const equiUrl = 'equip/equipSocket/querySocketStatus' // 查询设备
 // const formUrl = 'platform/service-push'
 
 export default class ScanIndex extends wepy.page {
@@ -350,14 +348,13 @@ export default class ScanIndex extends wepy.page {
               })
               this.submitDisabled = true
               this.$apply()
-              api.post(chargrURL + 'chargeStart', {
+              api.post(httpApi.postChargeStart, {
                 formId: _formId + ',' + this.formId,
                 chargerMode: _this.charger_mode,
                 chargerValue: _this.time_value,
                 streamNo: _this.code,
                 totalFee: _this.totalFee * 100
               }).then(res => {
-                console.log('加载完成')
                 this.submitDisabled = false
                 this.$apply()
                 wepy.hideLoading()
@@ -402,8 +399,10 @@ export default class ScanIndex extends wepy.page {
         if (selectedId === 1) {
           this.mode = 1
           this.items = this.itemsEle
+          this.charger_mode = 2
           this.checkIni(9 * 100)
         } else {
+          this.charger_mode = 3
           this.mode = 0
           this.items = this.itemsTime
           this.checkIni(12)
@@ -420,9 +419,7 @@ export default class ScanIndex extends wepy.page {
         this.$apply()
       } else if (value === '120' && this.mode === 1) {
         this.time_value = 9 * 100
-        this.charger_mode = 2
       } else if (this.mode === 1) {
-        this.charger_mode = 2
         this.time_value = value * 100
       } else {
         this.charger_mode = 0
@@ -445,7 +442,7 @@ export default class ScanIndex extends wepy.page {
     })
     if (this.code) {
       wepy.request({
-        url: api.apiData.host + equiUrl + '?serialNo=' + this.code + '&tagsFlag=true',
+        url: api.apiData.host + httpApi.getEquipStatus + '?serialNo=' + this.code + '&tagsFlag=true',
         method: 'GET',
         header: {
           'Authorization': 'Bearer ' + this._token
@@ -453,7 +450,6 @@ export default class ScanIndex extends wepy.page {
         success: res => {
           wepy.hideLoading()
           if (res.data.code === 0) {
-            console.log(res.data)
             this.equiDisabled = false
             this.$apply()
             // 默认选中充满自停
@@ -508,6 +504,7 @@ export default class ScanIndex extends wepy.page {
         }
       })
     } else {
+      wepy.hideLoading()
       this.showTopTips('未填设备ID')
     }
   }
@@ -517,7 +514,7 @@ export default class ScanIndex extends wepy.page {
       title: '余额查询中...',
       mask: true
     })
-    api.get(balaneURL, {}, {}, this._token).then(res => {
+    api.get(httpApi.getWallet).then(res => {
       wepy.hideLoading()
       this.showLoading = false
       this.showTopup = false
@@ -548,8 +545,7 @@ export default class ScanIndex extends wepy.page {
       title: '费用查询中...',
       mask: true
     })
-    api.get(chargrURL + 'getServerPayInfo?serialNum=' + this.code + '&chargeTime=' + this.time_value + '&chagerMode=' + _mode).then(({data}) => {
-      console.log(data)
+    api.get(httpApi.getMoney + '?serialNum=' + this.code + '&chargeTime=' + this.time_value + '&chagerMode=' + _mode, {}, {}, this._token).then(({data}) => {
       wepy.hideLoading()
       let _changeFee = data.changeFee ? data.changeFee : 0
       let _serviceFee = data.serviceCharge ? data.serviceCharge : 0

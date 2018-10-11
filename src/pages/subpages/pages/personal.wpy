@@ -1,5 +1,4 @@
 <style lang="scss">
-    
     .zan-col{
       text-align: center;
       .iconfont{
@@ -60,8 +59,7 @@ import Info from '../../../components/com-userinfo'
 import Loading from '../../../components/loading'
 import page from '../../../common/page'
 import api from '../../../common/api'
-// const URL = 'platform/platform/customer/getCustomerByKey'
-const URL = 'platform/platform/customer/getCustomerByToken' // 用户信息
+import httpApi from '../../../common/interface'
 export default class Personal extends wepy.page {
   config = {
     'navigationBarTitleText': '个人中心'
@@ -103,14 +101,21 @@ export default class Personal extends wepy.page {
         path: './setting'
       },
       {
+        iconfont: 'trust',
+        arrow: true,
+        title: '商户合作',
+        path: './cooperation'
+      },
+      {
         iconfont: 'information',
         title: '关于我们',
         path: './about'
       },
       {
-        iconfont: 'trust',
-        title: '商户合作申请',
-        path: './cooperation'
+        iconfont: 'kefu',
+        arrow: true,
+        title: '帮助与反馈',
+        path: './help'
       }
     ],
     showLoading: true,
@@ -166,8 +171,7 @@ export default class Personal extends wepy.page {
   }
   // 获取用户信息
   getUserinfo() {
-    api.get(URL, {}, {}, this.token).then(res => {
-      console.log(res)
+    api.get(httpApi.getCustomerInfo).then(res => {
       this.showLoading = false
       this.user = {
         name: res.data.nickName ? res.data.nickName : '未知用户',
@@ -176,7 +180,6 @@ export default class Personal extends wepy.page {
       }
       this.$apply()
     }).catch(err => {
-      console.log(err)
       this.showLoading = false
       this.$apply()
       if (err.code === -1) {

@@ -36,8 +36,7 @@ import wepy from 'wepy'
 import card from '../../../components/com-card'
 import zanToptips from '../../../components/zan-toptips'
 import api from '../../../common/api'
-const cardUrl = 'platform/platform/smartCard/findCtkSmartCardList'
-const delUrl = 'platform/platform/smartCard/updateUntieCard'
+import httpApi from '../../../common/interface.js'
 export default class Card extends wepy.page {
   config = {
     'navigationBarTitleText': '我的卡包'
@@ -89,8 +88,7 @@ export default class Card extends wepy.page {
         content: '是否删除此卡？',
         success: (res) => {
           if (res.confirm) {
-            api.post(delUrl + '?code=' + _code).then(res => {
-              console.log(res)
+            api.post(httpApi.postCardUnbind + '?code=' + _code).then(res => {
               this.currentIndex = null
               this.$apply()
               this.getCard(this.pageNum)
@@ -163,7 +161,7 @@ export default class Card extends wepy.page {
   }
   // 获取卡列表
   getCard(pageNum) {
-    api.get(cardUrl, {
+    api.get(httpApi.getCardList, {
       start: pageNum,
       size: this.pageSize
     }).then(res => {

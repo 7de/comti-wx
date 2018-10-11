@@ -68,13 +68,7 @@
 import wepy from 'wepy'
 import zanToptips from '../components/zan-toptips'
 import api from '../common/api'
-// import page from '../common/page'
-// const userUrl = 'platform/platform/customer/getCustomerByKey' // 用户信息
-const userUrl = 'platform/platform/customer/getCustomerByToken' // 用户信息
-const cardUrl = 'platform/platform/smartCard/findSmartCardByCode' // 卡信息
-const balanceUrl = 'wallet/customWallet/queryBalanceBySession' // 用户余额
-const bindUrl = 'platform/platform/smartCard/updateCtkSmartCard' // 绑定卡
-const payUrl = 'wxpay/wxpay/jsapi/pay' // 支付
+import httpApi from '../common/interface.js'
 export default class Cardadd extends wepy.page {
   config = {
     'navigationBarTitleText': '智能充电卡'
@@ -95,7 +89,8 @@ export default class Cardadd extends wepy.page {
     userId: null, // 绑定卡用户ID
     showBtn: true, // 显示绑定按钮
     disBtn: false, // 按钮不可用
-    invalidCard: false // 无效卡
+    invalidCard: false, // 无效卡
+    _token: null
   }
   onLoad(option) {
     wepy.showLoading({
@@ -103,7 +98,6 @@ export default class Cardadd extends wepy.page {
     })
     if (option.num) {
       this.code = option.num
-      console.log(option.num)
     } else if (option.q !== undefined) {
       let _url = decodeURIComponent(option.q) // 字符分割
       let _urlBox = _url.split('card=')
@@ -114,6 +108,7 @@ export default class Cardadd extends wepy.page {
     }
   }
   onShow() {
+    this._token = this.$parent.token
     setTimeout(function() {
       wepy.hideLoading()
     }, 10000)
@@ -122,23 +117,6 @@ export default class Cardadd extends wepy.page {
     } else {
       this.showTopTips('智能卡编号有误，请重新扫码')
     }
-    /* if (this.$parent.token) {
-      this.getCard()
-      // this.getBalance()
-      this.getUser()
-    } else {
-      wepy.showModal({
-        title: '温馨提示',
-        content: '您暂未授权或授权已过期',
-        showCancel: false,
-        confirmText: '去授权',
-        success: function(res) {
-          if (res.confirm) {
-            page.goAuthorize()
-          }
-        }
-      })
-    } */
   }
   onReady() {
   }
@@ -150,11 +128,11 @@ export default class Cardadd extends wepy.page {
   }
   getBalance() {
     // 账户余额查询
-    api.get(balanceUrl).then(res => {
-      console.log(res.code)
+    api.get(httpApi.getWallet).then(res => {
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.$apply()
     }).catch(err => {
+      console.log(err)
       if (err.code === -1) {
         wepy.showToast({
           title: err.msg ? err.msg : err.message,
@@ -167,12 +145,11 @@ export default class Cardadd extends wepy.page {
   // 获取卡号信息
   getCard() {
     const _this = this
-    api.get(cardUrl + '?code=' + this.code).then(res => {
+    api.get(httpApi.getCardInfo + '?code=' + this.code).then(res => {
       wepy.hideLoading()
       // status 0 未绑定 1 已绑定 2 已注销
       // state null 未绑定 0 自己卡 1 别人卡
       let _data = res.data
-      console.log(_data)
       if (_data) {
         _this.showBtn = false
         _this.invalidCard = false
@@ -229,12 +206,11 @@ export default class Cardadd extends wepy.page {
         success: res => {
           const _this = this
           if (res.confirm) {
-            api.post(payUrl + '?id=' + this.userId, {
+            api.post(httpApi.postWxPay + '?id=' + this.userId, {
               goodsId: 1, // 商品ID
               goodsName: _goodName + '充值' + _money + '元', // 商品名称
               totalfee: _money * 100  // 充值金额 转为以分为单位
             }).then(res => {
-              console.log(res)
               let _data = res.data
               // 调用支付接口
               wepy.requestPayment({
@@ -254,12 +230,8 @@ export default class Cardadd extends wepy.page {
                   })
                 },
                 'fail': err => {
-<<<<<<< HEAD
+                  console.log(err)
                   _this.showTopTips('充值失败！')
-=======
-                  _this.showTopTips('充值失败!')
->>>>>>> dev
-                  console.log(err.errMsg)
                 }
               })
             }).catch(err => {
@@ -283,13 +255,11 @@ export default class Cardadd extends wepy.page {
       title: '温馨提示',
       content: `绑定${_this.code}智能卡？`,
       success: res => {
-        console.log(_this.$parent.token)
         if (res.confirm) {
-          api.post(bindUrl, {
+          api.post(httpApi.postCardBind, {
             code: _this.code,
             nickName: _this.userNickname,
-            source: 1, // 1,微信客户 2,支付宝客户
-            token: _this.$parent.token
+            source: 1 // 1,微信客户 2,支付宝客户
           }).then(res => {
             this.getCard()
           }).catch(err => {
@@ -307,9 +277,7 @@ export default class Cardadd extends wepy.page {
   }
   // 获取用户昵称
   getUser() {
-    // api.get(userUrl).then(res => {
-    api.get(userUrl).then(res => {
-      console.log(res)
+    api.get(httpApi.getCustomerInfo).then(res => {
       this.userNickname = res.data.nickName
       this.$apply()
     }).catch(err => {

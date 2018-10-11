@@ -35,8 +35,7 @@
 import wepy from 'wepy'
 import Loading from '../../../components/loading'
 import api from '../../../common/api'
-
-const URL = 'wallet/customWallet/queryBalanceBySession'
+import httpApi from '../../../common/interface'
 
 export default class Wallet extends wepy.page {
   config = {
@@ -63,14 +62,13 @@ export default class Wallet extends wepy.page {
   }
   getBalance() {
     // 账户余额查询
-    api.get(URL).then(res => {
-      console.log(res.code)
+    api.get(httpApi.getWallet).then(res => {
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.showTopup = false
       this.$apply()
     }).catch(err => {
-      console.log(err)
-      wepy.hideLoading()
+      this.showTopup = false
+      this.$apply()
       if (err.code === -1) {
         wepy.showToast({
           title: err.msg ? err.msg : err.message,

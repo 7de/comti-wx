@@ -110,6 +110,12 @@
   font-size:28rpx;
   padding:0 30rpx 40rpx;
   background-color: #fff;
+  .zan-btn--small{
+    height:25px;
+    line-height: 25px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }
 .map-tag{
   margin: 0 20rpx;

@@ -1,4 +1,4 @@
-# comti-wx
+﻿# comti-wx
 
 
 >首页显示地图，点击图标跳转对应功能及栏目
@@ -35,5 +35,3 @@ npm install util
 ```bash
 wepy upgrade wepy
 ```
-### 6、wepy小笔记
-[参考这里](https://blog.csdn.net/g2526/article/details/80083243)

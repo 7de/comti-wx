@@ -18,7 +18,7 @@
 import wepy from 'wepy'
 import carddetail from '../../../components/com-card-detail'
 import api from '../../../common/api'
-const cardUrl = 'platform/platform/smartCard/findCtkSmartCardList'
+import httpApi from '../../../common/interface.js'
 export default class Carddetail extends wepy.page {
   config = {
     'navigationBarTitleText': '我的卡包'
@@ -51,7 +51,7 @@ export default class Carddetail extends wepy.page {
   // 获取卡号信息
   getCard() {
     // const _this = this
-    api.get(cardUrl, {
+    api.get(httpApi.getCardList, {
       code: this.code
     }).then(res => {
       wepy.hideLoading()

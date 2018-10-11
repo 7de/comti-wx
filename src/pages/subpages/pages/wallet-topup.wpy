@@ -58,9 +58,7 @@ import zanSelect from '../../../components/zan-select'
 import zanToptips from '../../../components/zan-toptips'
 import Loading from '../../../components/loading'
 import api from '../../../common/api'
-
-const URL = 'wallet/customWallet/queryBalanceBySession'
-const payUrl = 'wxpay/wxpay/jsapi/pay'
+import httpApi from '../../../common/interface'
 
 export default class WalletTopup extends wepy.page {
   config = {
@@ -123,11 +121,6 @@ export default class WalletTopup extends wepy.page {
     this.$apply()
   }
   onShow() {
-    /* wepy.showLoading({
-      content: '余额查询中...'
-    })
-    // 账户余额查询
-     */
   }
   methods = {
     // 马上充值
@@ -163,7 +156,6 @@ export default class WalletTopup extends wepy.page {
   bindblur(e) {
     let _value = parseFloat(e.detail.value)
     this.money_input = _value
-    console.log(this.money_input)
   }
   // 顶部提示
   showTopTips(content) {
@@ -178,12 +170,11 @@ export default class WalletTopup extends wepy.page {
       confirmText: '马上充值',
       success: res => {
         if (res.confirm) {
-          api.post(payUrl, {
+          api.post(httpApi.postWxPay, {
             goodsId: parseInt(this.time_value), // 商品ID
             goodsName: '充值' + _money + '元', // 商品名称
             totalfee: _money * 100  // 充值金额 转为以分为单位
           }).then(res => {
-            console.log(res)
             let _data = res.data
             // 调用支付接口
             wepy.requestPayment({
@@ -198,8 +189,8 @@ export default class WalletTopup extends wepy.page {
                 })
               },
               'fail': err => {
+                console.log(err)
                 this.showTopTips('充值失败，请稍后再试')
-                console.log(err.errMsg)
               }
             }).catch(err => {
               console.log(err)
@@ -219,7 +210,7 @@ export default class WalletTopup extends wepy.page {
   }
   // 账户余额查询
   getMoney() {
-    api.get(URL).then(res => {
+    api.get(httpApi.getWallet).then(res => {
       this.account = parseFloat(api.fotmatMoney(res.data))
       this.$apply()
     }).catch(err => {

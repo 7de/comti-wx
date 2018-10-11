@@ -43,9 +43,8 @@
   import zanToptips from '../components/zan-toptips'
   import api from '../common/api'
   import page from '../common/page'
+  import httpApi from '../common/interface.js'
   import Info from '../common/setinfo'
-  // const URL = 'platform/weChat/wechatLogin'
-  const URL = 'wxpay/weChat/wechatLogin'
   export default class Authorize extends wepy.page {
     config = {
       navigationBarTitleText: '用户授权'
@@ -103,6 +102,10 @@
           } else {
             this.showTopTips('登录失败，请稍后重试')
           }
+        },
+        fail: err => {
+          wepy.hideLoading()
+          console.log(err)
         }
       })
     }
@@ -114,25 +117,21 @@
         mask: true
       })
       wepy.request({
-        url: api.apiData.host + URL,
+        url: api.apiData.host + httpApi.postWxAuthorize,
         method: 'POST',
         data: params,
         success: (res) => {
           wepy.hideLoading()
-          console.log(res)
-          console.log('授权次数：' + num)
           if (res.data.code === 0) {
             _this.$parent.token = res.data.data['access_token']
             _this.$apply()
             wepy.setStorageSync('token_n', res.data.data['access_token'])
-            console.log(_this.getCurrentPages().length)
             if (_this.getCurrentPages().length > 1) {
               page.goBack()
             } else {
               page.goHome()
             }
           } else if (res.data.code === -1) {
-            console.log('次数：' + num)
             if (num < 3) {
               this.postLogin(num)
             } else {
